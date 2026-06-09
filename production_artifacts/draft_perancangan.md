@@ -40,7 +40,7 @@ Sistem mengisolasi hak akses berdasarkan 3 aktor utama yang didefinisikan pada D
 - **Autentikasi (Tabel Use Case 2.2 & 2.3):** Registrasi akun baru & Login multi-role. Pengguna baru otomatis mendapatkan role `customer`.
 - **Melihat Daftar Trip (Tabel Use Case 2.1):** Katalog utama yang menampilkan daftar destinasi, harga, tanggal keberangkatan, rincian itinerary, dan sisa kuota.
 - **Booking Open Trip (Tabel Use Case 2.4):** Formulir pemesanan paket open trip. Mengisi jumlah slot kursi dan nama peserta. Status awal pesanan diset otomatis: `PENDING`.
-- **Payment Gateway - Midtrans (Tabel Use Case 2.5):** Memproses pembayaran menggunakan Midtrans Snap Token. Status akan diperbarui secara **otomatis** oleh Webhook Midtrans menjadi `CONFIRMED` saat pembayaran sukses.
+- **Payment Gateway - Midtrans (Tabel Use Case 2.5):** Memproses pembayaran menggunakan Midtrans Snap Token dalam mode **Sandbox** (`\Midtrans\Config::$isProduction = false`). Status akan diperbarui secara **otomatis** oleh Webhook Midtrans menjadi `CONFIRMED` saat pembayaran sukses.
 - **Menerima Konfirmasi Booking (Tabel Use Case 2.6):** Halaman dashboard/tiket digital yang menampilkan detail kode booking apabila status pembayaran telah `CONFIRMED`.
 - **Konfirmasi Kehadiran (Tabel Use Case 2.7):** Tombol mandiri di dashboard customer untuk menyatakan kesiapan berangkat pada Hari-H sebelum berkumpul di titik temu.
 

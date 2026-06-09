@@ -67,6 +67,7 @@ class DatabaseSeeder extends Seeder
             'tanggal_mulai' => '2026-07-01',
             'tanggal_selesai' => '2026-07-01',
             'kuota' => 20,
+            'sisa_kuota' => 20,
             'status_trip' => 'Open'
         ]);
 
@@ -76,6 +77,7 @@ class DatabaseSeeder extends Seeder
             'tanggal_mulai' => '2026-08-15',
             'tanggal_selesai' => '2026-08-16',
             'kuota' => 15,
+            'sisa_kuota' => 15,
             'status_trip' => 'Draft'
         ]);
     }

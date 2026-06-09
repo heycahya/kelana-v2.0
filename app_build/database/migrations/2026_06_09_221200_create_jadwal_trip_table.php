@@ -18,6 +18,7 @@ return new class extends Migration
             $table->date('tanggal_mulai');
             $table->date('tanggal_selesai');
             $table->integer('kuota');
+            $table->integer('sisa_kuota');
             $table->enum('status_trip', ['Draft', 'Open', 'Berjalan', 'Selesai', 'Batal']);
             $table->timestamps();
 

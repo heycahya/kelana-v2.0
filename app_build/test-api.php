@@ -229,6 +229,68 @@ if ($loginCustomer['status'] == 200 && isset($loginCustomer['body']['data']['tok
             echo "❌ GAGAL: Rute Jadwal Trip dapat ditembus oleh Customer (HTTP {$testAccessJadwal['status']}).\n\n";
         }
     }
+
+    // ==========================================
+    // CUSTOMER BOOKING & MIDTRANS TESTING
+    // ==========================================
+    echo "--------------------------------------------------\n";
+    echo "       PENGUJIAN API PEMESANAN & INTEGRASI        \n";
+    echo "--------------------------------------------------\n\n";
+
+    // 15. Create Pemesanan (Valid)
+    echo "[15] Membuat Pemesanan Baru (Valid - 2 peserta)...\n";
+    $bookingData = [
+        'id_jadwal' => 1,
+        'jumlah_peserta' => 2
+    ];
+    $createBooking = makeRequest('POST', "$baseUrl/pemesanan", $bookingData, $customerToken);
+    if ($createBooking['status'] == 201) {
+        echo "✅ BERHASIL (HTTP 201 Created):\n";
+        echo "   Booking Code: " . $createBooking['body']['data']['booking_code'] . "\n";
+        echo "   Total Harga : " . $createBooking['body']['data']['total_harga'] . "\n";
+        echo "   Snap Token  : " . $createBooking['body']['data']['snap_token'] . "\n\n";
+    } else {
+        echo "❌ GAGAL (HTTP {$createBooking['status']})\n";
+        print_r($createBooking['body']);
+        exit(1);
+    }
+
+    // 16. Create Pemesanan (Gagal Validasi)
+    echo "[16] Membuat Pemesanan Baru (Gagal Validasi - jumlah_peserta = 0)...\n";
+    $invalidBookingData = [
+        'id_jadwal' => 1,
+        'jumlah_peserta' => 0
+    ];
+    $createInvalidBooking = makeRequest('POST', "$baseUrl/pemesanan", $invalidBookingData, $customerToken);
+    if ($createInvalidBooking['status'] == 422) {
+        echo "✅ BERHASIL (HTTP 422 Unprocessable Entity): Validasi berhasil menolak jumlah peserta kurang dari 1.\n";
+        echo "   Response Errors: " . json_encode($createInvalidBooking['body']['errors']) . "\n\n";
+    } else {
+        echo "❌ GAGAL: Validasi lolos dengan status {$createInvalidBooking['status']}\n\n";
+    }
+
+    // 17. Create Pemesanan (Kuota Tidak Cukup)
+    echo "[17] Membuat Pemesanan Baru (Gagal - kuota tidak cukup/999 peserta)...\n";
+    $overQuotaBookingData = [
+        'id_jadwal' => 1,
+        'jumlah_peserta' => 999
+    ];
+    $createOverQuota = makeRequest('POST', "$baseUrl/pemesanan", $overQuotaBookingData, $customerToken);
+    if ($createOverQuota['status'] == 422) {
+        echo "✅ BERHASIL (HTTP 422 Unprocessable Entity): Sistem berhasil menolak karena kuota tidak mencukupi.\n";
+        echo "   Message: " . $createOverQuota['body']['message'] . "\n\n";
+    } else {
+        echo "❌ GAGAL: Sistem membiarkan kuota berlebih lolos dengan status {$createOverQuota['status']}\n\n";
+    }
+
+    // 18. Test Admin cannot access Pemesanan endpoint
+    echo "[18] Mencoba mengakses rute Pemesanan Customer menggunakan token Admin...\n";
+    $testAdminAccessBooking = makeRequest('POST', "$baseUrl/pemesanan", $bookingData, $adminToken);
+    if ($testAdminAccessBooking['status'] == 403) {
+        echo "✅ BERHASIL (HTTP 403 Forbidden): Rute Pemesanan terproteksi dari Admin dengan benar!\n\n";
+    } else {
+        echo "❌ GAGAL: Rute Pemesanan dapat diakses oleh Admin (HTTP {$testAdminAccessBooking['status']}).\n\n";
+    }
 } else {
     echo "❌ GAGAL: Login Customer gagal.\n\n";
 }

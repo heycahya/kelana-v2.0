@@ -1,183 +1,87 @@
-# Implementasi CRUD Master Paket Wisata (Admin Only)
+# Issue: Implementasi API Pemesanan & Integrasi Midtrans Sandbox (Role Customer)
 
-## 1. Deskripsi Tugas
-Melakukan implementasi RESTful API untuk fitur CRUD pada tabel `paket_wisata`. Endpoint ini merupakan bagian dari modul Back-Office dan bersifat tertutup, sehingga **hanya boleh diakses oleh pengguna dengan role Admin**.
+## 1. Update Dokumentasi & Security
+- **Update `draft_perancangan.md`**: Tambahkan spesifikasi bahwa sistem menggunakan Midtrans dalam mode **Sandbox** untuk sistem pemesanan.
+- **Update `.gitignore`**: Pastikan file `.env` sudah terdaftar secara valid di `.gitignore` untuk mencegah kebocoran data sensitif. Semua credential Midtrans (`MIDTRANS_SERVER_KEY`, `MIDTRANS_CLIENT_KEY`, dll) **wajib** ditaruh di dalam file `.env`.
 
-## 2. Persiapan Model Database
-**File Model:** `app/Models/PaketWisata.php`
+## 2. API Pemesanan (POST `/api/v1/pemesanan`)
+- **Rute**: Daftarkan endpoint `POST /pemesanan` di dalam `routes/api.php` dengan prefix `v1`. Lindungi rute ini dengan middleware `auth:sanctum` dan pastikan hanya dapat diakses oleh *guard* atau *role* `customer`.
+- **Controller**: 
+  - Buat `app/Http/Controllers/Api/Customer/PemesananController.php`.
+  - Buat method `store(Request $request)`.
+- **Validasi Input**:
+  - `id_jadwal`: `required|exists:jadwal_trip,id_jadwal` (Sesuaikan nama primary key `jadwal_trip`).
+  - `jumlah_peserta`: `required|integer|min:1`.
 
-Pastikan Model disesuaikan dengan struktur tabel:
-```php
-<?php
+## 3. Low-Level Logic (DB Transaction)
+Semua proses database query (Insert/Update) **wajib** dibungkus di dalam `DB::transaction()` untuk mencegah inkonistensi data bila proses gagal di tengah jalan.
 
-namespace App\Models;
+1. **Cek Ketersediaan Kuota (tabel `jadwal_trip`)**:
+   - Ambil data jadwal trip menggunakan `id_jadwal` dari request (gunakan `lockForUpdate()` jika memungkinkan).
+   - Validasi ketersediaan: pastikan `sisa_kuota >= jumlah_peserta`.
+   - Jika kurang, lemparkan error response JSON (HTTP 422):
+     ```json
+     {
+       "status": "error",
+       "message": "Kuota tidak mencukupi"
+     }
+     ```
 
-use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Database\Eloquent\Model;
+2. **Kalkulasi**:
+   - `total_harga = jumlah_peserta * harga paket_wisata`. (Ambil harga paket wisata dari relasi jadwal ke tabel paket).
 
-class PaketWisata extends Model
-{
-    use HasFactory;
+3. **Generate Booking Code**:
+   - Generate `booking_code` unik. Format yang direkomendasikan: `TRIP-YYYYMMDD-XXXX` (contoh: `TRIP-20231024-0001`).
 
-    // Menentukan nama tabel secara eksplisit
-    protected $table = 'paket_wisata';
+4. **Insert tabel `pemesanan`**:
+   - Lakukan insert ke tabel `pemesanan` dengan data setidaknya mencakup:
+     - `booking_code` = kode unik.
+     - `id_customer` = ID user yang login (`Auth::id()`).
+     - `id_jadwal` = `$request->id_jadwal`.
+     - `jumlah_peserta` = `$request->jumlah_peserta`.
+     - `total_harga` = `$total_harga`.
+     - `status_pembayaran` (atau `status_pemesanan`) = `'PENDING'`.
 
-    // Menentukan primary key custom
-    protected $primaryKey = 'id_paket';
+5. **Insert tabel `pembayaran`**:
+   - Lakukan insert untuk data awal pembayaran:
+     - `id_pemesanan` = ID dari data pemesanan yang baru di-insert.
+     - `jumlah_bayar` = `$total_harga`.
 
-    // Kolom yang dapat diisi melalui mass assignment
-    protected $fillable = [
-        'nama_paket',
-        'deskripsi',
-        'harga',
-        'rute',
-        'fasilitas'
-    ];
-}
-```
+6. **Integrasi Midtrans (Sandbox)**:
+   - Pastikan konfigurasi diset di mode sandbox:
+     ```php
+     \Midtrans\Config::$serverKey = env('MIDTRANS_SERVER_KEY');
+     \Midtrans\Config::$isProduction = false;
+     \Midtrans\Config::$isSanitized = true;
+     \Midtrans\Config::$is3ds = true;
+     ```
+   - Siapkan array parameter:
+     - `transaction_details`: `order_id` (isi dengan `booking_code`), `gross_amount` (isi dengan `$total_harga`).
+     - `customer_details`: isi dengan nama, email, no_hp dari user yang login (`Auth::user()`).
+   - Generate snap token dengan perintah: `$snapToken = \Midtrans\Snap::getSnapToken($params);`.
 
-## 3. Spesifikasi Routing & Middleware
-**File Route:** `routes/api.php`
+7. **Update tabel `pembayaran`**:
+   - Update baris `pembayaran` yang baru di-insert tadi dengan menyimpan `$snapToken` ke field `snap_token` (pastikan kolom ini ada di database).
 
-Gunakan middleware `auth:sanctum` untuk memastikan pengguna terautentikasi. Karena Laravel Sanctum multi-role dalam proyek ini umumnya membedakan role lewat *token ability* atau *middleware custom*, pastikan terdapat check bahwa user adalah admin (contoh: middleware `ability:admin` atau `is_admin`).
+8. **Kurangi Kuota**:
+   - Lakukan update nilai `sisa_kuota` di tabel `jadwal_trip` sehingga sisa_kuota berkurang sesuai `jumlah_peserta`.
 
-```php
-use App\Http\Controllers\Api\Admin\PaketManagementController;
-use Illuminate\Support\Facades\Route;
+## 4. Format Response
+Jika transaksi di atas berhasil disimpan hingga commit, kembalikan HTTP `201 Created` dengan standard JSON response berikut:
 
-// Prefix /api/v1/admin
-Route::prefix('v1/admin')->middleware(['auth:sanctum', 'ability:admin'])->group(function () {
-    Route::get('/paket-wisata', [PaketManagementController::class, 'index']);
-    Route::post('/paket-wisata', [PaketManagementController::class, 'store']);
-    Route::get('/paket-wisata/{id}', [PaketManagementController::class, 'show']);
-    Route::put('/paket-wisata/{id}', [PaketManagementController::class, 'update']);
-    Route::delete('/paket-wisata/{id}', [PaketManagementController::class, 'destroy']);
-});
-```
-*(Catatan untuk Coder: Sesuaikan alias middleware role admin dengan yang telah disepakati atau buat logic pengecekan role manual di Controller jika middleware khusus belum ada `if ($request->user()->role !== 'admin') abort(403);`)*
-
-## 4. Spesifikasi Controller & Validasi
-**File Controller:** `app/Http/Controllers/Api/Admin/PaketManagementController.php`
-
-Gunakan `Illuminate\Support\Facades\Validator` atau *FormRequest* untuk validasi, dan kembalikan JSON Response konsisten pada setiap method.
-
-### A. Tampilkan Semua Data (`index` method)
-- **Tujuan:** Mendapatkan semua data master paket wisata.
-- **Logika:** `PaketWisata::all()` atau `PaketWisata::orderBy('created_at', 'desc')->get()`.
-- **Response Success (200 OK):**
+**Sukses (HTTP 201)**:
 ```json
 {
-  "success": true,
-  "message": "Data paket wisata berhasil diambil",
-  "data": [
-    {
-      "id_paket": 1,
-      "nama_paket": "Open Trip Bromo Midnight",
-      "deskripsi": "Menikmati sunrise dari penanjakan.",
-      "harga": "350000.00",
-      "rute": "Malang -> Bromo -> Malang",
-      "fasilitas": "Jeep, Tiket Masuk, Snack",
-      "created_at": "2026-06-09T10:00:00.000000Z",
-      "updated_at": "2026-06-09T10:00:00.000000Z"
-    }
-  ]
-}
-```
-
-### B. Tambah Data Baru (`store` method)
-- **Tujuan:** Menyimpan data paket wisata baru.
-- **Aturan Validasi (`$request->validate(...)`):**
-  - `nama_paket`: `required|string|max:150`
-  - `deskripsi`: `required|string`
-  - `harga`: `required|numeric|min:0`
-  - `rute`: `required|string`
-  - `fasilitas`: `required|string`
-- **Response Validation Error (422 Unprocessable Entity):**
-```json
-{
-  "success": false,
-  "message": "Validasi gagal",
-  "errors": {
-    "nama_paket": ["Kolom nama paket wajib diisi."],
-    "harga": ["Kolom harga harus berupa angka."]
-  }
-}
-```
-- **Response Success (201 Created):**
-```json
-{
-  "success": true,
-  "message": "Data paket wisata berhasil ditambahkan",
+  "status": "success",
+  "message": "Pemesanan berhasil dibuat.",
   "data": {
-    "id_paket": 2,
-    "nama_paket": "...",
-    "deskripsi": "...",
-    "harga": "...",
-    "rute": "...",
-    "fasilitas": "...",
-    "created_at": "...",
-    "updated_at": "..."
+    "booking_code": "TRIP-YYYYMMDD-XXXX",
+    "total_harga": 1500000,
+    "snap_token": "xxxx-xxxx-xxxx-xxxx"
   }
 }
 ```
 
-### C. Tampilkan Detail Data (`show` method)
-- **Tujuan:** Menampilkan satu paket wisata berdasarkan `id_paket`.
-- **Logika:** `PaketWisata::find($id)`.
-- **Response Data Tidak Ditemukan (404 Not Found):**
-```json
-{
-  "success": false,
-  "message": "Data paket wisata tidak ditemukan",
-  "data": null
-}
-```
-- **Response Success (200 OK):**
-```json
-{
-  "success": true,
-  "message": "Detail paket wisata",
-  "data": {
-    "id_paket": 1,
-    "nama_paket": "...",
-    ...
-  }
-}
-```
-
-### D. Update Data (`update` method)
-- **Tujuan:** Mengubah data paket wisata spesifik berdasarkan `id_paket`.
-- **Logika:** Cari dengan `find($id)`. Jika null, kembalikan response 404. Jika ditemukan, lakukan validasi dan `update()`.
-- **Aturan Validasi:** Sama dengan method `store`.
-- **Response Data Tidak Ditemukan (404 Not Found):** (Format sama seperti method Show).
-- **Response Validation Error (422 Unprocessable Entity):** (Format sama seperti method Store).
-- **Response Success (200 OK):**
-```json
-{
-  "success": true,
-  "message": "Data paket wisata berhasil diperbarui",
-  "data": {
-    "id_paket": 1,
-    "nama_paket": "Nama Update...",
-    ...
-  }
-}
-```
-
-### E. Hapus Data (`destroy` method)
-- **Tujuan:** Menghapus paket wisata dari database.
-- **Logika:** Cari dengan `find($id)`. Jika null, kembalikan response 404. Jika ada, lakukan `delete()`.
-- **Response Data Tidak Ditemukan (404 Not Found):** (Format sama seperti method Show).
-- **Response Success (200 OK):**
-```json
-{
-  "success": true,
-  "message": "Data paket wisata berhasil dihapus",
-  "data": null
-}
-```
-
-## 5. Instruksi Khusus Untuk Coder
-1. **Response Format Standard:** Harap buat struktur JSON yang seragam (`success`, `message`, `data`/`errors`). Anda bisa membuat *Helper* atau *Trait* jika diperlukan untuk menghasilkan response ini agar kodenya tetap DRY (*Don't Repeat Yourself*).
-2. **Naming Convention:** Semua nama property di JSON disesuaikan dengan nama kolom tabel aslinya, jangan di-cast ke camelCase, tetapkan dengan `snake_case` (misalnya `nama_paket`).
-3. **Penyimpanan:** Jangan mengeksekusi migration secara terpisah. Jika diperlukan, modifikasi langsung logic pada `PaketManagementController.php`.
+## Catatan Eksekutor (@engineer-coder):
+- Pastikan seluruh tabel/relasi dan field sesuai dengan struktur `draft_perancangan.md` terbaru.
+- Setelah implementasi selesai dan sukses, tulis log/update progres di file `STATE.md`.

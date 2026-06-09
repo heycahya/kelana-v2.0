@@ -78,6 +78,7 @@ class JadwalTripController extends Controller
             'tanggal_mulai' => $request->tanggal_mulai,
             'tanggal_selesai' => $request->tanggal_selesai,
             'kuota' => $request->kuota,
+            'sisa_kuota' => $request->kuota,
             'status_trip' => $request->status_trip,
         ]);
 

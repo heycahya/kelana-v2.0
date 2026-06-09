@@ -3,6 +3,7 @@
 use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\Admin\PaketManagementController;
 use App\Http\Controllers\Api\Admin\JadwalTripController;
+use App\Http\Controllers\Api\Customer\PemesananController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -36,5 +37,10 @@ Route::prefix('v1')->group(function () {
         Route::get('/jadwal-trip/{id}', [JadwalTripController::class, 'show']);
         Route::put('/jadwal-trip/{id}', [JadwalTripController::class, 'update']);
         Route::delete('/jadwal-trip/{id}', [JadwalTripController::class, 'destroy']);
+    });
+
+    // Customer Routes
+    Route::middleware(['auth:sanctum', 'customer'])->group(function () {
+        Route::post('/pemesanan', [PemesananController::class, 'store']);
     });
 });
