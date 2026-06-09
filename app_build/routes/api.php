@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\Admin\PaketManagementController;
+use App\Http\Controllers\Api\Admin\JadwalTripController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -20,12 +21,20 @@ Route::prefix('v1')->group(function () {
     Route::post('/auth/register', [AuthController::class, 'register']);
     Route::post('/auth/login', [AuthController::class, 'login']);
 
-    // Admin Paket Wisata CRUD
+    // Admin CRUD Routes
     Route::prefix('admin')->middleware(['auth:sanctum', 'admin'])->group(function () {
+        // Paket Wisata
         Route::get('/paket-wisata', [PaketManagementController::class, 'index']);
         Route::post('/paket-wisata', [PaketManagementController::class, 'store']);
         Route::get('/paket-wisata/{id}', [PaketManagementController::class, 'show']);
         Route::put('/paket-wisata/{id}', [PaketManagementController::class, 'update']);
         Route::delete('/paket-wisata/{id}', [PaketManagementController::class, 'destroy']);
+
+        // Jadwal Trip
+        Route::get('/jadwal-trip', [JadwalTripController::class, 'index']);
+        Route::post('/jadwal-trip', [JadwalTripController::class, 'store']);
+        Route::get('/jadwal-trip/{id}', [JadwalTripController::class, 'show']);
+        Route::put('/jadwal-trip/{id}', [JadwalTripController::class, 'update']);
+        Route::delete('/jadwal-trip/{id}', [JadwalTripController::class, 'destroy']);
     });
 });

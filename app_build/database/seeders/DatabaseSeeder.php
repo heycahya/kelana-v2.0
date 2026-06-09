@@ -36,7 +36,7 @@ class DatabaseSeeder extends Seeder
         ]);
 
         // 3. Seed Trip Leader
-        TripLeader::create([
+        $leader = TripLeader::create([
             'nama_leader' => 'Adi Wijaya',
             'no_telp' => '089876543210',
             'email' => 'adi.wijaya@kelana.com',
@@ -44,7 +44,7 @@ class DatabaseSeeder extends Seeder
         ]);
 
         // 4. Seed Paket Wisata
-        \App\Models\PaketWisata::create([
+        $paket1 = \App\Models\PaketWisata::create([
             'nama_paket' => 'Trip Bromo Midnight',
             'deskripsi' => 'Open Trip Bromo Sunrise semi-private. Menikmati indahnya sunrise dari Penanjakan, berfoto di Bukit Cinta & Widodaren, pasir berbisik, kawah Bromo.',
             'harga' => 350000.00,
@@ -52,12 +52,31 @@ class DatabaseSeeder extends Seeder
             'fasilitas' => 'Jeep Bromo, Tiket Masuk, Sopir & BBM, Air Mineral, Snack & Kopi pagi.'
         ]);
 
-        \App\Models\PaketWisata::create([
+        $paket2 = \App\Models\PaketWisata::create([
             'nama_paket' => 'Trip Kawah Ijen Blue Fire',
             'deskripsi' => 'Open Trip Kawah Ijen Banyuwangi. Menyaksikan fenomena blue fire yang langka, sunrise di atas kawah, danau asam hijau toska.',
             'harga' => 450000.00,
             'rute' => 'Banyuwangi - Paltuding - Kawah Ijen - Banyuwangi',
             'fasilitas' => 'Transportasi AC, Tiket Masuk, Local Guide, Masker Gas, Air Mineral.'
+        ]);
+
+        // 5. Seed Jadwal Trip
+        \App\Models\JadwalTrip::create([
+            'id_paket' => $paket1->id_paket,
+            'id_leader' => $leader->id_leader,
+            'tanggal_mulai' => '2026-07-01',
+            'tanggal_selesai' => '2026-07-01',
+            'kuota' => 20,
+            'status_trip' => 'Open'
+        ]);
+
+        \App\Models\JadwalTrip::create([
+            'id_paket' => $paket2->id_paket,
+            'id_leader' => $leader->id_leader,
+            'tanggal_mulai' => '2026-08-15',
+            'tanggal_selesai' => '2026-08-16',
+            'kuota' => 15,
+            'status_trip' => 'Draft'
         ]);
     }
 }
