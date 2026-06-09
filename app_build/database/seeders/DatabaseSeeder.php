@@ -42,5 +42,22 @@ class DatabaseSeeder extends Seeder
             'email' => 'adi.wijaya@kelana.com',
             'password' => Hash::make('PasswordLeader123!')
         ]);
+
+        // 4. Seed Paket Wisata
+        \App\Models\PaketWisata::create([
+            'nama_paket' => 'Trip Bromo Midnight',
+            'deskripsi' => 'Open Trip Bromo Sunrise semi-private. Menikmati indahnya sunrise dari Penanjakan, berfoto di Bukit Cinta & Widodaren, pasir berbisik, kawah Bromo.',
+            'harga' => 350000.00,
+            'rute' => 'Malang - Tumpang - Wonokitri - Penanjakan - Bromo - Malang',
+            'fasilitas' => 'Jeep Bromo, Tiket Masuk, Sopir & BBM, Air Mineral, Snack & Kopi pagi.'
+        ]);
+
+        \App\Models\PaketWisata::create([
+            'nama_paket' => 'Trip Kawah Ijen Blue Fire',
+            'deskripsi' => 'Open Trip Kawah Ijen Banyuwangi. Menyaksikan fenomena blue fire yang langka, sunrise di atas kawah, danau asam hijau toska.',
+            'harga' => 450000.00,
+            'rute' => 'Banyuwangi - Paltuding - Kawah Ijen - Banyuwangi',
+            'fasilitas' => 'Transportasi AC, Tiket Masuk, Local Guide, Masker Gas, Air Mineral.'
+        ]);
     }
 }

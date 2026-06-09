@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Api\AuthController;
+use App\Http\Controllers\Api\Admin\PaketManagementController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -18,4 +19,13 @@ use Illuminate\Support\Facades\Route;
 Route::prefix('v1')->group(function () {
     Route::post('/auth/register', [AuthController::class, 'register']);
     Route::post('/auth/login', [AuthController::class, 'login']);
+
+    // Admin Paket Wisata CRUD
+    Route::prefix('admin')->middleware(['auth:sanctum', 'admin'])->group(function () {
+        Route::get('/paket-wisata', [PaketManagementController::class, 'index']);
+        Route::post('/paket-wisata', [PaketManagementController::class, 'store']);
+        Route::get('/paket-wisata/{id}', [PaketManagementController::class, 'show']);
+        Route::put('/paket-wisata/{id}', [PaketManagementController::class, 'update']);
+        Route::delete('/paket-wisata/{id}', [PaketManagementController::class, 'destroy']);
+    });
 });
