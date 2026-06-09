@@ -19,7 +19,7 @@ return new class extends Migration
             $table->dateTime('tgl_pemesanan');
             $table->integer('jumlah_peserta');
             $table->decimal('total_harga', 10, 2);
-            $table->enum('status_pembayaran', ['PENDING', 'WAITING_VERIFICATION', 'CONFIRMED', 'CANCELLED'])->default('PENDING');
+            $table->enum('status_pembayaran', ['PENDING', 'WAITING_VERIFICATION', 'CONFIRMED', 'CANCELLED', 'PAID', 'FAILED'])->default('PENDING');
             $table->enum('attendance_status', ['belum_hadir', 'hadir', 'absen'])->default('belum_hadir');
             $table->timestamps();
 

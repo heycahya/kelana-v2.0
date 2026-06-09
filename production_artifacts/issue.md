@@ -82,6 +82,51 @@ Jika transaksi di atas berhasil disimpan hingga commit, kembalikan HTTP `201 Cre
 }
 ```
 
+## 5. API Webhook (POST `/api/v1/webhook/midtrans`)
+- **Rute**: Daftarkan endpoint `POST /webhook/midtrans` di dalam `routes/api.php` dengan prefix `v1`. **PENTING:** Rute ini **TIDAK BOLEH** menggunakan middleware `auth:sanctum` atau pembatasan role apa pun, karena akan diakses langsung oleh server Midtrans secara publik.
+
+- **Controller**:
+  - Buat `app/Http/Controllers/Api/WebhookController.php`.
+  - Buat method `handleMidtrans(Request $request)`.
+  - Gunakan `try-catch` dan `DB::transaction()` untuk semua proses manipulasi database di dalam method ini.
+
+- **Low-Level Logic & Library Midtrans**:
+  - Konfigurasi kunci Midtrans:
+    ```php
+    \Midtrans\Config::$serverKey = env('MIDTRANS_SERVER_KEY');
+    \Midtrans\Config::$isProduction = false;
+    ```
+  - Panggil object notifikasi:
+    ```php
+    $notification = new \Midtrans\Notification();
+    ```
+  - Ambil data dari notifikasi:
+    ```php
+    $transactionStatus = $notification->transaction_status;
+    $orderId = $notification->order_id; // ini adalah booking_code kita
+    ```
+  - Cari data di tabel `pemesanan` berdasarkan `booking_code` (dari `$orderId`). Jika tidak ketemu, segera hentikan proses dan return HTTP 404.
+
+- **Logika Update Status & Kuota (Berdasarkan `$transactionStatus`)**:
+  - Jika status `'capture'` atau `'settlement'`:
+    - Update tabel `pemesanan`: `status_pembayaran = 'PAID'`.
+    - Update tabel `pembayaran` terkait: `status_transaksi = 'SUCCESS'`.
+  - Jika status `'deny'`, `'cancel'`, atau `'expire'`:
+    - Update tabel `pemesanan`: `status_pembayaran = 'FAILED'` (atau `'CANCELLED'`).
+    - Update tabel `pembayaran` terkait: `status_transaksi = 'FAILED'` (atau `'EXPIRED'`).
+    - **PENTING:** Lakukan *increment* (tambah kembali) field `sisa_kuota` di tabel `jadwal_trip` sebesar `jumlah_peserta` dari pemesanan tersebut agar kuota tidak hangus.
+  - Jika status `'pending'`:
+    - Abaikan atau biarkan `status_pembayaran` tetap `'PENDING'`.
+
+- **Format Response**:
+  - Selalu kembalikan HTTP Status `200 OK` dengan format JSON jika proses dieksekusi dengan aman (terlepas dari status transaksi sukses atau gagal), agar Midtrans tidak mengulang pengiriman webhook.
+  ```json
+  {
+    "status": "success",
+    "message": "Webhook processed"
+  }
+  ```
+
 ## Catatan Eksekutor (@engineer-coder):
 - Pastikan seluruh tabel/relasi dan field sesuai dengan struktur `draft_perancangan.md` terbaru.
 - Setelah implementasi selesai dan sukses, tulis log/update progres di file `STATE.md`.

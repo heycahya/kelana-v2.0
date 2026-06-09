@@ -244,7 +244,9 @@ if ($loginCustomer['status'] == 200 && isset($loginCustomer['body']['data']['tok
         'jumlah_peserta' => 2
     ];
     $createBooking = makeRequest('POST', "$baseUrl/pemesanan", $bookingData, $customerToken);
+    $bookingCode = null;
     if ($createBooking['status'] == 201) {
+        $bookingCode = $createBooking['body']['data']['booking_code'];
         echo "✅ BERHASIL (HTTP 201 Created):\n";
         echo "   Booking Code: " . $createBooking['body']['data']['booking_code'] . "\n";
         echo "   Total Harga : " . $createBooking['body']['data']['total_harga'] . "\n";
@@ -290,6 +292,115 @@ if ($loginCustomer['status'] == 200 && isset($loginCustomer['body']['data']['tok
         echo "✅ BERHASIL (HTTP 403 Forbidden): Rute Pemesanan terproteksi dari Admin dengan benar!\n\n";
     } else {
         echo "❌ GAGAL: Rute Pemesanan dapat diakses oleh Admin (HTTP {$testAdminAccessBooking['status']}).\n\n";
+    }
+
+    // ==========================================
+    // MIDTRANS WEBHOOK TESTING
+    // ==========================================
+    echo "--------------------------------------------------\n";
+    echo "       PENGUJIAN WEBHOOK INTEGRASI MIDTRANS        \n";
+    echo "--------------------------------------------------\n\n";
+
+    // 19. Webhook: Order Not Found (404)
+    echo "[19] Menguji Webhook Midtrans - Booking Code Tidak Ditemukan...\n";
+    $webhookNotFound = makeRequest('POST', "$baseUrl/webhook/midtrans", [
+        'order_id' => 'TRIP-NOT-FOUND-999',
+        'transaction_status' => 'settlement',
+        'payment_type' => 'bank_transfer',
+        'transaction_id' => 'trx-mock-999',
+        'transaction_time' => '2026-06-09 23:20:00',
+        'gross_amount' => '100000'
+    ]);
+    if ($webhookNotFound['status'] == 404) {
+        echo "✅ BERHASIL (HTTP 404 Not Found): Webhook mengembalikan 404 untuk order_id yang salah.\n\n";
+    } else {
+        echo "❌ GAGAL: Webhook meloloskan order_id tidak valid (HTTP {$webhookNotFound['status']}).\n\n";
+    }
+
+    if ($bookingCode) {
+        // 20. Webhook: Status Pending
+        echo "[20] Menguji Webhook Midtrans - Status PENDING...\n";
+        $webhookPending = makeRequest('POST', "$baseUrl/webhook/midtrans", [
+            'order_id' => $bookingCode,
+            'transaction_status' => 'pending',
+            'payment_type' => 'bank_transfer',
+            'transaction_id' => 'trx-mock-pending',
+            'transaction_time' => '2026-06-09 23:21:00',
+            'gross_amount' => $createBooking['body']['data']['total_harga']
+        ]);
+        if ($webhookPending['status'] == 200) {
+            echo "✅ BERHASIL (HTTP 200 OK): Status PENDING diproses.\n\n";
+        } else {
+            echo "❌ GAGAL: Webhook pending gagal diproses (HTTP {$webhookPending['status']}).\n\n";
+        }
+
+        // 21. Webhook: Status Settlement (SUCCESS)
+        echo "[21] Menguji Webhook Midtrans - Status SETTLEMENT (Sukses)...\n";
+        $webhookSettlement = makeRequest('POST', "$baseUrl/webhook/midtrans", [
+            'order_id' => $bookingCode,
+            'transaction_status' => 'settlement',
+            'payment_type' => 'bank_transfer',
+            'transaction_id' => 'trx-mock-settled',
+            'transaction_time' => '2026-06-09 23:22:00',
+            'gross_amount' => $createBooking['body']['data']['total_harga']
+        ]);
+        if ($webhookSettlement['status'] == 200) {
+            echo "✅ BERHASIL (HTTP 200 OK): Status SETTLEMENT diproses.\n\n";
+        } else {
+            echo "❌ GAGAL: Webhook settlement gagal diproses (HTTP {$webhookSettlement['status']}).\n\n";
+        }
+
+        // 22. Webhook: Status Expire (Quota Restored)
+        echo "[22] Membuat Booking Baru untuk Pengujian Expire & Pengembalian Kuota...\n";
+        
+        // Cek kuota sebelum booking baru
+        $checkJadwalBefore = makeRequest('GET', "$baseUrl/admin/jadwal-trip/1", null, $adminToken);
+        $kuotaBefore = $checkJadwalBefore['body']['data']['sisa_kuota'] ?? 0;
+        echo "     Kuota awal jadwal ID 1: $kuotaBefore\n";
+
+        $tempBooking = makeRequest('POST', "$baseUrl/pemesanan", [
+            'id_jadwal' => 1,
+            'jumlah_peserta' => 3
+        ], $customerToken);
+
+        if ($tempBooking['status'] == 201) {
+            $tempBookingCode = $tempBooking['body']['data']['booking_code'];
+            
+            // Cek kuota sesudah booking baru (harus berkurang 3)
+            $checkJadwalAfterBooking = makeRequest('GET', "$baseUrl/admin/jadwal-trip/1", null, $adminToken);
+            $kuotaAfterBooking = $checkJadwalAfterBooking['body']['data']['sisa_kuota'] ?? 0;
+            echo "     Kuota setelah booking (dikurangi 3): $kuotaAfterBooking\n";
+
+            // Kirim webhook EXPIRE
+            echo "     Mengirim Webhook Midtrans EXPIRE untuk booking $tempBookingCode...\n";
+            $webhookExpire = makeRequest('POST', "$baseUrl/webhook/midtrans", [
+                'order_id' => $tempBookingCode,
+                'transaction_status' => 'expire',
+                'payment_type' => 'bank_transfer',
+                'transaction_id' => 'trx-mock-expired',
+                'transaction_time' => '2026-06-09 23:25:00',
+                'gross_amount' => $tempBooking['body']['data']['total_harga']
+            ]);
+
+            if ($webhookExpire['status'] == 200) {
+                // Cek kuota sesudah expire (harus kembali bertambah 3)
+                $checkJadwalAfterExpire = makeRequest('GET', "$baseUrl/admin/jadwal-trip/1", null, $adminToken);
+                $kuotaAfterExpire = $checkJadwalAfterExpire['body']['data']['sisa_kuota'] ?? 0;
+                echo "     Kuota setelah webhook EXPIRE (harus kembali bertambah 3): $kuotaAfterExpire\n";
+
+                if ($kuotaAfterExpire == $kuotaBefore) {
+                    echo "✅ BERHASIL (HTTP 200 OK): Status EXPIRE diproses dan kuota berhasil dikembalikan!\n\n";
+                } else {
+                    echo "❌ GAGAL: Kuota tidak kembali ke nilai awal ($kuotaBefore) setelah EXPIRE (kuota sekarang: $kuotaAfterExpire).\n\n";
+                }
+            } else {
+                echo "❌ GAGAL: Webhook expire gagal diproses (HTTP {$webhookExpire['status']}).\n\n";
+            }
+        } else {
+            echo "❌ GAGAL: Gagal membuat booking sementara untuk tes expire.\n\n";
+        }
+    } else {
+        echo "⚠️ KEPUTUSAN: Booking code tidak ada, pengujian webhook dilewati.\n\n";
     }
 } else {
     echo "❌ GAGAL: Login Customer gagal.\n\n";

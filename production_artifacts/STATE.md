@@ -2,7 +2,7 @@
 
 ## Current Status
 - **Phase**: PHASE 3: EXECUTION & CODING
-- **Feature**: API Pemesanan & Integrasi Midtrans Sandbox (Role Customer) (Issue #10)
+- **Feature**: API Webhook Notification Midtrans (Issue #11)
 - **Status**: Completed & Verified ✅
 
 ## Tasks Checklist
@@ -50,6 +50,11 @@
 - [x] Update `DatabaseSeeder.php` to include initial `sisa_kuota` data (AI)
 - [x] Update `draft_perancangan.md` for Midtrans Sandbox mode (AI)
 - [x] Extend `test-api.php` with comprehensive Booking API test cases (AI)
+- [x] Add status `'PAID'` and `'FAILED'` to `status_pembayaran` enum on `pemesanan` migration (AI)
+- [x] Add `status_transaksi` column to `pembayaran` migration & model fillable list (AI)
+- [x] Create `WebhookController` to handle Midtrans webhook notification logic (AI)
+- [x] Register public route `POST /api/v1/webhook/midtrans` in `routes/api.php` (AI)
+- [x] Add comprehensive Webhook integration test scenarios to `test-api.php` (AI)
 
 ## Notes
 - Model `Customer`, `Admin`, dan `TripLeader` sekarang telah dikonfigurasi sebagai class `Authenticatable` dengan trait `HasApiTokens` dari Laravel Sanctum.
@@ -68,5 +73,12 @@
   - Method `store()` pada `PemesananController` menangani logic database transaction, validasi sisa kuota, kalkulasi harga, generation booking code unik, integrasi Snap API Midtrans Sandbox, dan update data pembayaran (snap_token) & sisa kuota jadwal trip.
   - Skrip testing `test-api.php` diperluas dengan skenario pengujian lengkap: pemesanan sukses, gagal validasi, kuota tidak mencukupi, dan proteksi hak akses admin.
 - Karena Sanctum membutuhkan package composer dan eksekusi migrasi, instruksi langkah-langkah pengujian terminal diserahkan kepada User untuk dieksekusi secara lokal.
+- Implementasi API Webhook Notification Midtrans (Issue #11) telah selesai:
+  - Migrasi `pemesanan` dimodifikasi untuk menampung status pembayaran `'PAID'` dan `'FAILED'`.
+  - Migrasi `pembayaran` dimodifikasi untuk menampung kolom `status_transaksi`.
+  - Model `Pembayaran` disesuaikan dengan menambahkan `status_transaksi` ke fillable array.
+  - `WebhookController` telah diimplementasikan lengkap dengan validasi status Midtrans (`capture`, `settlement`, `deny`, `cancel`, `expire`, `pending`), penanganan database transaction, serta pengembalian (increment) kuota trip jika status pembayaran dibatalkan/expired.
+  - Route didaftarkan di `routes/api.php` di bawah prefix `v1` tanpa middleware auth apapun.
+  - Skrip pengujian `test-api.php` diperluas dengan skenario webhooks (order not found, status pending, status settlement, dan status expire untuk memvalidasi pemulihan kuota jadwal trip).
 
 

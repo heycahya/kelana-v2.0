@@ -20,6 +20,7 @@ return new class extends Migration
             $table->decimal('jumlah_bayar', 10, 2);
             $table->string('metode_pembayaran', 100)->nullable();
             $table->string('bukti_pembayaran', 255)->nullable();
+            $table->string('status_transaksi', 50)->nullable();
             $table->timestamps();
 
             $table->foreign('id_pemesanan')->references('id_pemesanan')->on('pemesanan')->onDelete('cascade');

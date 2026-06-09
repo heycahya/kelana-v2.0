@@ -4,6 +4,7 @@ use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\Admin\PaketManagementController;
 use App\Http\Controllers\Api\Admin\JadwalTripController;
 use App\Http\Controllers\Api\Customer\PemesananController;
+use App\Http\Controllers\Api\WebhookController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -21,6 +22,9 @@ use Illuminate\Support\Facades\Route;
 Route::prefix('v1')->group(function () {
     Route::post('/auth/register', [AuthController::class, 'register']);
     Route::post('/auth/login', [AuthController::class, 'login']);
+    
+    // Webhook Midtrans (Public/No Auth Middleware)
+    Route::post('/webhook/midtrans', [WebhookController::class, 'handleMidtrans']);
 
     // Admin CRUD Routes
     Route::prefix('admin')->middleware(['auth:sanctum', 'admin'])->group(function () {

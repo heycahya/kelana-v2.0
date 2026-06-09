@@ -6,7 +6,7 @@ use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-#[Fillable(['id_pemesanan', 'transaction_id', 'snap_token', 'tgl_pembayaran', 'jumlah_bayar', 'metode_pembayaran', 'bukti_pembayaran'])]
+#[Fillable(['id_pemesanan', 'transaction_id', 'snap_token', 'tgl_pembayaran', 'jumlah_bayar', 'metode_pembayaran', 'bukti_pembayaran', 'status_transaksi'])]
 class Pembayaran extends Model
 {
     use HasFactory;
