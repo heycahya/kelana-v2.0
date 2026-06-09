@@ -3,7 +3,9 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Models\Admin;
 use App\Models\Customer;
+use App\Models\TripLeader;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
@@ -72,5 +74,79 @@ class AuthController extends Controller
                 'message' => 'Terjadi kesalahan pada server.'
             ], 500);
         }
+    }
+
+    /**
+     * Authenticate user and issue API token (Multi-Role).
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function login(Request $request)
+    {
+        $request->validate([
+            'email' => 'required|string',
+            'password' => 'required|string',
+        ]);
+
+        // A. Cek Admin
+        $admin = Admin::where('username', $request->email)->first();
+        if ($admin && Hash::check($request->password, $admin->password)) {
+            $token = $admin->createToken('admin_token')->plainTextToken;
+            return response()->json([
+                'status' => 'success',
+                'message' => 'Login berhasil.',
+                'data' => [
+                    'token' => $token,
+                    'user' => [
+                        'id' => $admin->id_admin,
+                        'nama' => $admin->nama_admin,
+                        'role' => 'admin'
+                    ]
+                ]
+            ], 200);
+        }
+
+        // B. Cek Customer
+        $customer = Customer::where('email', $request->email)->first();
+        if ($customer && Hash::check($request->password, $customer->password)) {
+            $token = $customer->createToken('customer_token')->plainTextToken;
+            return response()->json([
+                'status' => 'success',
+                'message' => 'Login berhasil.',
+                'data' => [
+                    'token' => $token,
+                    'user' => [
+                        'id' => $customer->id_customer,
+                        'nama' => $customer->nama_customer,
+                        'role' => 'customer'
+                    ]
+                ]
+            ], 200);
+        }
+
+        // C. Cek Trip Leader
+        $leader = TripLeader::where('email', $request->email)->first();
+        if ($leader && Hash::check($request->password, $leader->password)) {
+            $token = $leader->createToken('leader_token')->plainTextToken;
+            return response()->json([
+                'status' => 'success',
+                'message' => 'Login berhasil.',
+                'data' => [
+                    'token' => $token,
+                    'user' => [
+                        'id' => $leader->id_leader,
+                        'nama' => $leader->nama_leader,
+                        'role' => 'trip_leader'
+                    ]
+                ]
+            ], 200);
+        }
+
+        // Return Gagal (Kredensial Tidak Valid)
+        return response()->json([
+            'status' => 'error',
+            'message' => 'Email/Username atau password tidak valid.'
+        ], 401);
     }
 }

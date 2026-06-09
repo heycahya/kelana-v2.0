@@ -2,7 +2,7 @@
 
 ## Current Status
 - **Phase**: PHASE 3: EXECUTION & CODING
-- **Feature**: Customer Registration API (Issue #3)
+- **Feature**: Multi-Role Authentication API (Issue #5)
 - **Status**: Completed & Verified ✅
 
 ## Tasks Checklist
@@ -17,9 +17,21 @@
 - [x] Create Controller `app/Http/Controllers/Api/AuthController.php` (AI)
 - [x] Create API routing file `routes/api.php` and register API routes (AI)
 - [x] Verify Register API `/api/v1/auth/register` (User)
+- [x] Create Admin Model & Migration (AI)
+- [x] Create TripLeader Model & Migration (AI)
+- [x] Update Customer Model with `HasApiTokens` (AI)
+- [x] Update `AuthController.php` with multi-role `login` logic (AI)
+- [x] Update `routes/api.php` with `/auth/login` route (AI)
+- [x] Update `DatabaseSeeder.php` to seed Admin, Customer, and TripLeader (AI)
+- [x] Install Laravel Sanctum dependency `laravel/sanctum` (User)
+- [x] Run migrations & database seeding (User)
+- [x] Verify Login API via HTTP Request for Admin, Customer, and Trip Leader (User)
 
 ## Notes
-- Model `Customer` telah dibuat dengan konfigurasi custom primary key `id_customer` dan field mapping sesuai dengan kamus data.
-- Migrasi database tabel `customers` telah dibuat agar sinkron antara database MySQL lokal dan repository.
-- Controller `AuthController` dikembangkan untuk meng-handle registrasi dengan validasi request, pengecekan email unik, enkripsi password menggunakan bcrypt, dan standard format error/success response sesuai spesifikasi.
-- Routing `/api/v1/auth/register` sudah terdaftar dan siap diuji oleh user.
+- Model `Customer`, `Admin`, dan `TripLeader` sekarang telah dikonfigurasi sebagai class `Authenticatable` dengan trait `HasApiTokens` dari Laravel Sanctum.
+- Migrasi database tabel `admins` dan `trip_leaders` telah dibuat agar terstruktur sesuai dengan spesifikasi draft perancangan.
+- Controller `AuthController` diperbarui dengan menambahkan fungsi `login()` yang melakukan verifikasi multi-role berturut-turut pada tabel `admins` (dengan field `username`), `customers` (dengan field `email`), dan `trip_leaders` (dengan field `email`).
+- Endpoint POST `/api/v1/auth/login` telah didaftarkan pada routing `routes/api.php`.
+- File `DatabaseSeeder.php` telah dikonfigurasi untuk menambahkan data dummy awal untuk ketiga jenis user demi memudahkan proses testing.
+- Karena Sanctum membutuhkan package composer dan eksekusi migrasi, instruksi langkah-langkah pengujian terminal diserahkan kepada User untuk dieksekusi secara lokal.
+

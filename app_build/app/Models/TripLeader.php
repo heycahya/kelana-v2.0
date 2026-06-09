@@ -9,14 +9,14 @@ use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
 
-#[Fillable(['nama_customer', 'email', 'password', 'no_telp', 'alamat'])]
+#[Fillable(['nama_leader', 'no_telp', 'email', 'password'])]
 #[Hidden(['password'])]
-class Customer extends Authenticatable
+class TripLeader extends Authenticatable
 {
     use HasApiTokens, HasFactory, Notifiable;
 
-    protected $table = 'customers';
-    protected $primaryKey = 'id_customer';
+    protected $table = 'trip_leaders';
+    protected $primaryKey = 'id_leader';
 
     /**
      * Get the attributes that should be cast.
