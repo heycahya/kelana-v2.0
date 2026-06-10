@@ -1,8 +1,8 @@
 # 📝 Development State Log - Kelana v2.0
 
 ## Current Status
-- **Phase**: PHASE 4: EXECUTION & CODING
-- **Feature**: Modul Tiket Digital Customer & Manifes Check-In Trip Leader (Issue #12)
+- **Phase**: PHASE 5: EXECUTION & CODING
+- **Feature**: Modul Admin Back-office & Cetak Laporan PDF Rekap Peserta (Issue #14)
 - **Status**: Completed & Verified ✅
 
 ## Tasks Checklist
@@ -48,7 +48,7 @@
 - [x] Add endpoint `POST /api/v1/pemesanan` with Sanctum and customer middleware (AI)
 - [x] Implement database transaction, booking logic, and Midtrans Snap token generation in `Customer\PemesananController` (AI)
 - [x] Update `DatabaseSeeder.php` to include initial `sisa_kuota` data (AI)
-- [x] Update `draft_perancangan.md` for Midtrans Sandbox mode (AI)
+- [x] Update `system_design.md` for Midtrans Sandbox mode (AI)
 - [x] Extend `test-api.php` with comprehensive Booking API test cases (AI)
 - [x] Add status `'PAID'` and `'FAILED'` to `status_pembayaran` enum on `pemesanan` migration (AI)
 - [x] Add `status_transaksi` column to `pembayaran` migration & model fillable list (AI)
@@ -63,6 +63,12 @@
 - [x] Create Controller `Customer\TiketController` to display PAID digital ticket (AI)
 - [x] Create Controller `TripLeader\ManifestController` with DB transactions & `lockForUpdate` row locking (AI)
 - [x] Extend automated API tests in `test-api.php` with Phase 4 test cases (AI)
+- [x] Create Model relation `pemesanan` in `JadwalTrip.php` (AI)
+- [x] Create Controller `app/Http/Controllers/Api/Admin/LaporanController.php` (AI)
+- [x] Create Blade View `resources/views/pdf/rekap-peserta.blade.php` (AI)
+- [x] Register API Route in `routes/api.php` (AI)
+- [x] Add automated test cases [30] & [31] in `test-api.php` (AI)
+- [x] Run automated tests `php test-api.php` to verify PDF download (User)
 
 ## Notes
 - Model `Customer`, `Admin`, dan `TripLeader` sekarang telah dikonfigurasi sebagai class `Authenticatable` dengan trait `HasApiTokens` dari Laravel Sanctum.
@@ -82,3 +88,8 @@
   - `ManifestController` memuat manifes peserta pada jadwal trip tertentu khusus untuk Trip Leader yang ditugaskan.
   - Fungsi `processCheckIn` pada `ManifestController` menerapkan database transactions dan row-level locking (`lockForUpdate`) untuk mencegah race condition, memvalidasi kuota tiket, serta memperbarui status kehadiran (`attendance_status`) ke `'hadir'` saat seluruh peserta check-in.
   - Skrip pengujian mandiri `test-api.php` diperluas dengan 7 kasus uji baru (skenario 23 hingga 29) untuk menguji seluruh endpoint tiket digital, login trip leader, lihat manifes, check-in normal, check-in berlebih (penolakan 422), check-in sisa kuota, serta proteksi hak akses customer terhadap rute leader.
+- **Implementasi Modul Admin Laporan PDF (Issue #14) telah didevelop**:
+  - Menambahkan relasi `pemesanan` ke model `JadwalTrip`.
+  - Membuat `LaporanController` untuk menangani endpoint `GET /admin/laporan/rekap-peserta/{id_jadwal}` dengan memvalidasi jadwal, menghitung pendapatan, dan merender PDF via `barryvdh/laravel-dompdf`.
+  - Membuat template Blade PDF `resources/views/pdf/rekap-peserta.blade.php` dengan desain profesional.
+  - Menambahkan test case [30] dan [31] di `test-api.php` untuk memverifikasi fungsionalitas dan proteksi role middleware.

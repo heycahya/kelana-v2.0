@@ -1,5 +1,5 @@
 # 🤝 Handoff Document - Kelana v2.0
-**Features:** Customer Registration, Multi-Role Authentication, CRUD Admin, Customer Booking, Midtrans Webhook, Digital Ticket, & Trip Leader Manifest Check-In
+**Features:** Customer Registration, Multi-Role Authentication, CRUD Admin, Customer Booking, Midtrans Webhook, Digital Ticket, Trip Leader Manifest Check-In, & Cetak Laporan PDF Rekap Peserta
 **Issue References:** 
 - [#3 - Register Customer API](https://github.com/heycahya/kelana-v2.0/issues/3)
 - [#5 - Multi-Role Login API](https://github.com/heycahya/kelana-v2.0/issues/5)
@@ -9,51 +9,47 @@
 - [#10 - API Pemesanan & Integrasi Midtrans Sandbox (Role Customer)](https://github.com/heycahya/kelana-v2.0/issues/10)
 - [#11 - API Webhook Notification Midtrans](https://github.com/heycahya/kelana-v2.0/issues/11)
 - [#12 - Modul Tiket Digital Customer & Manifes Check-In Trip Leader](https://github.com/heycahya/kelana-v2.0/issues/12)
-**Branch:** `feature/phase-4-digital-ticket-manifest`
+- [#14 - Modul Admin Back-office & Cetak Laporan PDF Rekap Peserta](https://github.com/heycahya/kelana-v2.0/issues/14)
+**Branch:** `feature/phase-5-admin-pdf-reports`
 **Status:** Completed & Verified ✅
 
 ---
 
 ## 📋 Ringkasan Pekerjaan
-Telah diimplementasikan secara lengkap modul Tiket Digital untuk Customer serta manifes peserta lunas & check-in kehadiran mandiri berbasis kuantitas untuk Trip Leader. Untuk menjamin keamanan transaksi dan kekokohan sistem, check-in diimplementasikan menggunakan **Database Transaction** dan **Pessimistic Locking** (`lockForUpdate`) untuk menghindari kondisi balapan (*race condition*) jika terdapat banyak petugas tapping bersamaan. Rute dan middleware diisolasi sehingga data manifes hanya bisa dibaca oleh Trip Leader yang ditugaskan pada trip tersebut. Pengujian terotomasi pada `test-api.php` telah diperluas dan sukses memverifikasi semua alur operasi normal serta batasan penolakan kuota check-in.
+Telah diimplementasikan fitur **Modul Admin Back-office & Cetak Laporan PDF Rekap Peserta (Phase 5)**. Fitur ini memungkinkan Admin untuk mengunduh rekap manifes final peserta trip yang lunas (`PAID`) dalam bentuk file PDF per jadwal trip. Fitur ini dirancang menggunakan library `barryvdh/laravel-dompdf` yang memuat template Blade HTML berdesain rapi dan bersih. Endpoint diamankan dengan middleware `auth:sanctum` dan `admin` untuk memastikan hanya Admin terautentikasi yang dapat mengunduhnya. Kasus uji otomatis `30` dan `31` telah ditambahkan di `test-api.php` untuk memvalidasi fungsionalitas unduhan PDF dan proteksi role akses. Seluruh uji coba otomatis telah dijalankan dan diverifikasi berhasil di terminal pengguna.
 
 ---
 
 ## 🛠️ Perubahan Berkas (File Changes)
 
 ### 1. Model Database
-- **[Pemesanan.php](file:///c:/Development/kelana-v2.0/app_build/app/Models/Pemesanan.php)**
-  - Menambahkan kolom `'jumlah_hadir'` pada fillable attributes list agar dapat dimutasi.
+- **[JadwalTrip.php](file:///c:/Development/kelana-v2.0/app_build/app/Models/JadwalTrip.php)**
+  - Menambahkan relasi `pemesanan` (`hasMany` ke model `Pemesanan`) untuk mempermudah penarikan manifes peserta lunas per jadwal trip.
 
-### 2. Migrasi Database
-- **[2026_06_10_173000_add_jumlah_hadir_to_pemesanan_table.php](file:///c:/Development/kelana-v2.0/app_build/database/migrations/2026_06_10_173000_add_jumlah_hadir_to_pemesanan_table.php)**
-  - Menambahkan kolom integer `jumlah_hadir` dengan nilai default `0` setelah kolom `status_pembayaran` di tabel `pemesanan`.
+### 2. Controller
+- **[LaporanController.php](file:///c:/Development/kelana-v2.0/app_build/app/Http/Controllers/Api/Admin/LaporanController.php)**
+  - Mengambil data jadwal trip beserta relasi terkait (`paketWisata`, `tripLeader`).
+  - Mengambil daftar pemesanan berstatus `PAID` untuk jadwal tersebut beserta data customernya.
+  - Menghitung statistik total peserta dan total pendapatan.
+  - Memuat template Blade `pdf.rekap-peserta` dengan data-data tersebut lalu mengembalikan response download stream PDF.
 
-### 3. Middleware & Routing
-- **[EnsureUserIsTripLeader.php](file:///c:/Development/kelana-v2.0/app_build/app/Http/Middleware/EnsureUserIsTripLeader.php)**
-  - Middleware baru untuk membatasi request agar hanya diijinkan jika instansi pengguna adalah `App\Models\TripLeader`.
-- **[app.php](file:///c:/Development/kelana-v2.0/app_build/bootstrap/app.php)**
-  - Mendaftarkan alias middleware `'trip_leader'` untuk memetakan class `EnsureUserIsTripLeader`.
+### 3. View / Template
+- **[rekap-peserta.blade.php](file:///c:/Development/kelana-v2.0/app_build/resources/views/pdf/rekap-peserta.blade.php)**
+  - Mendesain template cetak PDF menggunakan HTML/CSS dasar yang didukung oleh dompdf. Menampilkan kop surat, info detail paket/jadwal/trip leader, ringkasan statistik (jumlah peserta & total pendapatan), dan tabel manifes detail peserta.
+
+### 4. Routing
 - **[api.php](file:///c:/Development/kelana-v2.0/app_build/routes/api.php)**
-  - Mendaftarkan endpoint `GET /v1/customer/tiket/{booking_code}` di bawah middleware customer.
-  - Mendaftarkan `GET /v1/trip-leader/manifest/{id_jadwal}` dan `POST /v1/trip-leader/check-in` di bawah middleware trip_leader.
-
-### 4. Controller
-- **[TiketController.php](file:///c:/Development/kelana-v2.0/app_build/app/Http/Controllers/Api/Customer/TiketController.php)**
-  - Mengembalikan representasi JSON tiket digital. Memvalidasi status kelunasan pembayaran (`PAID`) dan memverifikasi bahwa tiket tersebut dibeli oleh customer bersangkutan.
-- **[ManifestController.php](file:///c:/Development/kelana-v2.0/app_build/app/Http/Controllers/Api/TripLeader/ManifestController.php)**
-  - Menampilkan manifes peserta PAID pada jadwal trip. Mengamankan data agar hanya Trip Leader penanggung jawab jadwal tersebut yang bisa membacanya.
-  - Memproses check-in kuantitas berbasis `lockForUpdate` dalam `DB::transaction()`. Memastikan akumulasi jumlah hadir tidak pernah melebihi total kuota yang dipesan. Mengubah status kehadiran (`attendance_status`) menjadi `'hadir'` otomatis ketika total kehadiran rombongan lengkap.
+  - Mendaftarkan route `GET /admin/laporan/rekap-peserta/{id_jadwal}` di bawah prefix `/api/v1/admin` yang diproteksi oleh middleware `['auth:sanctum', 'admin']`.
 
 ### 5. Script Testing
 - **[test-api.php](file:///c:/Development/kelana-v2.0/app_build/test-api.php)**
-  - Ditambahkan kasus uji `23` hingga `29` yang mensimulasikan seluruh alur fitur baru dan pengujian proteksi rute.
+  - Menambahkan skenario pengujian `30` (Admin mengunduh laporan PDF rekap peserta dan memvalidasi keaslian file PDF lewat signature `%PDF-`) dan `31` (Memastikan Customer ditolak saat mencoba mengunduh PDF).
 
 ---
 
 ## 🧪 Hasil Pengujian (Test Results)
 
-Skenario uji otomatis berjalan sukses dengan log keluaran sebagai berikut:
+Skenario uji otomatis berjalan sukses dengan log keluaran lengkap sebagai berikut:
 
 ```text
 ==================================================
@@ -180,13 +176,23 @@ Trip Leader = Adi Wijaya
 [29] Mencoba melakukan check-in menggunakan token Customer...
 ✅ BERHASIL (HTTP 403 Forbidden): Rute check-in terproteksi dari Customer dengan benar!
 
+--------------------------------------------------
+       PENGUJIAN LAPORAN PDF REKAP PESERTA        
+--------------------------------------------------
+
+[30] Admin mengunduh laporan PDF rekap peserta untuk Jadwal Trip ID 1...
+✅ BERHASIL (HTTP 200 OK): Dokumen PDF berhasil diunduh dan diverifikasi (PDF Signature ditemukan).
+
+[31] Mencoba mengunduh laporan PDF menggunakan token Customer...
+✅ BERHASIL (HTTP 403 Forbidden): Rute laporan terproteksi dari Customer dengan benar!
+
 ==================================================
-             PENGUJIAN SELESAI
+             PENGUJIAN SELESAI                    
 ==================================================
 ```
 
 ---
 
 ## 🚀 Langkah Selanjutnya (Next Steps)
-1. Lakukan penggabungan (*merge*) Pull Request ke branch utama `main`.
-2. Mulai Phase 5: Implementasi Modul Admin Back-office & Cetak Laporan PDF Rekap Peserta via `laravel-dompdf`.
+1. Gabungkan Pull Request `feature/phase-5-admin-pdf-reports` ke branch utama `main`.
+2. Handoff siap diserahkan sepenuhnya ke orkestrator proyek.
