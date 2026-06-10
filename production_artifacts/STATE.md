@@ -1,8 +1,8 @@
 # 📝 Development State Log - Kelana v2.0
 
 ## Current Status
-- **Phase**: PHASE 6: EXECUTION & CODING
-- **Feature**: Modul Ulasan & Rating (Review) - Sisi Customer (Issue #16)
+- **Phase**: PHASE 8: EXECUTION & CODING
+- **Feature**: Modul Profil Customer & Riwayat Pemesanan Komprehensif (Issue #19)
 - **Status**: Completed & Ready for Verification ✅
 
 ## Tasks Checklist
@@ -76,6 +76,19 @@
 - [x] Extend automated API tests in `test-api.php` with Phase 6 test cases [32] to [36] (AI)
 - [ ] Run migrations & database seeding for ulasan table (User)
 - [ ] Run automated tests `php test-api.php` to verify Phase 6 Review & Rating functionality (User)
+- [x] Create Model relationships `jadwalTrip` and `reviews` in `PaketWisata.php` (AI)
+- [x] Create Controller `App\Http\Controllers\Api\Publik\KatalogController` (AI)
+- [x] Register public routes `/api/v1/publik/paket-wisata` and `/api/v1/publik/paket-wisata/{id}` (AI)
+- [x] Extend automated API tests in `test-api.php` with Phase 7 test cases [37] to [42] (AI)
+- [ ] Run automated tests `php test-api.php` to verify Phase 6 & Phase 7 functionality (User)
+- [x] Create Migration `database/migrations/2026_06_10_195500_add_kontak_darurat_to_customers_table.php` (AI)
+- [x] Add `kontak_darurat` to fillable fields on `Customer.php` model (AI)
+- [x] Create Controller `App\Http\Controllers\Api\Customer\ProfileController` (AI)
+- [x] Create Controller `App\Http\Controllers\Api\Customer\PesananHistoryController` (AI)
+- [x] Register routes for Customer Profile & Booking History under Sanctum/Customer middleware (AI)
+- [x] Extend automated API tests in `test-api.php` with Phase 8 test cases [43] to [50] (AI)
+- [ ] Run migrations to apply `add_kontak_darurat` (User)
+- [ ] Run automated tests `php test-api.php` to verify Phase 8 Profile & History functionality (User)
 
 ## Notes
 - Model `Customer`, `Admin`, dan `TripLeader` sekarang telah dikonfigurasi sebagai class `Authenticatable` dengan trait `HasApiTokens` dari Laravel Sanctum.
@@ -102,7 +115,17 @@
   - Menambahkan test case [30] dan [31] di `test-api.php` untuk memverifikasi fungsionalitas dan proteksi role middleware.
 - **Implementasi Modul Ulasan & Rating Customer (Issue #16) telah selesai**:
   - Tabel `ulasan` dirancang dengan composite unique key `['id_customer', 'id_jadwal']` untuk mencegah ulasan ganda di tingkat database, serta foreign keys dengan cascading delete ke tabel `customers` dan `jadwal_trip`.
-  - Model `Ulasan` dibuat menggunakan attribute PHP `#[Fillable]` dan mendefinisikan relasi `belongsTo` ke `Customer` dan `JadwalTrip`.
+  - Model `Ulasan` dibuat menggunakan attribute PHP `#[Fillable]` dan mendefinisikan relasi `belongsTo` ke `Customer` and `JadwalTrip`.
   - Endpoint `POST /api/v1/customer/ulasan` didaftarkan di `routes/api.php` di dalam grup middleware `['auth:sanctum', 'customer']`.
   - `UlasanController` diimplementasikan untuk menangani ulasan baru dengan validasi input, verifikasi kepemilikan booking berstatus 'PAID' (jika tidak ada, return 403 Forbidden), dan pencegahan duplikasi ulasan (jika ada, return 409 Conflict).
   - Skrip pengujian otomatis `test-api.php` diperluas dengan kasus uji [32] hingga [36] untuk memverifikasi ulasan sukses, ulasan ganda, ulasan tanpa booking lunas, rating tidak valid, dan proteksi hak akses admin.
+- **Implementasi API Katalog Paket Wisata & Pencarian Publik (Issue #17) telah selesai**:
+  - Model `PaketWisata` diperluas dengan relasi `jadwalTrip` (hasMany) dan `reviews` (hasManyThrough melalui `JadwalTrip`).
+  - Endpoint publik `GET /api/v1/publik/paket-wisata` dan `GET /api/v1/publik/paket-wisata/{id}` didaftarkan di `routes/api.php` di luar middleware otentikasi.
+  - `KatalogController` dibuat di bawah namespace `App\Http\Controllers\Api\Publik` untuk menangani logika katalog dengan standard Laravel pagination, input validator (untuk parameter search, location, start_date, end_date, per_page), database subqueries (`withAvg` dan `withCount`) untuk rating ulasan, serta pemfilteran kondisional query.
+- **Implementasi Modul Profil Customer & Riwayat Pemesanan Komprehensif (Issue #19) telah selesai**:
+  - Kolom `kontak_darurat` ditambahkan ke tabel `customers` melalui migrasi baru dan diatur sebagai fillable di model `Customer`.
+  - `ProfileController` menangani pemuatan profil customer (`show`) dan pembaruan profil (`update`) dengan validator regex nomor telepon dan exclusion ID user saat memvalidasi keunikan email.
+  - `PesananHistoryController` mengelompokkan data riwayat pemesanan PAID menjadi dua kategori logis: `active_trips` (tanggal_mulai >= hari ini dan status_trip bukan 'Selesai') serta `past_trips` (tanggal_mulai < hari ini atau status_trip 'Selesai'), lengkap dengan field `jumlah_hadir` dan `kuota_rombongan` (jumlah_peserta).
+  - Skrip pengujian otomatis `test-api.php` diperluas dengan test case [43] hingga [50] untuk memverifikasi profil sukses, update data valid, penolakan input invalid (non-numeric phone, email duplikat), pemisahan logis active vs past trips berdasarkan tanggal dan status 'Selesai', serta proteksi rute customer dari akses admin.
+

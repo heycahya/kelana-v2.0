@@ -693,6 +693,230 @@ if ($detailPublikNotFound['status'] == 404) {
     echo "❌ GAGAL: Sistem tidak mengembalikan status 404 (HTTP {$detailPublikNotFound['status']}).\n\n";
 }
 
+// ==========================================
+// PHASE 8: CUSTOMER PROFILE & BOOKING HISTORY
+// ==========================================
+echo "--------------------------------------------------\n";
+echo "    PENGUJIAN PROFIL & RIWAYAT PEMESANAN         \n";
+echo "--------------------------------------------------\n\n";
+
+// 43. Get Profile (Success)
+echo "[43] Customer melihat profil sendiri...\n";
+$getProfile = makeRequest('GET', "$baseUrl/customer/profile", null, $customerToken);
+if ($getProfile['status'] == 200 && isset($getProfile['body']['data']['email'])) {
+    echo "✅ BERHASIL (HTTP 200 OK): Profil didapatkan.\n";
+    echo "   Nama: " . $getProfile['body']['data']['nama_customer'] . "\n";
+    echo "   Email: " . $getProfile['body']['data']['email'] . "\n";
+    echo "   No Telp: " . ($getProfile['body']['data']['no_telp'] ?? 'N/A') . "\n";
+    echo "   Kontak Darurat: " . ($getProfile['body']['data']['kontak_darurat'] ?? 'N/A') . "\n\n";
+} else {
+    echo "❌ GAGAL: Gagal mendapatkan profil (HTTP {$getProfile['status']}).\n";
+    print_r($getProfile['body']);
+    echo "\n";
+}
+
+// 44. Update Profile (Success)
+echo "[44] Customer mengupdate profil dengan data valid...\n";
+$updateProfileData = [
+    'nama_customer' => 'Budi Santoso Update',
+    'email' => 'budi.update@kelana.com',
+    'no_telp' => '081234567888',
+    'alamat' => 'Jl. Merdeka No. 45 B',
+    'kontak_darurat' => 'Istri - 081211112222'
+];
+$updateProfile = makeRequest('PUT', "$baseUrl/customer/profile", $updateProfileData, $customerToken);
+if ($updateProfile['status'] == 200) {
+    echo "✅ BERHASIL (HTTP 200 OK): Profil diperbarui.\n";
+    echo "   Nama Baru: " . $updateProfile['body']['data']['nama_customer'] . "\n";
+    echo "   Email Baru: " . $updateProfile['body']['data']['email'] . "\n";
+    echo "   Kontak Darurat: " . $updateProfile['body']['data']['kontak_darurat'] . "\n\n";
+} else {
+    echo "❌ GAGAL: Gagal memperbarui profil (HTTP {$updateProfile['status']}).\n";
+    print_r($updateProfile['body']);
+    echo "\n";
+}
+
+// 45. Update Profile (Validation Error - format nomor telepon)
+echo "[45] Customer mengupdate profil dengan format nomor telepon salah...\n";
+$invalidProfileData = $updateProfileData;
+$invalidProfileData['no_telp'] = '0812-345-abc';
+$updateProfileInvalid = makeRequest('PUT', "$baseUrl/customer/profile", $invalidProfileData, $customerToken);
+if ($updateProfileInvalid['status'] == 422) {
+    echo "✅ BERHASIL (HTTP 422 Unprocessable Entity): Sistem menolak nomor telepon non-numeric.\n";
+    echo "   Errors: " . json_encode($updateProfileInvalid['body']['errors'] ?? []) . "\n\n";
+} else {
+    echo "❌ GAGAL: Sistem membiarkan format telepon tidak valid lolos (HTTP {$updateProfileInvalid['status']}).\n\n";
+}
+
+// 46. Update Profile (Validation Error - email duplikat)
+echo "[46] Mendaftarkan customer lain untuk pengujian email unik...\n";
+$otherCustomer = [
+    'nama_customer' => 'Dewi Lestari',
+    'email' => 'dewi.lestari@kelana.com',
+    'password' => 'PasswordCustomer123!',
+    'no_telp' => '081222223333',
+    'alamat' => 'Jl. Mawar No. 10'
+];
+$registerOther = makeRequest('POST', "$baseUrl/auth/register", $otherCustomer);
+if ($registerOther['status'] == 201) {
+    echo "   Customer lain terdaftar. Mencoba mengupdate email Budi ke email Dewi...\n";
+    $duplicateEmailData = $updateProfileData;
+    $duplicateEmailData['email'] = 'dewi.lestari@kelana.com';
+    $updateDuplicateEmail = makeRequest('PUT', "$baseUrl/customer/profile", $duplicateEmailData, $customerToken);
+    if ($updateDuplicateEmail['status'] == 422) {
+        echo "✅ BERHASIL (HTTP 422 Unprocessable Entity): Sistem mendeteksi email duplikat dan menolaknya.\n";
+        echo "   Errors: " . json_encode($updateDuplicateEmail['body']['errors'] ?? []) . "\n\n";
+    } else {
+        echo "❌ GAGAL: Sistem meloloskan email duplikat (HTTP {$updateDuplicateEmail['status']}).\n\n";
+    }
+} else {
+    echo "⚠️ KEPUTUSAN: Gagal mendaftarkan customer lain, pengujian email unik dilewati.\n\n";
+}
+
+// 47. Get Booking History - Active Trips
+echo "[47] Mengambil riwayat pemesanan Customer (Harus memuat active_trips & past_trips)...\n";
+$getHistory = makeRequest('GET', "$baseUrl/customer/pesanan-history", null, $customerToken);
+if ($getHistory['status'] == 200 && isset($getHistory['body']['data']['active_trips'])) {
+    echo "✅ BERHASIL (HTTP 200 OK): Riwayat pemesanan didapatkan.\n";
+    echo "   Active Trips Count: " . count($getHistory['body']['data']['active_trips']) . "\n";
+    echo "   Past Trips Count: " . count($getHistory['body']['data']['past_trips']) . "\n";
+    if (count($getHistory['body']['data']['active_trips']) > 0) {
+        $firstActive = $getHistory['body']['data']['active_trips'][0];
+        echo "   Contoh Active Trip:\n";
+        echo "     Trip Name: " . $firstActive['trip_name'] . "\n";
+        echo "     Mulai    : " . $firstActive['tanggal_mulai'] . "\n";
+        echo "     Hadir    : " . $firstActive['jumlah_hadir'] . " / " . $firstActive['kuota_rombongan'] . "\n";
+    }
+    echo "\n";
+} else {
+    echo "❌ GAGAL: Gagal memuat riwayat pemesanan (HTTP {$getHistory['status']}).\n";
+    print_r($getHistory['body']);
+    echo "\n";
+}
+
+// 48. Booking History - Past Trips (Date in past)
+echo "[48] Membuat Jadwal Trip di masa lalu (untuk menguji Past Trips)...\n";
+$pastJadwalData = [
+    'id_paket' => 1,
+    'id_leader' => 1,
+    'tanggal_mulai' => '2026-05-01',
+    'tanggal_selesai' => '2026-05-02',
+    'kuota' => 10,
+    'status_trip' => 'Open'
+];
+$createPastJadwal = makeRequest('POST', "$baseUrl/admin/jadwal-trip", $pastJadwalData, $adminToken);
+if ($createPastJadwal['status'] == 201) {
+    $pastJadwalId = $createPastJadwal['body']['data']['id_jadwal'];
+    echo "   Jadwal masa lalu dibuat dengan ID $pastJadwalId. Melakukan pemesanan...\n";
+    $bookPast = makeRequest('POST', "$baseUrl/pemesanan", [
+        'id_jadwal' => $pastJadwalId,
+        'jumlah_peserta' => 3
+    ], $customerToken);
+    
+    if ($bookPast['status'] == 201) {
+        $pastBookingCode = $bookPast['body']['data']['booking_code'];
+        echo "   Booking masa lalu dibuat: $pastBookingCode. Mengirim settlement webhook...\n";
+        $settlePast = makeRequest('POST', "$baseUrl/webhook/midtrans", [
+            'order_id' => $pastBookingCode,
+            'transaction_status' => 'settlement',
+            'payment_type' => 'bank_transfer',
+            'transaction_id' => 'trx-mock-past-settled',
+            'transaction_time' => '2026-05-01 10:00:00',
+            'gross_amount' => $bookPast['body']['data']['total_harga']
+        ]);
+        
+        if ($settlePast['status'] == 200) {
+            echo "   Mengambil kembali riwayat pemesanan...\n";
+            $getHistory2 = makeRequest('GET', "$baseUrl/customer/pesanan-history", null, $customerToken);
+            $foundInPast = false;
+            foreach ($getHistory2['body']['data']['past_trips'] ?? [] as $t) {
+                if ($t['booking_code'] === $pastBookingCode) {
+                    $foundInPast = true;
+                }
+            }
+            if ($foundInPast) {
+                echo "✅ BERHASIL: Booking masa lalu berhasil dipisahkan ke 'past_trips' berdasarkan tanggal!\n\n";
+            } else {
+                echo "❌ GAGAL: Booking masa lalu tidak ditemukan di 'past_trips'.\n\n";
+            }
+        } else {
+            echo "❌ GAGAL: Gagal melakukan settlement booking masa lalu.\n\n";
+        }
+    } else {
+        echo "❌ GAGAL: Gagal memesan jadwal masa lalu.\n\n";
+    }
+} else {
+    echo "❌ GAGAL: Gagal membuat jadwal masa lalu.\n\n";
+}
+
+// 49. Booking History - Past Trips (Status 'Selesai' in future)
+echo "[49] Membuat Jadwal Trip masa depan yang kemudian diubah ke status 'Selesai'...\n";
+$futureJadwalData = [
+    'id_paket' => 1,
+    'id_leader' => 1,
+    'tanggal_mulai' => '2026-12-01',
+    'tanggal_selesai' => '2026-12-02',
+    'kuota' => 10,
+    'status_trip' => 'Open'
+];
+$createFutureJadwal = makeRequest('POST', "$baseUrl/admin/jadwal-trip", $futureJadwalData, $adminToken);
+if ($createFutureJadwal['status'] == 201) {
+    $futureJadwalId = $createFutureJadwal['body']['data']['id_jadwal'];
+    echo "   Jadwal masa depan dibuat dengan ID $futureJadwalId. Melakukan pemesanan...\n";
+    $bookFuture = makeRequest('POST', "$baseUrl/pemesanan", [
+        'id_jadwal' => $futureJadwalId,
+        'jumlah_peserta' => 2
+    ], $customerToken);
+    
+    if ($bookFuture['status'] == 201) {
+        $futureBookingCode = $bookFuture['body']['data']['booking_code'];
+        makeRequest('POST', "$baseUrl/webhook/midtrans", [
+            'order_id' => $futureBookingCode,
+            'transaction_status' => 'settlement',
+            'payment_type' => 'bank_transfer',
+            'transaction_id' => 'trx-mock-future-settled',
+            'transaction_time' => '2026-06-10 10:00:00',
+            'gross_amount' => $bookFuture['body']['data']['total_harga']
+        ]);
+        
+        echo "   Mengubah status jadwal ID $futureJadwalId menjadi 'Selesai' oleh Admin...\n";
+        $futureJadwalData['status_trip'] = 'Selesai';
+        $updateJadwalSelesai = makeRequest('PUT', "$baseUrl/admin/jadwal-trip/$futureJadwalId", $futureJadwalData, $adminToken);
+        
+        if ($updateJadwalSelesai['status'] == 200) {
+            echo "   Mengambil kembali riwayat pemesanan...\n";
+            $getHistory3 = makeRequest('GET', "$baseUrl/customer/pesanan-history", null, $customerToken);
+            $foundInPast = false;
+            foreach ($getHistory3['body']['data']['past_trips'] ?? [] as $t) {
+                if ($t['booking_code'] === $futureBookingCode) {
+                    $foundInPast = true;
+                }
+            }
+            if ($foundInPast) {
+                echo "✅ BERHASIL: Booking dengan status 'Selesai' berhasil dipisahkan ke 'past_trips' meskipun tanggalnya di masa depan!\n\n";
+            } else {
+                echo "❌ GAGAL: Booking berstatus 'Selesai' tidak ditemukan di 'past_trips'.\n\n";
+            }
+        } else {
+            echo "❌ GAGAL: Gagal mengupdate status jadwal ke 'Selesai'.\n\n";
+        }
+    } else {
+        echo "❌ GAGAL: Gagal memesan jadwal masa depan.\n\n";
+    }
+} else {
+    echo "❌ GAGAL: Gagal membuat jadwal masa depan.\n\n";
+}
+
+// 50. Protection tests for Profile and History
+echo "[50] Menguji proteksi rute customer profile & history menggunakan token Admin...\n";
+$testAdminProfile = makeRequest('GET', "$baseUrl/customer/profile", null, $adminToken);
+$testAdminHistory = makeRequest('GET', "$baseUrl/customer/pesanan-history", null, $adminToken);
+if ($testAdminProfile['status'] == 403 && $testAdminHistory['status'] == 403) {
+    echo "✅ BERHASIL (HTTP 403 Forbidden): Rute profil dan riwayat terproteksi dari role Admin dengan benar!\n\n";
+} else {
+    echo "❌ GAGAL: Admin dapat mengakses rute customer (Profile: {$testAdminProfile['status']}, History: {$testAdminHistory['status']}).\n\n";
+}
+
 echo "==================================================\n";
 echo "             PENGUJIAN SELESAI                    \n";
 echo "==================================================\n";

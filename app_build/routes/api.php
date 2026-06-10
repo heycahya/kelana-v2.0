@@ -7,6 +7,8 @@ use App\Http\Controllers\Api\Admin\LaporanController;
 use App\Http\Controllers\Api\Customer\PemesananController;
 use App\Http\Controllers\Api\Customer\TiketController;
 use App\Http\Controllers\Api\Customer\UlasanController;
+use App\Http\Controllers\Api\Customer\ProfileController;
+use App\Http\Controllers\Api\Customer\PesananHistoryController;
 use App\Http\Controllers\Api\TripLeader\ManifestController;
 use App\Http\Controllers\Api\WebhookController;
 use App\Http\Controllers\Api\Publik\KatalogController;
@@ -60,6 +62,9 @@ Route::prefix('v1')->group(function () {
         Route::post('/pemesanan', [PemesananController::class, 'store']);
         Route::get('/customer/tiket/{booking_code}', [TiketController::class, 'showTicket']);
         Route::post('/customer/ulasan', [UlasanController::class, 'store']);
+        Route::get('/customer/profile', [ProfileController::class, 'show']);
+        Route::put('/customer/profile', [ProfileController::class, 'update']);
+        Route::get('/customer/pesanan-history', [PesananHistoryController::class, 'index']);
     });
 
     // Trip Leader Routes
