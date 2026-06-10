@@ -399,9 +399,6 @@ if ($loginCustomer['status'] == 200 && isset($loginCustomer['body']['data']['tok
         } else {
             echo "❌ GAGAL: Gagal membuat booking sementara untuk tes expire.\n\n";
         }
-    } else {
-        echo "⚠️ KEPUTUSAN: Booking code tidak ada, pengujian webhook dilewati.\n\n";
-    }
         // ==========================================
         // PHASE 4: TIKET DIGITAL & MANIFES CHECK-IN TESTING
         // ==========================================
@@ -487,6 +484,36 @@ if ($loginCustomer['status'] == 200 && isset($loginCustomer['body']['data']['tok
                 echo "✅ BERHASIL (HTTP 403 Forbidden): Rute check-in terproteksi dari Customer dengan benar!\n\n";
             } else {
                 echo "❌ GAGAL: Customer bisa menembus rute check-in (HTTP {$testCustomerCheckIn['status']}).\n\n";
+            }
+
+            // ==========================================
+            // PHASE 5: ADMIN BACK-OFFICE & LAPORAN PDF TESTING
+            // ==========================================
+            echo "--------------------------------------------------\n";
+            echo "       PENGUJIAN LAPORAN PDF REKAP PESERTA        \n";
+            echo "--------------------------------------------------\n\n";
+
+            // 30. Admin download PDF rekap peserta (Success)
+            echo "[30] Admin mengunduh laporan PDF rekap peserta untuk Jadwal Trip ID 1...\n";
+            $getLaporan = makeRequest('GET', "$baseUrl/admin/laporan/rekap-peserta/1", null, $adminToken);
+            if ($getLaporan['status'] == 200) {
+                $isPdf = (strpos($getLaporan['body'], '%PDF-') === 0);
+                if ($isPdf) {
+                    echo "✅ BERHASIL (HTTP 200 OK): Dokumen PDF berhasil diunduh dan diverifikasi (PDF Signature ditemukan).\n\n";
+                } else {
+                    echo "❌ GAGAL: Respons sukses tetapi konten bukan file PDF.\n\n";
+                }
+            } else {
+                echo "❌ GAGAL: Admin gagal mengunduh laporan PDF (HTTP {$getLaporan['status']}).\n\n";
+            }
+
+            // 31. Customer mencoba download PDF rekap peserta (Forbidden)
+            echo "[31] Mencoba mengunduh laporan PDF menggunakan token Customer...\n";
+            $testCustomerLaporan = makeRequest('GET', "$baseUrl/admin/laporan/rekap-peserta/1", null, $customerToken);
+            if ($testCustomerLaporan['status'] == 403) {
+                echo "✅ BERHASIL (HTTP 403 Forbidden): Rute laporan terproteksi dari Customer dengan benar!\n\n";
+            } else {
+                echo "❌ GAGAL: Customer bisa mengunduh laporan PDF (HTTP {$testCustomerLaporan['status']}).\n\n";
             }
         } else {
             echo "❌ GAGAL: Login Trip Leader gagal.\n\n";

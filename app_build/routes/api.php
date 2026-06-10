@@ -3,6 +3,7 @@
 use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\Admin\PaketManagementController;
 use App\Http\Controllers\Api\Admin\JadwalTripController;
+use App\Http\Controllers\Api\Admin\LaporanController;
 use App\Http\Controllers\Api\Customer\PemesananController;
 use App\Http\Controllers\Api\Customer\TiketController;
 use App\Http\Controllers\Api\TripLeader\ManifestController;
@@ -43,6 +44,9 @@ Route::prefix('v1')->group(function () {
         Route::get('/jadwal-trip/{id}', [JadwalTripController::class, 'show']);
         Route::put('/jadwal-trip/{id}', [JadwalTripController::class, 'update']);
         Route::delete('/jadwal-trip/{id}', [JadwalTripController::class, 'destroy']);
+
+        // Laporan PDF Rekap Peserta
+        Route::get('/laporan/rekap-peserta/{id_jadwal}', [LaporanController::class, 'downloadRekapPeserta']);
     });
 
     // Customer Routes
