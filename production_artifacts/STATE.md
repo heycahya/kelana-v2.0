@@ -1,12 +1,12 @@
 # 📝 Development State Log - Kelana v2.0
 
 ## Current Status
-- **Phase**: PHASE 3: EXECUTION & CODING
-- **Feature**: API Webhook Notification Midtrans (Issue #11)
-- **Status**: Completed & Verified ✅
+- **Phase**: PHASE 4: EXECUTION & CODING
+- **Feature**: Modul Tiket Digital Customer & Manifes Check-In Trip Leader (Issue #12)
+- **Status**: Completed & Ready to Test ✅
 
 ## Tasks Checklist
-- [x] Create feature branch `feat/register-user` (User)
+- [x] Create feature branch `feature/phase-4-digital-ticket-manifest` (User)
 - [x] Clean install Laravel 11.x inside `app_build/` (User)
 - [x] Install dependency `laravel/breeze` (blade) (User)
 - [x] Install dependency `midtrans/midtrans-php` (User)
@@ -55,6 +55,14 @@
 - [x] Create `WebhookController` to handle Midtrans webhook notification logic (AI)
 - [x] Register public route `POST /api/v1/webhook/midtrans` in `routes/api.php` (AI)
 - [x] Add comprehensive Webhook integration test scenarios to `test-api.php` (AI)
+- [x] Create Migration `database/migrations/2026_06_10_173000_add_jumlah_hadir_to_pemesanan_table.php` (AI)
+- [x] Update Model `Pemesanan.php` to make `jumlah_hadir` fillable (AI)
+- [x] Create custom middleware `EnsureUserIsTripLeader` (AI)
+- [x] Register `trip_leader` middleware alias in `bootstrap/app.php` (AI)
+- [x] Create API routes for Customer Ticket, Trip Leader Manifest, and Trip Leader Check-In in `routes/api.php` (AI)
+- [x] Create Controller `Customer\TiketController` to display PAID digital ticket (AI)
+- [x] Create Controller `TripLeader\ManifestController` with DB transactions & `lockForUpdate` row locking (AI)
+- [x] Extend automated API tests in `test-api.php` with Phase 4 test cases (AI)
 
 ## Notes
 - Model `Customer`, `Admin`, dan `TripLeader` sekarang telah dikonfigurasi sebagai class `Authenticatable` dengan trait `HasApiTokens` dari Laravel Sanctum.
@@ -63,22 +71,14 @@
 - Endpoint POST `/api/v1/auth/login` telah didaftarkan pada routing `routes/api.php`.
 - File `DatabaseSeeder.php` telah dikonfigurasi untuk menambahkan data dummy awal untuk ketiga jenis user demi memudahkan proses testing.
 - Implementasi CRUD Master Paket Wisata (Admin Only) telah selesai.
-- Implementasi CRUD Jadwal Trip (Admin Only) telah selesai:
-  - Migrasi `2026_06_09_221200_create_jadwal_trip_table.php` dan model `JadwalTrip.php` telah dibuat lengkap dengan relasi Eloquent.
-- Implementasi API Pemesanan & Integrasi Midtrans Sandbox (Role Customer) telah selesai:
-  - Migrasi untuk tabel `pemesanan` (`2026_06_09_222600_create_pemesanan_table.php`) dan tabel `pembayaran` (`2026_06_09_222700_create_pembayaran_table.php`) telah dibuat.
-  - Model `Pemesanan.php` dan `Pembayaran.php` telah diimplementasikan lengkap dengan relasi antartabel.
-  - Custom middleware `EnsureUserIsCustomer` dibuat dan didaftarkan sebagai alias `'customer'` di `bootstrap/app.php`.
-  - Endpoint `POST /api/v1/pemesanan` dilindungi dengan `auth:sanctum` dan middleware `customer`.
-  - Method `store()` pada `PemesananController` menangani logic database transaction, validasi sisa kuota, kalkulasi harga, generation booking code unik, integrasi Snap API Midtrans Sandbox, dan update data pembayaran (snap_token) & sisa kuota jadwal trip.
-  - Skrip testing `test-api.php` diperluas dengan skenario pengujian lengkap: pemesanan sukses, gagal validasi, kuota tidak mencukupi, dan proteksi hak akses admin.
-- Karena Sanctum membutuhkan package composer dan eksekusi migrasi, instruksi langkah-langkah pengujian terminal diserahkan kepada User untuk dieksekusi secara lokal.
-- Implementasi API Webhook Notification Midtrans (Issue #11) telah selesai:
-  - Migrasi `pemesanan` dimodifikasi untuk menampung status pembayaran `'PAID'` dan `'FAILED'`.
-  - Migrasi `pembayaran` dimodifikasi untuk menampung kolom `status_transaksi`.
-  - Model `Pembayaran` disesuaikan dengan menambahkan `status_transaksi` ke fillable array.
-  - `WebhookController` telah diimplementasikan lengkap dengan validasi status Midtrans (`capture`, `settlement`, `deny`, `cancel`, `expire`, `pending`), penanganan database transaction, serta pengembalian (increment) kuota trip jika status pembayaran dibatalkan/expired.
-  - Route didaftarkan di `routes/api.php` di bawah prefix `v1` tanpa middleware auth apapun.
-  - Skrip pengujian `test-api.php` diperluas dengan skenario webhooks (order not found, status pending, status settlement, dan status expire untuk memvalidasi pemulihan kuota jadwal trip).
-
-
+- Implementasi CRUD Jadwal Trip (Admin Only) telah selesai.
+- Implementasi API Pemesanan & Integrasi Midtrans Sandbox (Role Customer) telah selesai.
+- Implementasi API Webhook Notification Midtrans (Issue #11) telah selesai.
+- **Implementasi Modul Tiket Digital & Manifes Check-In (Issue #12) telah selesai**:
+  - Kolom `jumlah_hadir` ditambahkan ke tabel `pemesanan` melalui migrasi baru dan diatur sebagai fillable di model `Pemesanan`.
+  - Custom middleware `EnsureUserIsTripLeader` berhasil dibuat dan didaftarkan sebagai alias `'trip_leader'` pada `bootstrap/app.php`.
+  - Rute baru `/api/v1/customer/tiket/{booking_code}`, `/api/v1/trip-leader/manifest/{id_jadwal}`, dan `/api/v1/trip-leader/check-in` didaftarkan di `routes/api.php` di bawah prefix `v1` dengan proteksi middleware masing-masing peran.
+  - `TiketController` memuat data detail tiket digital untuk pemesanan berstatus `PAID` dan memvalidasi kepemilikan tiket oleh customer bersangkutan.
+  - `ManifestController` memuat manifes peserta pada jadwal trip tertentu khusus untuk Trip Leader yang ditugaskan.
+  - Fungsi `processCheckIn` pada `ManifestController` menerapkan database transactions dan row-level locking (`lockForUpdate`) untuk mencegah race condition, memvalidasi kuota tiket, serta memperbarui status kehadiran (`attendance_status`) ke `'hadir'` saat seluruh peserta check-in.
+  - Skrip pengujian mandiri `test-api.php` diperluas dengan 7 kasus uji baru (skenario 23 hingga 29) untuk menguji seluruh endpoint tiket digital, login trip leader, lihat manifes, check-in normal, check-in berlebih (penolakan 422), check-in sisa kuota, serta proteksi hak akses customer terhadap rute leader.

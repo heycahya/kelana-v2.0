@@ -1,5 +1,5 @@
 # 🤝 Handoff Document - Kelana v2.0
-**Features:** Customer Registration, Multi-Role Authentication, CRUD Admin, Customer Booking with Midtrans Sandbox, & Midtrans Webhook Notification
+**Features:** Customer Registration, Multi-Role Authentication, CRUD Admin, Customer Booking, Midtrans Webhook, Digital Ticket, & Trip Leader Manifest Check-In
 **Issue References:** 
 - [#3 - Register Customer API](https://github.com/heycahya/kelana-v2.0/issues/3)
 - [#5 - Multi-Role Login API](https://github.com/heycahya/kelana-v2.0/issues/5)
@@ -8,83 +8,52 @@
 - [#9 - CRUD Manajemen Jadwal Trip (Admin Only)](https://github.com/heycahya/kelana-v2.0/issues/9)
 - [#10 - API Pemesanan & Integrasi Midtrans Sandbox (Role Customer)](https://github.com/heycahya/kelana-v2.0/issues/10)
 - [#11 - API Webhook Notification Midtrans](https://github.com/heycahya/kelana-v2.0/issues/11)
-**Branch:** `feat/register-user`
+- [#12 - Modul Tiket Digital Customer & Manifes Check-In Trip Leader](https://github.com/heycahya/kelana-v2.0/issues/12)
+**Branch:** `feature/phase-4-digital-ticket-manifest`
 **Status:** Completed & Verified ✅
 
 ---
 
 ## 📋 Ringkasan Pekerjaan
-Telah diimplementasikan fitur API Registrasi Customer, Login Multi-Role (Admin, Customer, Trip Leader), CRUD Master Paket Wisata & Jadwal Trip khusus Admin, API Pemesanan & Integrasi Midtrans Sandbox khusus Customer, serta API Webhook Notification Midtrans. Sistem transaksi database dibungkus dengan DB Transaction, melakukan validasi ketersediaan kuota jadwal trip dengan lock, kalkulasi harga otomatis, pembuatan booking code unik, inisialisasi token pembayaran Snap Midtrans, pembaruan kuota, dan pemrosesan callback webhook Midtrans secara otomatis (termasuk *quota recovery* ketika pesanan dibatalkan/expired). Webhook controller dilengkapi fallback parsing untuk mempermudah testing lokal/sandbox. Seluruh sistem API telah diuji menggunakan skrip otomatis dan terbukti aman serta mematuhi spesifikasi response body JSON standard.
+Telah diimplementasikan secara lengkap modul Tiket Digital untuk Customer serta manifes peserta lunas & check-in kehadiran mandiri berbasis kuantitas untuk Trip Leader. Untuk menjamin keamanan transaksi dan kekokohan sistem, check-in diimplementasikan menggunakan **Database Transaction** dan **Pessimistic Locking** (`lockForUpdate`) untuk menghindari kondisi balapan (*race condition*) jika terdapat banyak petugas tapping bersamaan. Rute dan middleware diisolasi sehingga data manifes hanya bisa dibaca oleh Trip Leader yang ditugaskan pada trip tersebut. Pengujian terotomasi pada `test-api.php` telah diperluas dan sukses memverifikasi semua alur operasi normal serta batasan penolakan kuota check-in.
 
 ---
 
 ## 🛠️ Perubahan Berkas (File Changes)
 
 ### 1. Model Database
-- **[Customer.php](file:///c:/Development/kelana-v2.0/app_build/app/Models/Customer.php)**
-  - Ditambahkan trait `HasApiTokens` dan diubah agar meng-extends `Authenticatable`.
-- **[Admin.php](file:///c:/Development/kelana-v2.0/app_build/app/Models/Admin.php)**
-  - Model baru untuk tabel `admins` dengan primary key `id_admin` dan trait `HasApiTokens`.
-- **[TripLeader.php](file:///c:/Development/kelana-v2.0/app_build/app/Models/TripLeader.php)**
-  - Model baru untuk tabel `trip_leaders` dengan primary key `id_leader` dan trait `HasApiTokens`.
-- **[PaketWisata.php](file:///c:/Development/kelana-v2.0/app_build/app/Models/PaketWisata.php)**
-  - Model baru untuk tabel `paket_wisata` dengan primary key `id_paket` dan PHP 8.2+ class attribute `#[Fillable]`.
-- **[JadwalTrip.php](file:///c:/Development/kelana-v2.0/app_build/app/Models/JadwalTrip.php)**
-  - Model baru untuk tabel `jadwal_trip` dengan primary key `id_jadwal` beserta hubungan relasi `paketWisata` dan `tripLeader` serta penambahan field `sisa_kuota`.
 - **[Pemesanan.php](file:///c:/Development/kelana-v2.0/app_build/app/Models/Pemesanan.php)**
-  - Model baru untuk tabel `pemesanan` dengan primary key `id_pemesanan` beserta relasi `customer`, `jadwalTrip`, dan `pembayaran`.
-- **[Pembayaran.php](file:///c:/Development/kelana-v2.0/app_build/app/Models/Pembayaran.php)**
-  - Model baru untuk tabel `pembayaran` dengan primary key `id_pembayaran`, relasi `pemesanan`, serta penambahan kolom `status_transaksi` ke dalam attribute fillable.
+  - Menambahkan kolom `'jumlah_hadir'` pada fillable attributes list agar dapat dimutasi.
 
 ### 2. Migrasi Database
-- **[0001_01_01_000004_create_admins_table.php](file:///c:/Development/kelana-v2.0/app_build/database/migrations/0001_01_01_000004_create_admins_table.php)**
-  - Skema tabel `admins` untuk login administrator.
-- **[0001_01_01_000005_create_trip_leaders_table.php](file:///c:/Development/kelana-v2.0/app_build/database/migrations/0001_01_01_000005_create_trip_leaders_table.php)**
-  - Skema tabel `trip_leaders` untuk petugas lapangan.
-- **2026_06_09_143751_create_personal_access_tokens_table.php**
-  - Skema tabel bawaan Laravel Sanctum untuk mencatat log token API.
-- **[2026_06_09_145000_create_paket_wisata_table.php](file:///c:/Development/kelana-v2.0/app_build/database/migrations/2026_06_09_145000_create_paket_wisata_table.php)**
-  - Skema tabel `paket_wisata` untuk data master paket open trip.
-- **[2026_06_09_221200_create_jadwal_trip_table.php](file:///c:/Development/kelana-v2.0/app_build/database/migrations/2026_06_09_221200_create_jadwal_trip_table.php)**
-  - Skema tabel `jadwal_trip` dengan foreign key ke `paket_wisata` dan `trip_leaders` serta batasan enum status trip, ditambah kolom `sisa_kuota`.
-- **[2026_06_09_222600_create_pemesanan_table.php](file:///c:/Development/kelana-v2.0/app_build/database/migrations/2026_06_09_222600_create_pemesanan_table.php)**
-  - Skema tabel `pemesanan` untuk reservasi customer, diperbarui untuk mencakup status `'PAID'` dan `'FAILED'` di enum `status_pembayaran`.
-- **[2026_06_09_222700_create_pembayaran_table.php](file:///c:/Development/kelana-v2.0/app_build/database/migrations/2026_06_09_222700_create_pembayaran_table.php)**
-  - Skema tabel `pembayaran` untuk log rekonsiliasi data Midtrans, diperbarui untuk mencakup kolom `status_transaksi`.
+- **[2026_06_10_173000_add_jumlah_hadir_to_pemesanan_table.php](file:///c:/Development/kelana-v2.0/app_build/database/migrations/2026_06_10_173000_add_jumlah_hadir_to_pemesanan_table.php)**
+  - Menambahkan kolom integer `jumlah_hadir` dengan nilai default `0` setelah kolom `status_pembayaran` di tabel `pemesanan`.
 
 ### 3. Middleware & Routing
-- **[EnsureUserIsAdmin.php](file:///c:/Development/kelana-v2.0/app_build/app/Http/Middleware/EnsureUserIsAdmin.php)**
-  - Middleware khusus untuk menyaring request agar hanya dapat dilewati oleh user dengan instance `App\Models\Admin`.
-- **[EnsureUserIsCustomer.php](file:///c:/Development/kelana-v2.0/app_build/app/Http/Middleware/EnsureUserIsCustomer.php)**
-  - Middleware khusus untuk menyaring request agar hanya dapat dilewati oleh user dengan instance `App\Models\Customer`.
+- **[EnsureUserIsTripLeader.php](file:///c:/Development/kelana-v2.0/app_build/app/Http/Middleware/EnsureUserIsTripLeader.php)**
+  - Middleware baru untuk membatasi request agar hanya diijinkan jika instansi pengguna adalah `App\Models\TripLeader`.
 - **[app.php](file:///c:/Development/kelana-v2.0/app_build/bootstrap/app.php)**
-  - Mendaftarkan alias middleware `admin` ke `EnsureUserIsAdmin::class` dan `customer` ke `EnsureUserIsCustomer::class`.
+  - Mendaftarkan alias middleware `'trip_leader'` untuk memetakan class `EnsureUserIsTripLeader`.
 - **[api.php](file:///c:/Development/kelana-v2.0/app_build/routes/api.php)**
-  - Rute administratif `/api/v1/admin/*` dilindungi oleh middleware `['auth:sanctum', 'admin']`. Rute pemesanan `/api/v1/pemesanan` dilindungi oleh middleware `['auth:sanctum', 'customer']`. Rute webhook `/api/v1/webhook/midtrans` terdaftar secara publik tanpa middleware auth.
+  - Mendaftarkan endpoint `GET /v1/customer/tiket/{booking_code}` di bawah middleware customer.
+  - Mendaftarkan `GET /v1/trip-leader/manifest/{id_jadwal}` dan `POST /v1/trip-leader/check-in` di bawah middleware trip_leader.
 
 ### 4. Controller
-- **[AuthController.php](file:///c:/Development/kelana-v2.0/app_build/app/Http/Controllers/Api/AuthController.php)**
-  - Logika login multi-role terintegrasi.
-- **[PaketManagementController.php](file:///c:/Development/kelana-v2.0/app_build/app/Http/Controllers/Api/Admin/PaketManagementController.php)**
-  - Mengimplementasikan CRUD API untuk `paket_wisata`.
-- **[JadwalTripController.php](file:///c:/Development/kelana-v2.0/app_build/app/Http/Controllers/Api/Admin/JadwalTripController.php)**
-  - Mengimplementasikan CRUD API untuk `jadwal_trip` beserta penanganan validasi relasi, tanggal, dan pengisian nilai awal `sisa_kuota`.
-- **[PemesananController.php](file:///c:/Development/kelana-v2.0/app_build/app/Http/Controllers/Api/Customer/PemesananController.php)**
-  - Mengimplementasikan pembuatan booking API dengan DB Transaction, validasi sisa kuota, kalkulasi harga, generation booking code unik, inisialisasi token pembayaran Snap Midtrans, pembaruan tabel pembayaran, dan pembaruan kuota jadwal trip.
-- **[WebhookController.php](file:///c:/Development/kelana-v2.0/app_build/app/Http/Controllers/Api/WebhookController.php)**
-  - Mengimplementasikan callback webhook Midtrans dengan database transaction, update status pemesanan (PAID/CANCELLED) & pembayaran (SUCCESS/EXPIRED/FAILED), serta logika pengembalian kuota trip jika transaksi gagal/expire, didukung fallback parsing untuk pengujian lokal.
+- **[TiketController.php](file:///c:/Development/kelana-v2.0/app_build/app/Http/Controllers/Api/Customer/TiketController.php)**
+  - Mengembalikan representasi JSON tiket digital. Memvalidasi status kelunasan pembayaran (`PAID`) dan memverifikasi bahwa tiket tersebut dibeli oleh customer bersangkutan.
+- **[ManifestController.php](file:///c:/Development/kelana-v2.0/app_build/app/Http/Controllers/Api/TripLeader/ManifestController.php)**
+  - Menampilkan manifes peserta PAID pada jadwal trip. Mengamankan data agar hanya Trip Leader penanggung jawab jadwal tersebut yang bisa membacanya.
+  - Memproses check-in kuantitas berbasis `lockForUpdate` dalam `DB::transaction()`. Memastikan akumulasi jumlah hadir tidak pernah melebihi total kuota yang dipesan. Mengubah status kehadiran (`attendance_status`) menjadi `'hadir'` otomatis ketika total kehadiran rombongan lengkap.
 
-### 5. Seeder & Script Testing
-- **[DatabaseSeeder.php](file:///c:/Development/kelana-v2.0/app_build/database/seeders/DatabaseSeeder.php)**
-  - Diperbarui untuk meng-seed data dummy awal lengkap dengan sisa kuota.
+### 5. Script Testing
 - **[test-api.php](file:///c:/Development/kelana-v2.0/app_build/test-api.php)**
-  - Script uji otomatis diperluas untuk menguji seluruh siklus CRUD paket wisata, jadwal trip, serta modul pemesanan customer terintegrasi Midtrans.
+  - Ditambahkan kasus uji `23` hingga `29` yang mensimulasikan seluruh alur fitur baru dan pengujian proteksi rute.
 
 ---
 
 ## 🧪 Hasil Pengujian (Test Results)
 
-Pengujian dijalankan secara lokal dengan mengaktifkan `php artisan serve` dan memicu script `test-api.php`:
+Skenario uji otomatis berjalan sukses dengan log keluaran sebagai berikut:
 
 ```text
 ==================================================
@@ -183,6 +152,34 @@ Trip Leader = Adi Wijaya
      Kuota setelah webhook EXPIRE (harus kembali bertambah 3): 13
 ✅ BERHASIL (HTTP 200 OK): Status EXPIRE diproses dan kuota berhasil dikembalikan!
 
+--------------------------------------------------
+   PENGUJIAN TIKET DIGITAL & MANIFES CHECK-IN    
+--------------------------------------------------
+
+[23] Customer melihat tiket digital untuk booking TRIP-20260609-7724...
+✅ BERHASIL (HTTP 200 OK): Detail tiket berhasil dimuat.
+   Paket Wisata : Trip Bromo Midnight
+   Jumlah Hadir : 0 / 2
+
+[24] Melakukan Login Trip Leader...
+✅ BERHASIL: Login Trip Leader sukses. Token didapatkan.
+
+[25] Trip Leader melihat manifes untuk Jadwal Trip ID 1...
+✅ BERHASIL (HTTP 200 OK): Manifes berhasil dimuat. Jumlah booking PAID: 1
+
+[26] Trip Leader memproses check-in (1 orang) untuk booking TRIP-20260609-7724...
+✅ BERHASIL (HTTP 200 OK): Check-in berhasil. Hadir sekarang: 1 / 2
+
+[27] Trip Leader memproses check-in berlebih (2 orang lagi) untuk booking TRIP-20260609-7724 (Kuota tersisa 1)...
+✅ BERHASIL (HTTP 422 Unprocessable Entity): Sistem menolak check-in melebihi kuota.
+   Message: Jumlah check-in melebihi total kuota tiket.
+
+[28] Trip Leader memproses check-in sisa kuota (1 orang) untuk booking TRIP-20260609-7724...
+✅ BERHASIL (HTTP 200 OK): Check-in sisa kuota sukses. Status Kehadiran: hadir
+
+[29] Mencoba melakukan check-in menggunakan token Customer...
+✅ BERHASIL (HTTP 403 Forbidden): Rute check-in terproteksi dari Customer dengan benar!
+
 ==================================================
              PENGUJIAN SELESAI
 ==================================================
@@ -191,6 +188,5 @@ Trip Leader = Adi Wijaya
 ---
 
 ## 🚀 Langkah Selanjutnya (Next Steps)
-1. Gabungkan (*merge*) Pull Request/branch ke branch utama (`main`).
-2. Mulai implementasi modul Dashboard/Tiket Digital Customer dan fitur konfirmasi kehadiran mandiri (D-Day).
-3. Mulai implementasi modul Trip Leader untuk check-in digital manifes peserta lapangan.
+1. Lakukan penggabungan (*merge*) Pull Request ke branch utama `main`.
+2. Mulai Phase 5: Implementasi Modul Admin Back-office & Cetak Laporan PDF Rekap Peserta via `laravel-dompdf`.

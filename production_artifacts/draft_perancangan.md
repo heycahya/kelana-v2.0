@@ -174,10 +174,11 @@ Sistem mengisolasi hak akses berdasarkan 3 aktor utama yang didefinisikan pada D
 | 5 | tgl_pemesanan | DATETIME | - | Waktu reservasi dibuat |
 | 6 | jumlah_peserta | INT | - | Total slot/kursi yang dipesan |
 | 7 | total_harga | DECIMAL | 10,2 | jumlah_peserta x paket_wisata.harga |
-| 8 | status_pembayaran | ENUM | - | 'PENDING', 'WAITING_VERIFICATION', 'CONFIRMED', 'CANCELLED' |
+| 8 | status_pembayaran | ENUM | - | 'PENDING', 'WAITING_VERIFICATION', 'CONFIRMED', 'CANCELLED', 'PAID', 'FAILED' |
 | 9 | attendance_status | ENUM | - | 'belum_hadir', 'hadir', 'absen' (Untuk Check-in) |
-| 10 | created_at | TIMESTAMP | - | Catatan waktu dibuat |
-| 11 | updated_at | TIMESTAMP | - | Catatan waktu diubah |
+| 10 | jumlah_hadir | INT | - | Kuantitas peserta yang telah check-in (Default: 0) |
+| 11 | created_at | TIMESTAMP | - | Catatan waktu dibuat |
+| 12 | updated_at | TIMESTAMP | - | Catatan waktu diubah |
 
 **7. Tabel: `pembayaran`**
 

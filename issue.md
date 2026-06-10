@@ -132,8 +132,8 @@ Fungsi ini memodifikasi data secara asinkron (multi-user/petugas yang mungkin ta
      ```php
      try {
          $pesanan = Pemesanan::where('kode_booking', $request->kode_booking)
-                    ->lockForUpdate()
-                    ->first();
+                        ->lockForUpdate()
+                        ->first();
          
          // 4. Jika pesanan tidak ditemukan
          if (!$pesanan) {
@@ -192,5 +192,5 @@ Fungsi ini memodifikasi data secara asinkron (multi-user/petugas yang mungkin ta
      - `GET /api/trip-leader/manifest/{jadwal_trip_id}` (beserta skema respons).
      - `POST /api/trip-leader/check-in` (beserta skema *request body*, dan seluruh kemungkinan kode respons seperti 200, 400, 404, 422, dan 500).
 2. **Update Arsitektur Sistem**:
-   - Jika ada file seperti `production_artifact/system_architecture.md` or `database_schema.md`, tambahkan penjelasan mengenai kolom baru `jumlah_hadir` di tabel `pemesanan`.
+   - Jika ada file seperti `production_artifact/system_architecture.md` atau `database_schema.md`, tambahkan penjelasan mengenai kolom baru `jumlah_hadir` di tabel `pemesanan`.
    - Dokumentasikan alur mekanisme konkurensi check-in yang menggunakan *Pessimistic Locking* (`lockForUpdate`) agar developer lain paham rasionalisasi desainnya.

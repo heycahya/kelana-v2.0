@@ -4,6 +4,8 @@ use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\Admin\PaketManagementController;
 use App\Http\Controllers\Api\Admin\JadwalTripController;
 use App\Http\Controllers\Api\Customer\PemesananController;
+use App\Http\Controllers\Api\Customer\TiketController;
+use App\Http\Controllers\Api\TripLeader\ManifestController;
 use App\Http\Controllers\Api\WebhookController;
 use Illuminate\Support\Facades\Route;
 
@@ -46,5 +48,12 @@ Route::prefix('v1')->group(function () {
     // Customer Routes
     Route::middleware(['auth:sanctum', 'customer'])->group(function () {
         Route::post('/pemesanan', [PemesananController::class, 'store']);
+        Route::get('/customer/tiket/{booking_code}', [TiketController::class, 'showTicket']);
+    });
+
+    // Trip Leader Routes
+    Route::middleware(['auth:sanctum', 'trip_leader'])->group(function () {
+        Route::get('/trip-leader/manifest/{id_jadwal}', [ManifestController::class, 'getManifest']);
+        Route::post('/trip-leader/check-in', [ManifestController::class, 'processCheckIn']);
     });
 });

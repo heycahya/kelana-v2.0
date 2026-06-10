@@ -402,6 +402,98 @@ if ($loginCustomer['status'] == 200 && isset($loginCustomer['body']['data']['tok
     } else {
         echo "⚠️ KEPUTUSAN: Booking code tidak ada, pengujian webhook dilewati.\n\n";
     }
+        // ==========================================
+        // PHASE 4: TIKET DIGITAL & MANIFES CHECK-IN TESTING
+        // ==========================================
+        echo "--------------------------------------------------\n";
+        echo "   PENGUJIAN TIKET DIGITAL & MANIFES CHECK-IN    \n";
+        echo "--------------------------------------------------\n\n";
+
+        // 23. Customer view digital ticket (Success)
+        echo "[23] Customer melihat tiket digital untuk booking $bookingCode...\n";
+        $getTicket = makeRequest('GET', "$baseUrl/customer/tiket/$bookingCode", null, $customerToken);
+        if ($getTicket['status'] == 200) {
+            echo "✅ BERHASIL (HTTP 200 OK): Detail tiket berhasil dimuat.\n";
+            echo "   Paket Wisata : " . ($getTicket['body']['data']['paket_wisata']['nama_paket'] ?? 'N/A') . "\n";
+            echo "   Jumlah Hadir : " . ($getTicket['body']['data']['jumlah_hadir'] ?? 0) . " / " . ($getTicket['body']['data']['jumlah_peserta'] ?? 0) . "\n\n";
+        } else {
+            echo "❌ GAGAL: Gagal melihat tiket digital (HTTP {$getTicket['status']}).\n\n";
+        }
+
+        // 24. Login Trip Leader
+        echo "[24] Melakukan Login Trip Leader...\n";
+        $loginLeader = makeRequest('POST', "$baseUrl/auth/login", [
+            'email' => 'adi.wijaya@kelana.com',
+            'password' => 'PasswordLeader123!'
+        ]);
+
+        if ($loginLeader['status'] == 200 && isset($loginLeader['body']['data']['token'])) {
+            $leaderToken = $loginLeader['body']['data']['token'];
+            echo "✅ BERHASIL: Login Trip Leader sukses. Token didapatkan.\n\n";
+
+            // 25. Trip Leader melihat manifes (Success)
+            echo "[25] Trip Leader melihat manifes untuk Jadwal Trip ID 1...\n";
+            $getManifest = makeRequest('GET', "$baseUrl/trip-leader/manifest/1", null, $leaderToken);
+            if ($getManifest['status'] == 200) {
+                echo "✅ BERHASIL (HTTP 200 OK): Manifes berhasil dimuat. Jumlah booking PAID: " . count($getManifest['body']['data']['manifes'] ?? []) . "\n\n";
+            } else {
+                echo "❌ GAGAL: Trip Leader gagal memuat manifes (HTTP {$getManifest['status']}).\n\n";
+            }
+
+            // 26. Trip Leader memproses check-in (Success - 1 orang)
+            echo "[26] Trip Leader memproses check-in (1 orang) untuk booking $bookingCode...\n";
+            $checkIn1 = makeRequest('POST', "$baseUrl/trip-leader/check-in", [
+                'booking_code' => $bookingCode,
+                'jumlah_check_in' => 1
+            ], $leaderToken);
+            if ($checkIn1['status'] == 200) {
+                echo "✅ BERHASIL (HTTP 200 OK): Check-in berhasil. Hadir sekarang: " . $checkIn1['body']['data']['jumlah_hadir'] . " / " . $checkIn1['body']['data']['total_peserta'] . "\n\n";
+            } else {
+                echo "❌ GAGAL: Check-in gagal (HTTP {$checkIn1['status']}).\n\n";
+            }
+
+            // 27. Trip Leader memproses check-in (Excess - melebih total kuota booking)
+            echo "[27] Trip Leader memproses check-in berlebih (2 orang lagi) untuk booking $bookingCode (Kuota tersisa 1)...\n";
+            $checkInExcess = makeRequest('POST', "$baseUrl/trip-leader/check-in", [
+                'booking_code' => $bookingCode,
+                'jumlah_check_in' => 2
+            ], $leaderToken);
+            if ($checkInExcess['status'] == 422) {
+                echo "✅ BERHASIL (HTTP 422 Unprocessable Entity): Sistem menolak check-in melebihi kuota.\n";
+                echo "   Message: " . $checkInExcess['body']['message'] . "\n\n";
+            } else {
+                echo "❌ GAGAL: Sistem meloloskan check-in berlebih (HTTP {$checkInExcess['status']}).\n\n";
+            }
+
+            // 28. Trip Leader memproses check-in sisa kuota (Success - 1 orang)
+            echo "[28] Trip Leader memproses check-in sisa kuota (1 orang) untuk booking $bookingCode...\n";
+            $checkInFinal = makeRequest('POST', "$baseUrl/trip-leader/check-in", [
+                'booking_code' => $bookingCode,
+                'jumlah_check_in' => 1
+            ], $leaderToken);
+            if ($checkInFinal['status'] == 200) {
+                echo "✅ BERHASIL (HTTP 200 OK): Check-in sisa kuota sukses. Status Kehadiran: " . $checkInFinal['body']['data']['attendance_status'] . "\n\n";
+            } else {
+                echo "❌ GAGAL: Check-in sisa kuota gagal (HTTP {$checkInFinal['status']}).\n\n";
+            }
+
+            // 29. Test Customer mencoba check-in (Forbidden)
+            echo "[29] Mencoba melakukan check-in menggunakan token Customer...\n";
+            $testCustomerCheckIn = makeRequest('POST', "$baseUrl/trip-leader/check-in", [
+                'booking_code' => $bookingCode,
+                'jumlah_check_in' => 1
+            ], $customerToken);
+            if ($testCustomerCheckIn['status'] == 403) {
+                echo "✅ BERHASIL (HTTP 403 Forbidden): Rute check-in terproteksi dari Customer dengan benar!\n\n";
+            } else {
+                echo "❌ GAGAL: Customer bisa menembus rute check-in (HTTP {$testCustomerCheckIn['status']}).\n\n";
+            }
+        } else {
+            echo "❌ GAGAL: Login Trip Leader gagal.\n\n";
+        }
+    } else {
+        echo "⚠️ KEPUTUSAN: Booking code tidak ada, pengujian webhook dilewati.\n\n";
+    }
 } else {
     echo "❌ GAGAL: Login Customer gagal.\n\n";
 }
