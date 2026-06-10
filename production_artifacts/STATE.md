@@ -1,9 +1,9 @@
 # 📝 Development State Log - Kelana v2.0
 
 ## Current Status
-- **Phase**: PHASE 5: EXECUTION & CODING
-- **Feature**: Modul Admin Back-office & Cetak Laporan PDF Rekap Peserta (Issue #14)
-- **Status**: Completed & Verified ✅
+- **Phase**: PHASE 6: EXECUTION & CODING
+- **Feature**: Modul Ulasan & Rating (Review) - Sisi Customer (Issue #16)
+- **Status**: Completed & Ready for Verification ✅
 
 ## Tasks Checklist
 - [x] Create feature branch `feature/phase-4-digital-ticket-manifest` (User)
@@ -69,6 +69,13 @@
 - [x] Register API Route in `routes/api.php` (AI)
 - [x] Add automated test cases [30] & [31] in `test-api.php` (AI)
 - [x] Run automated tests `php test-api.php` to verify PDF download (User)
+- [x] Create Migration `database/migrations/2026_06_10_180000_create_ulasan_table.php` (AI)
+- [x] Create Model `app/Models/Ulasan.php` with PHP attributes & relations (AI)
+- [x] Add endpoint `POST /api/v1/customer/ulasan` protected by sanctum and customer middleware (AI)
+- [x] Implement UlasanController store method with validation, PAID booking authorization, and duplicate ulasan prevention (AI)
+- [x] Extend automated API tests in `test-api.php` with Phase 6 test cases [32] to [36] (AI)
+- [ ] Run migrations & database seeding for ulasan table (User)
+- [ ] Run automated tests `php test-api.php` to verify Phase 6 Review & Rating functionality (User)
 
 ## Notes
 - Model `Customer`, `Admin`, dan `TripLeader` sekarang telah dikonfigurasi sebagai class `Authenticatable` dengan trait `HasApiTokens` dari Laravel Sanctum.
@@ -93,3 +100,9 @@
   - Membuat `LaporanController` untuk menangani endpoint `GET /admin/laporan/rekap-peserta/{id_jadwal}` dengan memvalidasi jadwal, menghitung pendapatan, dan merender PDF via `barryvdh/laravel-dompdf`.
   - Membuat template Blade PDF `resources/views/pdf/rekap-peserta.blade.php` dengan desain profesional.
   - Menambahkan test case [30] dan [31] di `test-api.php` untuk memverifikasi fungsionalitas dan proteksi role middleware.
+- **Implementasi Modul Ulasan & Rating Customer (Issue #16) telah selesai**:
+  - Tabel `ulasan` dirancang dengan composite unique key `['id_customer', 'id_jadwal']` untuk mencegah ulasan ganda di tingkat database, serta foreign keys dengan cascading delete ke tabel `customers` dan `jadwal_trip`.
+  - Model `Ulasan` dibuat menggunakan attribute PHP `#[Fillable]` dan mendefinisikan relasi `belongsTo` ke `Customer` dan `JadwalTrip`.
+  - Endpoint `POST /api/v1/customer/ulasan` didaftarkan di `routes/api.php` di dalam grup middleware `['auth:sanctum', 'customer']`.
+  - `UlasanController` diimplementasikan untuk menangani ulasan baru dengan validasi input, verifikasi kepemilikan booking berstatus 'PAID' (jika tidak ada, return 403 Forbidden), dan pencegahan duplikasi ulasan (jika ada, return 409 Conflict).
+  - Skrip pengujian otomatis `test-api.php` diperluas dengan kasus uji [32] hingga [36] untuk memverifikasi ulasan sukses, ulasan ganda, ulasan tanpa booking lunas, rating tidak valid, dan proteksi hak akses admin.

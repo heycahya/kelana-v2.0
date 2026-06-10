@@ -518,6 +518,80 @@ if ($loginCustomer['status'] == 200 && isset($loginCustomer['body']['data']['tok
         } else {
             echo "❌ GAGAL: Login Trip Leader gagal.\n\n";
         }
+
+        // ==========================================
+        // PHASE 6: CUSTOMER REVIEW & RATING TESTING
+        // ==========================================
+        echo "--------------------------------------------------\n";
+        echo "       PENGUJIAN MODUL ULASAN & RATING            \n";
+        echo "--------------------------------------------------\n\n";
+
+        // 32. Customer submit ulasan valid (Success)
+        echo "[32] Customer mengirimkan ulasan valid untuk Jadwal Trip ID 1...\n";
+        $ulasanValid = [
+            'id_jadwal' => 1,
+            'rating' => 5,
+            'komentar' => 'Trip yang sangat menyenangkan!'
+        ];
+        $submitUlasan = makeRequest('POST', "$baseUrl/customer/ulasan", $ulasanValid, $customerToken);
+        if ($submitUlasan['status'] == 201) {
+            echo "✅ BERHASIL (HTTP 201 Created): Ulasan berhasil disimpan.\n";
+            echo "   Rating  : " . ($submitUlasan['body']['data']['rating'] ?? 'N/A') . "\n";
+            echo "   Komentar: " . ($submitUlasan['body']['data']['komentar'] ?? 'N/A') . "\n\n";
+        } else {
+            echo "❌ GAGAL: Gagal mengirimkan ulasan (HTTP {$submitUlasan['status']}).\n";
+            print_r($submitUlasan['body']);
+            echo "\n";
+        }
+
+        // 33. Customer submit ulasan ganda (Conflict 409)
+        echo "[33] Customer mencoba mengirimkan ulasan ganda untuk Jadwal Trip ID 1...\n";
+        $submitUlasanGanda = makeRequest('POST', "$baseUrl/customer/ulasan", $ulasanValid, $customerToken);
+        if ($submitUlasanGanda['status'] == 409) {
+            echo "✅ BERHASIL (HTTP 409 Conflict): Sistem menolak ulasan ganda dengan benar.\n";
+            echo "   Message: " . ($submitUlasanGanda['body']['message'] ?? 'N/A') . "\n\n";
+        } else {
+            echo "❌ GAGAL: Sistem membiarkan ulasan ganda lolos (HTTP {$submitUlasanGanda['status']}).\n\n";
+        }
+
+        // 34. Customer submit ulasan untuk trip tanpa PAID booking (Forbidden 403)
+        echo "[34] Customer mencoba mengirimkan ulasan untuk Jadwal Trip ID 2 (tidak ada booking lunas)...\n";
+        $ulasanNoBooking = [
+            'id_jadwal' => 2,
+            'rating' => 4,
+            'komentar' => 'Trip palsu'
+        ];
+        $submitUlasanNoBooking = makeRequest('POST', "$baseUrl/customer/ulasan", $ulasanNoBooking, $customerToken);
+        if ($submitUlasanNoBooking['status'] == 403) {
+            echo "✅ BERHASIL (HTTP 403 Forbidden): Sistem menolak ulasan karena tidak ada tiket lunas.\n";
+            echo "   Message: " . ($submitUlasanNoBooking['body']['message'] ?? 'N/A') . "\n\n";
+        } else {
+            echo "❌ GAGAL: Sistem meloloskan ulasan tanpa tiket lunas (HTTP {$submitUlasanNoBooking['status']}).\n\n";
+        }
+
+        // 35. Customer submit ulasan dengan rating tidak valid (Validation 422)
+        echo "[35] Customer mencoba mengirimkan ulasan dengan rating tidak valid (6)...\n";
+        $ulasanInvalidRating = [
+            'id_jadwal' => 1,
+            'rating' => 6,
+            'komentar' => 'Terlalu bagus sampai rating 6'
+        ];
+        $submitInvalidRating = makeRequest('POST', "$baseUrl/customer/ulasan", $ulasanInvalidRating, $customerToken);
+        if ($submitInvalidRating['status'] == 422) {
+            echo "✅ BERHASIL (HTTP 422 Unprocessable Entity): Validasi berhasil menolak rating tidak valid.\n";
+            echo "   Errors: " . json_encode($submitInvalidRating['body']['errors'] ?? []) . "\n\n";
+        } else {
+            echo "❌ GAGAL: Validasi membiarkan rating tidak valid lolos (HTTP {$submitInvalidRating['status']}).\n\n";
+        }
+
+        // 36. Admin mencoba submit ulasan (Forbidden 403)
+        echo "[36] Admin mencoba mengirimkan ulasan (diharapkan ditolak middleware customer)...\n";
+        $submitAdminUlasan = makeRequest('POST', "$baseUrl/customer/ulasan", $ulasanValid, $adminToken);
+        if ($submitAdminUlasan['status'] == 403) {
+            echo "✅ BERHASIL (HTTP 403 Forbidden): Rute terproteksi dari Admin dengan benar.\n\n";
+        } else {
+            echo "❌ GAGAL: Admin bisa menembus rute ulasan customer (HTTP {$submitAdminUlasan['status']}).\n\n";
+        }
     } else {
         echo "⚠️ KEPUTUSAN: Booking code tidak ada, pengujian webhook dilewati.\n\n";
     }
