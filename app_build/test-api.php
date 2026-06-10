@@ -599,6 +599,101 @@ if ($loginCustomer['status'] == 200 && isset($loginCustomer['body']['data']['tok
     echo "❌ GAGAL: Login Customer gagal.\n\n";
 }
 
+// ==========================================
+// PHASE 7: PUBLIC CATALOG & SEARCH TESTING
+// ==========================================
+echo "--------------------------------------------------\n";
+echo "   PENGUJIAN API KATALOG & PENCARIAN PUBLIK       \n";
+echo "--------------------------------------------------\n\n";
+
+// 37. Get All Packages in Public Catalog
+echo "[37] Mengambil katalog paket wisata publik (Tanpa Auth)...\n";
+$getPublikKatalog = makeRequest('GET', "$baseUrl/publik/paket-wisata");
+if ($getPublikKatalog['status'] == 200 && isset($getPublikKatalog['body']['data']['data'])) {
+    echo "✅ BERHASIL (HTTP 200 OK): Katalog publik berhasil diambil.\n";
+    echo "   Jumlah paket: " . count($getPublikKatalog['body']['data']['data']) . "\n\n";
+} else {
+    echo "❌ GAGAL: Gagal mengambil katalog publik (HTTP {$getPublikKatalog['status']}).\n";
+    print_r($getPublikKatalog['body']);
+    echo "\n";
+}
+
+// 38. Search Packages by Keyword
+echo "[38] Mencari paket wisata dengan kata kunci 'Bromo'...\n";
+$searchKatalog = makeRequest('GET', "$baseUrl/publik/paket-wisata?search=Bromo");
+if ($searchKatalog['status'] == 200) {
+    $found = false;
+    foreach ($searchKatalog['body']['data']['data'] as $p) {
+        if (strpos($p['nama_paket'], 'Bromo') !== false) {
+            $found = true;
+        }
+    }
+    if ($found) {
+        echo "✅ BERHASIL (HTTP 200 OK): Paket Bromo ditemukan.\n\n";
+    } else {
+        echo "❌ GAGAL: Paket Bromo tidak ditemukan dalam hasil pencarian.\n\n";
+    }
+} else {
+    echo "❌ GAGAL (HTTP {$searchKatalog['status']})\n\n";
+}
+
+// 39. Filter Packages by Location (Route)
+echo "[39] Memfilter paket wisata dengan lokasi 'Banyuwangi'...\n";
+$filterKatalogLocation = makeRequest('GET', "$baseUrl/publik/paket-wisata?location=Banyuwangi");
+if ($filterKatalogLocation['status'] == 200) {
+    $found = false;
+    foreach ($filterKatalogLocation['body']['data']['data'] as $p) {
+        if (strpos($p['rute'], 'Banyuwangi') !== false) {
+            $found = true;
+        }
+    }
+    if ($found) {
+        echo "✅ BERHASIL (HTTP 200 OK): Paket rute Banyuwangi ditemukan.\n\n";
+    } else {
+        echo "❌ GAGAL: Paket rute Banyuwangi tidak ditemukan.\n\n";
+    }
+} else {
+    echo "❌ GAGAL (HTTP {$filterKatalogLocation['status']})\n\n";
+}
+
+// 40. Filter Packages by Date Range
+echo "[40] Memfilter paket wisata dengan rentang tanggal 2026-07-01 s/d 2026-07-02...\n";
+$filterKatalogDate = makeRequest('GET', "$baseUrl/publik/paket-wisata?start_date=2026-07-01&end_date=2026-07-02");
+if ($filterKatalogDate['status'] == 200) {
+    echo "✅ BERHASIL (HTTP 200 OK): Filter tanggal berhasil diproses.\n";
+    echo "   Jumlah paket dalam rentang tanggal tersebut: " . count($filterKatalogDate['body']['data']['data']) . "\n\n";
+} else {
+    echo "❌ GAGAL (HTTP {$filterKatalogDate['status']})\n\n";
+}
+
+// 41. View Detail Package with Active Schedules & Review Stats
+echo "[41] Melihat detail paket wisata ID 1 beserta jadwal dan rating ulasan...\n";
+$detailPublik = makeRequest('GET', "$baseUrl/publik/paket-wisata/1");
+if ($detailPublik['status'] == 200) {
+    echo "✅ BERHASIL (HTTP 200 OK): Detail paket berhasil dimuat.\n";
+    echo "   Nama Paket: " . $detailPublik['body']['data']['nama_paket'] . "\n";
+    echo "   Rating Rata-rata: " . ($detailPublik['body']['data']['reviews_avg_rating'] ?? 'N/A') . "\n";
+    echo "   Total Ulasan: " . ($detailPublik['body']['data']['reviews_count'] ?? 0) . "\n";
+    echo "   Jumlah Jadwal Aktif: " . count($detailPublik['body']['data']['jadwal_trip'] ?? []) . "\n";
+    echo "   Ulasan Terbaru: \n";
+    foreach ($detailPublik['body']['data']['reviews'] ?? [] as $rev) {
+        echo "     - " . ($rev['customer']['nama_customer'] ?? 'User') . ": " . $rev['rating'] . " Bintang - '" . $rev['komentar'] . "'\n";
+    }
+    echo "\n";
+} else {
+    echo "❌ GAGAL (HTTP {$detailPublik['status']})\n\n";
+}
+
+// 42. Detail Package Not Found
+echo "[42] Melihat detail paket wisata dengan ID tidak ada (ID 9999)...\n";
+$detailPublikNotFound = makeRequest('GET', "$baseUrl/publik/paket-wisata/9999");
+if ($detailPublikNotFound['status'] == 404) {
+    echo "✅ BERHASIL (HTTP 404 Not Found): Sistem merespons dengan 404.\n\n";
+} else {
+    echo "❌ GAGAL: Sistem tidak mengembalikan status 404 (HTTP {$detailPublikNotFound['status']}).\n\n";
+}
+
 echo "==================================================\n";
 echo "             PENGUJIAN SELESAI                    \n";
 echo "==================================================\n";
+

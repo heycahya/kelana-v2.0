@@ -9,6 +9,7 @@ use App\Http\Controllers\Api\Customer\TiketController;
 use App\Http\Controllers\Api\Customer\UlasanController;
 use App\Http\Controllers\Api\TripLeader\ManifestController;
 use App\Http\Controllers\Api\WebhookController;
+use App\Http\Controllers\Api\Publik\KatalogController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -29,6 +30,10 @@ Route::prefix('v1')->group(function () {
     
     // Webhook Midtrans (Public/No Auth Middleware)
     Route::post('/webhook/midtrans', [WebhookController::class, 'handleMidtrans']);
+
+    // Public Catalog & Search
+    Route::get('/publik/paket-wisata', [KatalogController::class, 'index']);
+    Route::get('/publik/paket-wisata/{id}', [KatalogController::class, 'show']);
 
     // Admin CRUD Routes
     Route::prefix('admin')->middleware(['auth:sanctum', 'admin'])->group(function () {
