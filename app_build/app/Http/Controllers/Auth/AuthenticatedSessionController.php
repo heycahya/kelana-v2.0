@@ -28,7 +28,13 @@ class AuthenticatedSessionController extends Controller
 
         $request->session()->regenerate();
 
-        return redirect()->intended(route('dashboard', absolute: false));
+        if (Auth::guard('admin')->check()) {
+            return redirect()->intended(route('admin.dashboard', absolute: false));
+        } elseif (Auth::guard('trip_leader')->check()) {
+            return redirect()->intended(route('trip_leader.dashboard', absolute: false));
+        } else {
+            return redirect()->intended(route('dashboard', absolute: false));
+        }
     }
 
     /**
@@ -36,7 +42,13 @@ class AuthenticatedSessionController extends Controller
      */
     public function destroy(Request $request): RedirectResponse
     {
-        Auth::guard('web')->logout();
+        if (Auth::guard('admin')->check()) {
+            Auth::guard('admin')->logout();
+        } elseif (Auth::guard('trip_leader')->check()) {
+            Auth::guard('trip_leader')->logout();
+        } elseif (Auth::guard('customer')->check()) {
+            Auth::guard('customer')->logout();
+        }
 
         $request->session()->invalidate();
 

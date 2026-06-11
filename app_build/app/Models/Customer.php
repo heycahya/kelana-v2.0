@@ -29,4 +29,12 @@ class Customer extends Authenticatable
             'password' => 'hashed',
         ];
     }
+
+    /**
+     * Get the name attribute.
+     */
+    public function getNameAttribute(): string
+    {
+        return $this->nama_customer;
+    }
 }

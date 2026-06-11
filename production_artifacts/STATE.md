@@ -1,8 +1,8 @@
 # 📝 Development State Log - Kelana v2.0
 
 ## Current Status
-- **Phase**: PHASE 8: EXECUTION & CODING
-- **Feature**: Modul Profil Customer & Riwayat Pemesanan Komprehensif (Issue #19)
+- **Phase**: PHASE 9: EXECUTION & CODING
+- **Feature**: Integrasi Multi-Role Authentication pada Web (Session-based) (Issue #21)
 - **Status**: Completed & Ready for Verification ✅
 
 ## Tasks Checklist
@@ -89,6 +89,14 @@
 - [x] Extend automated API tests in `test-api.php` with Phase 8 test cases [43] to [50] (AI)
 - [ ] Run migrations to apply `add_kontak_darurat` (User)
 - [ ] Run automated tests `php test-api.php` to verify Phase 8 Profile & History functionality (User)
+- [x] Configure guards (`admin`, `customer`, `trip_leader`) and providers (`admins`, `customers`, `trip_leaders`) in `config/auth.php` (AI)
+- [x] Add dynamic accessors `name` and `email` to `Admin`, `Customer`, and `TripLeader` models for Breeze compatibility (AI)
+- [x] Update `LoginRequest.php` to sequentially attempt authentication using multiple guards (AI)
+- [x] Update `AuthenticatedSessionController.php` to dynamically redirect based on authenticated guard and clean session upon logout (AI)
+- [x] Add Phone Number and Address fields to `auth/register` blade view (AI)
+- [x] Update `RegisteredUserController.php` to validate and register customer inside `customers` table and log in via customer guard (AI)
+- [x] Update `/dashboard` and `/profile` routes in `routes/web.php` to handle multiple roles and prevent redirect loop (AI)
+- [x] Update `ProfileController` and `ProfileUpdateRequest` to handle dynamic field validation and save profile info for all three roles (AI)
 
 ## Notes
 - Model `Customer`, `Admin`, dan `TripLeader` sekarang telah dikonfigurasi sebagai class `Authenticatable` dengan trait `HasApiTokens` dari Laravel Sanctum.
@@ -128,4 +136,11 @@
   - `ProfileController` menangani pemuatan profil customer (`show`) dan pembaruan profil (`update`) dengan validator regex nomor telepon dan exclusion ID user saat memvalidasi keunikan email.
   - `PesananHistoryController` mengelompokkan data riwayat pemesanan PAID menjadi dua kategori logis: `active_trips` (tanggal_mulai >= hari ini dan status_trip bukan 'Selesai') serta `past_trips` (tanggal_mulai < hari ini atau status_trip 'Selesai'), lengkap dengan field `jumlah_hadir` dan `kuota_rombongan` (jumlah_peserta).
   - Skrip pengujian otomatis `test-api.php` diperluas dengan test case [43] hingga [50] untuk memverifikasi profil sukses, update data valid, penolakan input invalid (non-numeric phone, email duplikat), pemisahan logis active vs past trips berdasarkan tanggal dan status 'Selesai', serta proteksi rute customer dari akses admin.
+- **Implementasi Integrasi Multi-Role Authentication pada Web (Issue #21) telah selesai**:
+  - Konfigurasi guards (`admin`, `customer`, `trip_leader`) and providers (`admins`, `customers`, `trip_leaders`) telah ditambahkan di `config/auth.php`.
+  - Model `Admin`, `Customer`, dan `TripLeader` ditambahkan dynamic accessor `name` dan `email` untuk kompabilitas dengan view layout Breeze.
+  - `LoginRequest.php` disesuaikan untuk menguji autentikasi secara sequential dan dinamis (Admin via `username`, Trip Leader/Customer via `email`).
+  - `AuthenticatedSessionController.php` diperbarui agar melakukan logout aman pada semua guard, serta dynamic redirect ke dashboard yang sesuai (Admin, Trip Leader, atau Customer).
+  - Ditambahkan input Phone Number dan Address di form registrasi `/register` serta di-handle registrasinya langsung ke tabel `customers` dengan `customer` guard.
+  - Rute `/dashboard` dan `/profile` di `routes/web.php` dan `routes/auth.php` dikonfigurasi untuk menerima multi-role authentication (`auth:customer,admin,trip_leader`) guna menghindari redirect loop dan memuluskan navigasi global.
 

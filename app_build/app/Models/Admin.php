@@ -29,4 +29,20 @@ class Admin extends Authenticatable
             'password' => 'hashed',
         ];
     }
+
+    /**
+     * Get the name attribute.
+     */
+    public function getNameAttribute(): string
+    {
+        return $this->nama_admin;
+    }
+
+    /**
+     * Get the email attribute.
+     */
+    public function getEmailAttribute(): string
+    {
+        return $this->username;
+    }
 }

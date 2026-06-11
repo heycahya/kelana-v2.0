@@ -21,18 +21,31 @@ class ProfileController extends Controller
         ]);
     }
 
-    /**
-     * Update the user's profile information.
-     */
     public function update(ProfileUpdateRequest $request): RedirectResponse
     {
-        $request->user()->fill($request->validated());
+        $user = $request->user();
+        $validated = $request->validated();
 
-        if ($request->user()->isDirty('email')) {
-            $request->user()->email_verified_at = null;
+        if ($user instanceof \App\Models\Customer) {
+            $user->nama_customer = $validated['name'];
+            $user->email = $validated['email'];
+        } elseif ($user instanceof \App\Models\Admin) {
+            $user->nama_admin = $validated['name'];
+            $user->username = $validated['email'];
+        } elseif ($user instanceof \App\Models\TripLeader) {
+            $user->nama_leader = $validated['name'];
+            $user->email = $validated['email'];
+        } else {
+            $user->fill($validated);
         }
 
-        $request->user()->save();
+        if ($user->isDirty('email') || $user->isDirty('username')) {
+            if (isset($user->email_verified_at)) {
+                $user->email_verified_at = null;
+            }
+        }
+
+        $user->save();
 
         return Redirect::route('profile.edit')->with('status', 'profile-updated');
     }

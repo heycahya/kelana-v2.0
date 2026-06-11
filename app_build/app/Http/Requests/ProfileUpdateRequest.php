@@ -16,6 +16,14 @@ class ProfileUpdateRequest extends FormRequest
      */
     public function rules(): array
     {
+        $user = $this->user();
+        $class = get_class($user);
+        $keyName = $user->getKeyName();
+
+        $uniqueRule = $user instanceof \App\Models\Admin 
+            ? Rule::unique($class, 'username')->ignore($user->getKey(), $keyName)
+            : Rule::unique($class, 'email')->ignore($user->getKey(), $keyName);
+
         return [
             'name' => ['required', 'string', 'max:255'],
             'email' => [
@@ -24,7 +32,7 @@ class ProfileUpdateRequest extends FormRequest
                 'lowercase',
                 'email',
                 'max:255',
-                Rule::unique(User::class)->ignore($this->user()->id),
+                $uniqueRule,
             ],
         ];
     }
