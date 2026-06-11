@@ -14,6 +14,20 @@ export default {
             fontFamily: {
                 sans: ['Figtree', ...defaultTheme.fontFamily.sans],
             },
+            colors: {
+                'electric-lime': '#beff50',
+                'near-black': '#14140f',
+                'warm-cream': '#f5f5eb',
+                'parchment-card': '#fafaf5',
+                'stone': '#d2d2c8',
+                'graphite': '#6e6e64',
+                'charcoal': '#333333',
+                'mint-confirm': '#a3e635',
+                'coral-alert': '#fca5a5',
+            },
+            borderRadius: {
+                '3xl': '26px',
+            }
         },
     },
 

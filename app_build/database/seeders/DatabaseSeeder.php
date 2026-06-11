@@ -20,65 +20,50 @@ class DatabaseSeeder extends Seeder
     public function run(): void
     {
         // 1. Seed Admin
-        Admin::create([
-            'username' => 'admin.kelana',
-            'password' => Hash::make('PasswordAdmin123!'),
-            'nama_admin' => 'Admin Kelana'
-        ]);
+        Admin::updateOrCreate(
+            ['username' => 'admin.kelana'],
+            [
+                'password' => Hash::make('PasswordAdmin123!'),
+                'nama_admin' => 'Admin Kelana'
+            ]
+        );
 
         // 2. Seed Customer
-        Customer::create([
-            'nama_customer' => 'Budi Santoso',
-            'email' => 'budi.santoso@kelana.com',
-            'password' => Hash::make('PasswordCustomer123!'),
-            'no_telp' => '081234567890',
-            'alamat' => 'Jl. Merdeka No. 45'
-        ]);
+        Customer::updateOrCreate(
+            ['email' => 'budi.santoso@kelana.com'],
+            [
+                'nama_customer' => 'Budi Santoso',
+                'password' => Hash::make('PasswordCustomer123!'),
+                'no_telp' => '081234567890',
+                'alamat' => 'Jl. Merdeka No. 45'
+            ]
+        );
+
+        Customer::updateOrCreate(
+            ['email' => 'siti.rahma@kelana.com'],
+            [
+                'nama_customer' => 'Siti Rahma',
+                'password' => Hash::make('PasswordCustomer123!'),
+                'no_telp' => '081234567891',
+                'alamat' => 'Jl. Sudirman No. 12'
+            ]
+        );
 
         // 3. Seed Trip Leader
-        $leader = TripLeader::create([
-            'nama_leader' => 'Adi Wijaya',
-            'no_telp' => '089876543210',
-            'email' => 'adi.wijaya@kelana.com',
-            'password' => Hash::make('PasswordLeader123!')
-        ]);
+        TripLeader::updateOrCreate(
+            ['email' => 'adi.wijaya@kelana.com'],
+            [
+                'nama_leader' => 'Adi Wijaya',
+                'no_telp' => '089876543210',
+                'password' => Hash::make('PasswordLeader123!')
+            ]
+        );
 
-        // 4. Seed Paket Wisata
-        $paket1 = \App\Models\PaketWisata::create([
-            'nama_paket' => 'Trip Bromo Midnight',
-            'deskripsi' => 'Open Trip Bromo Sunrise semi-private. Menikmati indahnya sunrise dari Penanjakan, berfoto di Bukit Cinta & Widodaren, pasir berbisik, kawah Bromo.',
-            'harga' => 350000.00,
-            'rute' => 'Malang - Tumpang - Wonokitri - Penanjakan - Bromo - Malang',
-            'fasilitas' => 'Jeep Bromo, Tiket Masuk, Sopir & BBM, Air Mineral, Snack & Kopi pagi.'
-        ]);
-
-        $paket2 = \App\Models\PaketWisata::create([
-            'nama_paket' => 'Trip Kawah Ijen Blue Fire',
-            'deskripsi' => 'Open Trip Kawah Ijen Banyuwangi. Menyaksikan fenomena blue fire yang langka, sunrise di atas kawah, danau asam hijau toska.',
-            'harga' => 450000.00,
-            'rute' => 'Banyuwangi - Paltuding - Kawah Ijen - Banyuwangi',
-            'fasilitas' => 'Transportasi AC, Tiket Masuk, Local Guide, Masker Gas, Air Mineral.'
-        ]);
-
-        // 5. Seed Jadwal Trip
-        \App\Models\JadwalTrip::create([
-            'id_paket' => $paket1->id_paket,
-            'id_leader' => $leader->id_leader,
-            'tanggal_mulai' => '2026-07-01',
-            'tanggal_selesai' => '2026-07-01',
-            'kuota' => 20,
-            'sisa_kuota' => 20,
-            'status_trip' => 'Open'
-        ]);
-
-        \App\Models\JadwalTrip::create([
-            'id_paket' => $paket2->id_paket,
-            'id_leader' => $leader->id_leader,
-            'tanggal_mulai' => '2026-08-15',
-            'tanggal_selesai' => '2026-08-16',
-            'kuota' => 15,
-            'sisa_kuota' => 15,
-            'status_trip' => 'Draft'
+        // 4. Call external seeders
+        $this->call([
+            PaketWisataSeeder::class,
+            JadwalTripSeeder::class,
+            UlasanSeeder::class,
         ]);
     }
 }

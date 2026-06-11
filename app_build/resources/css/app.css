@@ -1,3 +1,13 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+@layer base {
+    body {
+        @apply bg-warm-cream text-near-black font-sans;
+    }
+    /* Menghapus semua box-shadow bawaan di seluruh elemen jika ada */
+    * {
+        box-shadow: none !important;
+    }
+}

@@ -1,8 +1,8 @@
 # 📝 Development State Log - Kelana v2.0
 
 ## Current Status
-- **Phase**: PHASE 9: EXECUTION & CODING
-- **Feature**: Integrasi Multi-Role Authentication pada Web (Session-based) (Issue #21)
+- **Phase**: PHASE 12: EXECUTION & CODING
+- **Feature**: Pembuatan Data Dummy Premium (Database Seeder) (Issue #25)
 - **Status**: Completed & Ready for Verification ✅
 
 ## Tasks Checklist
@@ -74,21 +74,21 @@
 - [x] Add endpoint `POST /api/v1/customer/ulasan` protected by sanctum and customer middleware (AI)
 - [x] Implement UlasanController store method with validation, PAID booking authorization, and duplicate ulasan prevention (AI)
 - [x] Extend automated API tests in `test-api.php` with Phase 6 test cases [32] to [36] (AI)
-- [ ] Run migrations & database seeding for ulasan table (User)
-- [ ] Run automated tests `php test-api.php` to verify Phase 6 Review & Rating functionality (User)
+- [x] Run migrations & database seeding for ulasan table (User)
+- [x] Run automated tests `php test-api.php` to verify Phase 6 Review & Rating functionality (User)
 - [x] Create Model relationships `jadwalTrip` and `reviews` in `PaketWisata.php` (AI)
 - [x] Create Controller `App\Http\Controllers\Api\Publik\KatalogController` (AI)
 - [x] Register public routes `/api/v1/publik/paket-wisata` and `/api/v1/publik/paket-wisata/{id}` (AI)
 - [x] Extend automated API tests in `test-api.php` with Phase 7 test cases [37] to [42] (AI)
-- [ ] Run automated tests `php test-api.php` to verify Phase 6 & Phase 7 functionality (User)
+- [x] Run automated tests `php test-api.php` to verify Phase 6 & Phase 7 functionality (User)
 - [x] Create Migration `database/migrations/2026_06_10_195500_add_kontak_darurat_to_customers_table.php` (AI)
 - [x] Add `kontak_darurat` to fillable fields on `Customer.php` model (AI)
 - [x] Create Controller `App\Http\Controllers\Api\Customer\ProfileController` (AI)
 - [x] Create Controller `App\Http\Controllers\Api\Customer\PesananHistoryController` (AI)
 - [x] Register routes for Customer Profile & Booking History under Sanctum/Customer middleware (AI)
 - [x] Extend automated API tests in `test-api.php` with Phase 8 test cases [43] to [50] (AI)
-- [ ] Run migrations to apply `add_kontak_darurat` (User)
-- [ ] Run automated tests `php test-api.php` to verify Phase 8 Profile & History functionality (User)
+- [x] Run migrations to apply `add_kontak_darurat` (User)
+- [x] Run automated tests `php test-api.php` to verify Phase 8 Profile & History functionality (User)
 - [x] Configure guards (`admin`, `customer`, `trip_leader`) and providers (`admins`, `customers`, `trip_leaders`) in `config/auth.php` (AI)
 - [x] Add dynamic accessors `name` and `email` to `Admin`, `Customer`, and `TripLeader` models for Breeze compatibility (AI)
 - [x] Update `LoginRequest.php` to sequentially attempt authentication using multiple guards (AI)
@@ -97,6 +97,21 @@
 - [x] Update `RegisteredUserController.php` to validate and register customer inside `customers` table and log in via customer guard (AI)
 - [x] Update `/dashboard` and `/profile` routes in `routes/web.php` to handle multiple roles and prevent redirect loop (AI)
 - [x] Update `ProfileController` and `ProfileUpdateRequest` to handle dynamic field validation and save profile info for all three roles (AI)
+- [x] Configure Tailwind CSS `tailwind.config.js` with Travelperk color palette and 26px rounded corners (AI)
+- [x] Configure base CSS custom body background and override box-shadow in `resources/css/app.css` (AI)
+- [x] Update `layouts/guest.blade.php` public template with sticky top navbar and conditional centered auth container (AI)
+- [x] Create `KatalogWebController` with `index` and `show` actions to render packages and schedules (AI)
+- [x] Map public home and detail routes to `KatalogWebController` in `routes/web.php` (AI)
+- [x] Implement catalog landing page `welcome.blade.php` (AI)
+- [x] Implement details page `publik/detail.blade.php` with schedule selector (AI)
+- [x] Create `BookingWebController` for handling customer web bookings and Midtrans Snap token generation (AI)
+- [x] Update `dashboard.blade.php` layout to render active trips E-Ticket cards and past trips history list (AI)
+- [x] Configure Tailwind CSS `tailwind.config.js` with new colors (`charcoal`, `mint-confirm`, `coral-alert`) (AI)
+- [x] Implement Premium Landing Page layout directly in `resources/views/welcome.blade.php` with custom top navbar, hero, value proposition, premium grid, and comprehensive footer (AI)
+- [x] Create seeder file `database/seeders/PaketWisataSeeder.php` (AI)
+- [x] Create seeder file `database/seeders/JadwalTripSeeder.php` (AI)
+- [x] Create seeder file `database/seeders/UlasanSeeder.php` (AI)
+- [x] Update seeder file `database/seeders/DatabaseSeeder.php` (AI)
 
 ## Notes
 - Model `Customer`, `Admin`, dan `TripLeader` sekarang telah dikonfigurasi sebagai class `Authenticatable` dengan trait `HasApiTokens` dari Laravel Sanctum.
@@ -141,6 +156,20 @@
   - Model `Admin`, `Customer`, dan `TripLeader` ditambahkan dynamic accessor `name` dan `email` untuk kompabilitas dengan view layout Breeze.
   - `LoginRequest.php` disesuaikan untuk menguji autentikasi secara sequential dan dinamis (Admin via `username`, Trip Leader/Customer via `email`).
   - `AuthenticatedSessionController.php` diperbarui agar melakukan logout aman pada semua guard, serta dynamic redirect ke dashboard yang sesuai (Admin, Trip Leader, atau Customer).
-  - Ditambahkan input Phone Number dan Address di form registrasi `/register` serta di-handle registrasinya langsung ke tabel `customers` dengan `customer` guard.
+  - Ditambahkan input Phone Number dan Address di form registrasi `/register` serta di-handle registrasinya langsung ke tabel `customers` with `customer` guard.
   - Rute `/dashboard` dan `/profile` di `routes/web.php` dan `routes/auth.php` dikonfigurasi untuk menerima multi-role authentication (`auth:customer,admin,trip_leader`) guna menghindari redirect loop dan memuluskan navigasi global.
-
+- **Implementasi Frontend Layar Publik & Customer (Issue #22) telah selesai**:
+  - Tailwind CSS dan base styles dikonfigurasi dengan tema warna Travelperk (Warm Cream, Electric Lime, Near Black, Parchment Card, Stone, Graphite) dengan border-radius 26px (`rounded-3xl`) dan menonaktifkan semua box-shadow bawaan.
+  - Layout `layouts/guest.blade.php` diperbarui dengan sticky top navbar yang menyesuaikan status autentikasi masing-masing peran, serta pembungkus dinamis untuk halaman auth (login/register).
+  - Membuat `KatalogWebController` untuk melayani katalog paket wisata publik (`/`) dan detail paket (`/paket-wisata/{id}`) beserta daftar jadwal aktifnya.
+  - Membuat `BookingWebController` untuk mengelola booking baru bagi customer via web, mengintegrasikan Alpine.js untuk ringkasan perhitungan total biaya secara langsung (live summary), serta mengintegrasikan pembayaran Midtrans Snap secara interaktif.
+  - Mengubah tampilan `dashboard.blade.php` bagi peran Customer dengan tata letak premium untuk menampilkan E-Tiket perjalanan aktif (lengkap dengan detail kode booking, status, destinasi, tanggal, jumlah peserta, dan presensi hadir) serta panel riwayat perjalanan terdahulu.
+- **Implementasi Landing Page Kelana v2.0 (Premium Enterprise UI) (Issue #23) telah selesai**:
+  - Warna `charcoal`, `mint-confirm`, dan `coral-alert` ditambahkan pada `tailwind.config.js`.
+  - Keseluruhan tampilan landing page (`welcome.blade.php`) dirombak secara total sebagai layout standalone yang solid (termasuk Top Announcement Banner, Premium Navigation Bar, Massive Hero Section, Value Proposition yang ritmis, Katalog Paket Wisata Premium Grid, dan Comprehensive Footer).
+  - Skema visual mematuhi teknik kontras warna (value contrast) tanpa box shadow dengan sudut lengkung seragam 26px (`rounded-[26px]`).
+- **Pembuatan Data Dummy Premium (Database Seeder) (Issue #25) telah selesai**:
+  - Membuat `PaketWisataSeeder.php` dengan data paket wisata premium yang realistis.
+  - Membuat `JadwalTripSeeder.php` dengan jadwal keberangkatan aktif (masa depan) yang terhubung ke Paket Wisata dan Trip Leader.
+  - Membuat `UlasanSeeder.php` dengan ulasan/rating realistis untuk mendukung render UI rating.
+  - Memperbarui `DatabaseSeeder.php` untuk memanggil seeder-seeder baru secara teratur.
