@@ -33,16 +33,12 @@ class RegisteredUserController extends Controller
         $request->validate([
             'name' => ['required', 'string', 'max:255'],
             'email' => ['required', 'string', 'lowercase', 'email', 'max:255', 'unique:'.Customer::class],
-            'no_telp' => ['required', 'string', 'regex:/^[0-9]+$/', 'min:10', 'max:15'],
-            'alamat' => ['nullable', 'string'],
             'password' => ['required', 'confirmed', Rules\Password::defaults()],
         ]);
 
         $customer = Customer::create([
             'nama_customer' => $request->name,
             'email' => $request->email,
-            'no_telp' => $request->no_telp,
-            'alamat' => $request->alamat,
             'password' => Hash::make($request->password),
         ]);
 

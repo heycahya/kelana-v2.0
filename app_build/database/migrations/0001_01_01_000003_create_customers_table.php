@@ -16,7 +16,7 @@ return new class extends Migration
             $table->string('nama_customer', 100);
             $table->string('email', 100)->unique();
             $table->string('password', 255);
-            $table->string('no_telp', 15);
+            $table->string('no_telp', 15)->nullable();
             $table->text('alamat')->nullable();
             $table->timestamps();
         });
