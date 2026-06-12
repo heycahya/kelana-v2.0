@@ -9,7 +9,7 @@ use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
 
-#[Fillable(['nama_leader', 'no_telp', 'email', 'password'])]
+#[Fillable(['nama_leader', 'no_telp', 'email', 'password', 'avatar', 'bio', 'rating_akumulatif'])]
 #[Hidden(['password'])]
 class TripLeader extends Authenticatable
 {

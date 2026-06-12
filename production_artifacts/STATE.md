@@ -2,7 +2,7 @@
 
 ## Current Status
 - **Phase**: PHASE 12: EXECUTION & CODING
-- **Feature**: Pembuatan Data Dummy Premium (Database Seeder) (Issue #25)
+- **Feature**: Ekspansi Arsitektur Database Enterprise (Kelana v2.0) (Issue #32)
 - **Status**: Completed & Ready for Verification ✅
 
 ## Tasks Checklist
@@ -112,6 +112,14 @@
 - [x] Create seeder file `database/seeders/JadwalTripSeeder.php` (AI)
 - [x] Create seeder file `database/seeders/UlasanSeeder.php` (AI)
 - [x] Update seeder file `database/seeders/DatabaseSeeder.php` (AI)
+- [x] Create migration `add_maps_to_paket_wisata_table` for latitude and longitude fields (AI)
+- [x] Create migration `add_profile_fields_to_trip_leaders_table` for avatar, bio, and accumulative rating fields (AI)
+- [x] Create migration `add_qr_and_addons_to_pemesanan_table` for QR code tokens and total add-ons costs fields (AI)
+- [x] Create Model and Migration `PaketWisataGallery` for Masonry Grid UI image URLs (AI)
+- [x] Create Model `AddOn` and Migrations `create_add_ons_table` and `create_pemesanan_addon_table` for upsell/cross-sell (AI)
+- [x] Create Model and Migration `Wishlist` for wishlist features (AI)
+- [x] Update Eloquent relationships on `PaketWisata`, `Pemesanan`, `Customer`, and `TripLeader` models (AI)
+
 
 ## Notes
 - Model `Customer`, `Admin`, dan `TripLeader` sekarang telah dikonfigurasi sebagai class `Authenticatable` dengan trait `HasApiTokens` dari Laravel Sanctum.

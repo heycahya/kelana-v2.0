@@ -6,13 +6,20 @@ use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-#[Fillable(['booking_code', 'id_customer', 'id_jadwal', 'tgl_pemesanan', 'jumlah_peserta', 'total_harga', 'status_pembayaran', 'attendance_status', 'jumlah_hadir'])]
+#[Fillable(['booking_code', 'id_customer', 'id_jadwal', 'tgl_pemesanan', 'jumlah_peserta', 'total_harga', 'status_pembayaran', 'attendance_status', 'jumlah_hadir', 'qr_code_token', 'total_biaya_addons'])]
 class Pemesanan extends Model
 {
     use HasFactory;
 
     protected $table = 'pemesanan';
     protected $primaryKey = 'id_pemesanan';
+
+    public function addOns()
+    {
+        return $this->belongsToMany(AddOn::class, 'pemesanan_addon', 'pemesanan_id', 'add_on_id', 'id_pemesanan', 'id')
+            ->withPivot('kuantitas', 'subtotal')
+            ->withTimestamps();
+    }
 
     public function customer()
     {

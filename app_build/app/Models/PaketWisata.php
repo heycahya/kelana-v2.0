@@ -6,13 +6,18 @@ use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-#[Fillable(['nama_paket', 'deskripsi', 'harga', 'rute', 'fasilitas'])]
+#[Fillable(['nama_paket', 'deskripsi', 'harga', 'rute', 'fasilitas', 'latitude', 'longitude'])]
 class PaketWisata extends Model
 {
     use HasFactory;
 
     protected $table = 'paket_wisata';
     protected $primaryKey = 'id_paket';
+
+    public function galleries()
+    {
+        return $this->hasMany(PaketWisataGallery::class, 'paket_wisata_id', 'id_paket');
+    }
 
     public function jadwalTrip()
     {

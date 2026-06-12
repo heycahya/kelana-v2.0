@@ -18,6 +18,12 @@ class Customer extends Authenticatable
     protected $table = 'customers';
     protected $primaryKey = 'id_customer';
 
+    public function wishlists()
+    {
+        return $this->belongsToMany(PaketWisata::class, 'wishlists', 'customer_id', 'paket_wisata_id', 'id_customer', 'id_paket')
+            ->withTimestamps();
+    }
+
     /**
      * Get the attributes that should be cast.
      *
