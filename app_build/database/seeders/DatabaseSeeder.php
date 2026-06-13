@@ -64,6 +64,7 @@ class DatabaseSeeder extends Seeder
             PaketWisataSeeder::class,
             JadwalTripSeeder::class,
             UlasanSeeder::class,
+            AddOnSeeder::class,
         ]);
     }
 }

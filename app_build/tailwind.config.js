@@ -15,15 +15,15 @@ export default {
                 sans: ['Figtree', ...defaultTheme.fontFamily.sans],
             },
             colors: {
-                'electric-lime': '#beff50',
-                'near-black': '#14140f',
-                'warm-cream': '#f5f5eb',
-                'parchment-card': '#fafaf5',
-                'stone': '#d2d2c8',
-                'graphite': '#6e6e64',
-                'charcoal': '#333333',
-                'mint-confirm': '#a3e635',
-                'coral-alert': '#fca5a5',
+                'electric-lime': '#1e5e3a',   // Lush Forest Green (representing nature and adventure)
+                'near-black': '#0f1a15',      // Deep Jungle Black
+                'warm-cream': '#f4f3ed',      // Warm Cream sand page background
+                'parchment-card': '#ffffff',  // Pristine Elevated White
+                'stone': '#dfdfd6',           // Soft Stone borders
+                'graphite': '#3f4e45',        // Deep Sage Charcoal body text
+                'charcoal': '#0b1611',        // Midnight Forest dark sections
+                'mint-confirm': '#1dc479',
+                'coral-alert': '#eb3131',
             },
             borderRadius: {
                 '3xl': '26px',

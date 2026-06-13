@@ -1,8 +1,8 @@
 <!DOCTYPE html>
-<html lang="id">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Laporan Rekap Peserta Trip</title>
+    <title>Trip Participant Recap Report</title>
     <style>
         body {
             font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
@@ -150,29 +150,29 @@
 <body>
 
     <div class="header">
-        <h1>Laporan Rekap Peserta Trip</h1>
-        <p>Kelana Wisata Digital System • Dicetak pada: {{ date('d-m-Y H:i') }} WIB</p>
+        <h1>Trip Participant Recap Report</h1>
+        <p>Kelana Travel Digital System • Printed on: {{ date('d-M-Y H:i') }}</p>
     </div>
 
     <table class="info-grid">
         <tr>
-            <td class="info-label">Paket Wisata</td>
+            <td class="info-label">Travel Package</td>
             <td class="info-value">: <strong>{{ $jadwal->paketWisata->nama_paket ?? '-' }}</strong></td>
         </tr>
         <tr>
-            <td class="info-label">Tanggal Mulai</td>
-            <td class="info-value">: {{ \Carbon\Carbon::parse($jadwal->tanggal_mulai)->format('d-m-Y') }}</td>
+            <td class="info-label">Start Date</td>
+            <td class="info-value">: {{ \Carbon\Carbon::parse($jadwal->tanggal_mulai)->format('d-M-Y') }}</td>
         </tr>
         <tr>
-            <td class="info-label">Tanggal Selesai</td>
-            <td class="info-value">: {{ \Carbon\Carbon::parse($jadwal->tanggal_selesai)->format('d-m-Y') }}</td>
+            <td class="info-label">End Date</td>
+            <td class="info-value">: {{ \Carbon\Carbon::parse($jadwal->tanggal_selesai)->format('d-M-Y') }}</td>
         </tr>
         <tr>
             <td class="info-label">Trip Leader</td>
             <td class="info-value">: {{ $jadwal->tripLeader->nama ?? '-' }}</td>
         </tr>
         <tr>
-            <td class="info-label">Status Trip</td>
+            <td class="info-label">Trip Status</td>
             <td class="info-value">: {{ $jadwal->status_trip }}</td>
         </tr>
     </table>
@@ -181,27 +181,27 @@
         <table class="stats-table">
             <tr>
                 <td>
-                    <div class="stats-label">Total Peserta Lunas</div>
-                    <div class="stats-value blue">{{ $totalPeserta }} Orang</div>
+                    <div class="stats-label">Total Paid Participants</div>
+                    <div class="stats-value blue">{{ $totalPeserta }} People</div>
                 </td>
                 <td>
-                    <div class="stats-label">Total Pendapatan</div>
+                    <div class="stats-label">Total Revenue</div>
                     <div class="stats-value">Rp {{ number_format($totalPendapatan, 0, ',', '.') }}</div>
                 </td>
             </tr>
         </table>
     </div>
 
-    <div class="table-title">Daftar Manifes Peserta (PAID)</div>
+    <div class="table-title">Participant Manifest List (PAID)</div>
     <table class="manifest-table">
         <thead>
             <tr>
                 <th style="width: 5%;">No</th>
-                <th style="width: 15%;">Kode Booking</th>
-                <th style="width: 30%;">Nama Customer</th>
-                <th style="width: 15%; text-align: center;">Jml Peserta</th>
-                <th style="width: 15%; text-align: center;">Jml Hadir</th>
-                <th style="width: 20%; text-align: center;">Kehadiran</th>
+                <th style="width: 15%;">Booking Code</th>
+                <th style="width: 30%;">Customer Name</th>
+                <th style="width: 15%; text-align: center;">Total Participants</th>
+                <th style="width: 15%; text-align: center;">Total Present</th>
+                <th style="width: 20%; text-align: center;">Attendance</th>
             </tr>
         </thead>
         <tbody>
@@ -214,15 +214,15 @@
                     <td style="text-align: center;">{{ $item->jumlah_hadir }}</td>
                     <td style="text-align: center;">
                         @if($item->attendance_status === 'hadir')
-                            <span class="status-badge status-hadir">Hadir</span>
+                            <span class="status-badge status-hadir">Present</span>
                         @else
-                            <span class="status-badge status-belum">Belum Hadir</span>
+                            <span class="status-badge status-belum">Absent</span>
                         @endif
                     </td>
                 </tr>
             @empty
                 <tr>
-                    <td colspan="6" style="text-align: center; color: #777777; padding: 15px;">Belum ada peserta lunas untuk jadwal trip ini.</td>
+                    <td colspan="6" style="text-align: center; color: #777777; padding: 15px;">No paid participants registered for this trip schedule.</td>
                 </tr>
             @endforelse
         </tbody>
@@ -230,7 +230,7 @@
 
     <div class="footer">
         <div class="signature-area">
-            <p>Admin Operasional,</p>
+            <p>Operations Admin,</p>
             <div class="signature-line">Kelana Back-Office</div>
         </div>
         <div style="clear: both;"></div>

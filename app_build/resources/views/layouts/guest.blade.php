@@ -9,31 +9,52 @@
 
         <!-- Fonts -->
         <link rel="preconnect" href="https://fonts.bunny.net">
-        <link href="https://fonts.bunny.net/css?family=inter:400,500,600,700&display=swap" rel="stylesheet" />
+        <link href="https://fonts.bunny.net/css?family=figtree:400,500,600,700,800&display=swap" rel="stylesheet" />
 
         <!-- Scripts -->
         @vite(['resources/css/app.css', 'resources/js/app.js'])
     </head>
-    <body class="font-sans text-near-black antialiased h-screen overflow-hidden bg-white">
+    <body class="font-sans text-near-black antialiased h-screen overflow-hidden bg-warm-cream">
         <div class="flex h-full w-full">
-            <!-- Kolom Kiri: Form -->
-            <div class="w-full lg:w-1/2 flex flex-col justify-center px-8 sm:px-16 lg:px-24 xl:px-32 relative overflow-y-auto bg-white py-12">
-                <div class="absolute top-8 left-8 sm:left-16 lg:left-24 xl:left-32">
-                    <a href="/" class="flex items-center text-xl font-bold tracking-tight text-near-black hover:opacity-80 transition gap-2">
-                        <div class="w-8 h-8 bg-electric-lime rounded-[8px] flex items-center justify-center text-near-black text-sm">K</div>
-                        Kelana
+            
+            <!-- Left Column: Content (50% Split) -->
+            <div class="w-full lg:w-1/2 flex flex-col justify-between p-8 sm:p-12 md:p-16 lg:p-20 relative overflow-y-auto bg-warm-cream">
+                
+                <!-- Top Header: Back Button on the Left -->
+                <div class="flex items-center justify-start">
+                    <!-- Consistent Back Button with Text -->
+                    <a href="/" class="inline-flex items-center gap-2 px-4 py-2.5 rounded-full border border-transparent bg-stone/50 text-xs font-semibold uppercase tracking-wider text-near-black hover:bg-near-black hover:text-white transition-all duration-300 ease-in-out">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" />
+                        </svg>
+                        <span>Back</span>
                     </a>
                 </div>
                 
-                <div class="w-full max-w-[400px] mx-auto mt-12 lg:mt-0">
+                <!-- Form Area (No Nested Card Container, direct layout) -->
+                <div class="my-auto w-full max-w-[360px] mx-auto py-8">
+                    <!-- Enlarged Typography Branding above Welcome header -->
+                    <div class="mb-8">
+                        <a href="/" class="text-4xl font-bold tracking-tight text-near-black hover:opacity-85 transition-opacity">
+                            Kelana
+                        </a>
+                    </div>
+                    
                     {{ $slot }}
                 </div>
+
             </div>
 
-            <!-- Kolom Kanan: Gambar Cover (Fullscreen Split) -->
-            <div class="hidden lg:block lg:w-1/2 relative bg-warm-cream p-6 xl:p-8">
-                <img src="https://images.unsplash.com/photo-1506012787146-f92b2d7d6d96?auto=format&fit=crop&w=1200&q=80" class="w-full h-full object-cover rounded-[26px]" alt="Kelana Destination">
+            <!-- Right Column: Full-Bleed Split Screen Image (50% Split) -->
+            <div class="hidden lg:block lg:w-1/2 h-full relative overflow-hidden bg-near-black">
+                <img src="https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?auto=format&fit=crop&w=1200&q=80" 
+                     class="w-full h-full object-cover transition-transform duration-[8000ms] hover:scale-105 ease-out" 
+                     alt="Kelana Nature Journey">
+                
+                <!-- Premium Subtle Overlay for Image Depth -->
+                <div class="absolute inset-0 bg-gradient-to-t from-near-black/30 via-transparent to-transparent"></div>
             </div>
+            
         </div>
     </body>
 </html>

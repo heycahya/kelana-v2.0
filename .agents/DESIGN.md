@@ -9,15 +9,15 @@ Perk radiates controlled energy — a lime-charged black-and-cream field where e
 
 | Name | Value | Token | Role |
 |------|-------|-------|------|
-| Electric Lime | `#beff50` | `--color-electric-lime` | Primary CTA buttons, active UI chips, icon accent fills — the single chromatic accent that detonates against every surface (near-black, white, and cream alike), creating urgency without red-coded alarm |
-| Near Black | `#14140f` | `--color-near-black` | Primary text color, dark card backgrounds, nav borders — a warmed black (not pure #000000) that pairs with cream for a slightly analog feeling |
+| Lush Forest Green | `#1e5e3a` | `--color-electric-lime` | Primary CTA buttons, active UI chips, icon accent fills — represents nature, wilderness, and adventure |
+| Deep Jungle Black | `#0f1a15` | `--color-near-black` | Primary text color, dark card backgrounds, nav borders — warmed deep organic green-black for high contrast |
 | Pure Black | `#000000` | `--color-pure-black` | High-contrast text, icon fills, button borders at max contrast |
 | Pure White | `#ffffff` | `--color-pure-white` | Card backgrounds, overlay surfaces, inverted button text |
-| Warm Cream | `#f5f5eb` | `--color-warm-cream` | Page hero background, section fills — the warm off-white that makes Electric Lime feel naturalistic rather than neon |
-| Parchment Card | `#fafaf5` | `--color-parchment-card` | Secondary card surface, nested panel backgrounds |
-| Stone | `#d2d2c8` | `--color-stone` | Borders, disabled states, circular icon-only buttons in inactive state |
-| Graphite | `#6e6e64` | `--color-graphite` | Body text, supporting labels, card subtext — warm mid-gray that keeps warmth consistent across the achromatic scale |
-| Charcoal | `#30302a` | `--color-charcoal` | Dark surface card backgrounds, secondary dark mode elements |
+| Warm Cream | `#f4f3ed` | `--color-warm-cream` | Page background, hero background, section fills — soft organic warm parchment sand background |
+| Pristine White Card | `#ffffff` | `--color-parchment-card` | Elevated card surface background |
+| Soft Stone | `#dfdfd6` | `--color-stone` | Borders, dividers, disabled states, circular icon-only buttons in inactive state |
+| Deep Sage Charcoal | `#3f4e45` | `--color-graphite` | Body text, supporting labels, card subtext — warm mid-gray with a slight sage green cast, WCAG compliant contrast |
+| Midnight Forest | `#0b1611` | `--color-charcoal` | Dark surface card backgrounds, footer sections, secondary dark mode elements |
 | Slate Border | `#919183` | `--color-slate-border` | Dividers, subtle borders on light surfaces |
 | Signal Blue | `#144fcc` | `--color-signal-blue` | SVG icon fills — brand-category transport icons only |
 | Coral Alert | `#eb3131` | `--color-coral-alert` | Status badges — 'Needs Approval' destructive state only |
@@ -80,7 +80,7 @@ Perk radiates controlled energy — a lime-charged black-and-cream field where e
 
 ### Layout
 
-- **Page max-width:** 1200px
+- Page max-width: 1400px
 - **Section gap:** 60px
 - **Card padding:** 24-40px
 - **Element gap:** 8-16px
@@ -191,7 +191,7 @@ Product UI screenshots displayed as floating cards over the hero background, cro
 
 ## Layout
 
-Max-width ~1200px centered on a full-bleed warm cream (#f5f5eb) hero. Hero is full-viewport with centered headline text (OTSono 80-90px) and floating product UI cards arranged in a loose z-pattern around a central phone mockup. Below hero: alternating white and cream bands, each 60px vertical padding. Feature sections use a horizontal scroll card row (4 cards visible, arrow-navigated) rather than a static grid. Tab-switched feature sections (Automate / Control / Support) show 3-column card layouts within a contained max-width box. Logo bar (social proof) runs full-width on cream. Navigation is sticky, top bar, minimal — no mega-menu. Section transitions are seamless (no visual dividers, pure background-color shifts). Overall density is spacious — generous whitespace between the large display type and card elements.
+Max-width ~1400px centered on a full-bleed warm cream (#f5f5eb) hero. Hero is full-viewport with centered headline text (OTSono 80-90px) and floating product UI cards arranged in a loose z-pattern around a central phone mockup. Below hero: alternating white and cream bands, each 60px vertical padding. Feature sections use a horizontal scroll card row (4 cards visible, arrow-navigated) rather than a static grid. Tab-switched feature sections (Automate / Control / Support) show 3-column card layouts within a contained max-width box. Logo bar (social proof) runs full-width on cream. Navigation is sticky, top bar, minimal — no mega-menu. Section transitions are seamless (no visual dividers, pure background-color shifts). Overall density is spacious — generous whitespace between the large display type and card elements.
 
 ## Agent Prompt Guide
 
@@ -230,15 +230,15 @@ Max-width ~1200px centered on a full-bleed warm cream (#f5f5eb) hero. Hero is fu
 ```css
 :root {
   /* Colors */
-  --color-electric-lime: #beff50;
-  --color-near-black: #14140f;
+  --color-electric-lime: #1e5e3a;
+  --color-near-black: #0f1a15;
   --color-pure-black: #000000;
   --color-pure-white: #ffffff;
-  --color-warm-cream: #f5f5eb;
-  --color-parchment-card: #fafaf5;
-  --color-stone: #d2d2c8;
-  --color-graphite: #6e6e64;
-  --color-charcoal: #30302a;
+  --color-warm-cream: #f4f3ed;
+  --color-parchment-card: #ffffff;
+  --color-stone: #dfdfd6;
+  --color-graphite: #3f4e45;
+  --color-charcoal: #0b1611;
   --color-slate-border: #919183;
   --color-signal-blue: #144fcc;
   --color-coral-alert: #eb3131;
@@ -283,7 +283,7 @@ Max-width ~1200px centered on a full-bleed warm cream (#f5f5eb) hero. Hero is fu
   --spacing-224: 224px;
 
   /* Layout */
-  --page-max-width: 1200px;
+  --page-max-width: 1400px;
   --section-gap: 60px;
   --card-padding: 24-40px;
   --element-gap: 8-16px;
@@ -317,15 +317,15 @@ Max-width ~1200px centered on a full-bleed warm cream (#f5f5eb) hero. Hero is fu
 ```css
 @theme {
   /* Colors */
-  --color-electric-lime: #beff50;
-  --color-near-black: #14140f;
+  --color-electric-lime: #1e5e3a;
+  --color-near-black: #0f1a15;
   --color-pure-black: #000000;
   --color-pure-white: #ffffff;
-  --color-warm-cream: #f5f5eb;
-  --color-parchment-card: #fafaf5;
-  --color-stone: #d2d2c8;
-  --color-graphite: #6e6e64;
-  --color-charcoal: #30302a;
+  --color-warm-cream: #f4f3ed;
+  --color-parchment-card: #ffffff;
+  --color-stone: #dfdfd6;
+  --color-graphite: #3f4e45;
+  --color-charcoal: #0b1611;
   --color-slate-border: #919183;
   --color-signal-blue: #144fcc;
   --color-coral-alert: #eb3131;

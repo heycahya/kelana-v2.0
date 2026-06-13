@@ -1,8 +1,8 @@
 # 📝 Development State Log - Kelana v2.0
 
 ## Current Status
-- **Phase**: PHASE 12: EXECUTION & CODING
-- **Feature**: Ekspansi Arsitektur Database Enterprise (Kelana v2.0) (Issue #32)
+- **Phase**: PHASE 4: REVIEW GATE
+- **Feature**: Implementasi UI Enterprise: Halaman Detail Produk & Form Konversi (Issue #34)
 - **Status**: Completed & Ready for Verification ✅
 
 ## Tasks Checklist
@@ -119,6 +119,17 @@
 - [x] Create Model `AddOn` and Migrations `create_add_ons_table` and `create_pemesanan_addon_table` for upsell/cross-sell (AI)
 - [x] Create Model and Migration `Wishlist` for wishlist features (AI)
 - [x] Update Eloquent relationships on `PaketWisata`, `Pemesanan`, `Customer`, and `TripLeader` models (AI)
+- [x] Update `KatalogWebController.php` to fetch galleries, schedules with trip leader, and all addons (AI)
+- [x] Overwrite `resources/views/publik/detail.blade.php` with Airbnb masonry, Leaflet maps, leader profiles, and sticky booking card with Alpine.js live calculation (AI)
+- [x] Update `resources/views/customer/booking.blade.php` to pre-fill participant count from query parameter (AI)
+- [x] Update `PaketWisataSeeder.php` to seed coordinates and gallery images (AI)
+- [x] Create `AddOnSeeder.php` to seed optional addons (AI)
+- [x] Include `AddOnSeeder` in `DatabaseSeeder.php` (AI)
+- [x] Revamp `detail.blade.php` with Premium 5-Image Grid and Jitter-Free Absolute Floating Dropdown Date Picker (AI)
+- [x] Revamp `customer/booking.blade.php` typography and styles to align with the premium landing page (AI)
+- [x] Fix destination catalog grid links in `welcome.blade.php` to direct to `paket.detail` instead of `register` (AI)
+
+
 
 
 ## Notes
@@ -181,3 +192,37 @@
   - Membuat `JadwalTripSeeder.php` dengan jadwal keberangkatan aktif (masa depan) yang terhubung ke Paket Wisata dan Trip Leader.
   - Membuat `UlasanSeeder.php` dengan ulasan/rating realistis untuk mendukung render UI rating.
   - Memperbarui `DatabaseSeeder.php` untuk memanggil seeder-seeder baru secara teratur.
+- **Implementasi UI Enterprise: Halaman Detail Produk & Form Konversi (Issue #34) telah selesai & Direvamp**:
+  - `KatalogWebController` memuat relasi galeri, detail trip leader, dan seluruh add-on.
+  - `detail.blade.php` dirancang ulang secara *pixel-perfect* mengikuti gaya navigasi, warna, dan font Figtree dari landing page (`welcome.blade.php`).
+  - Mengimplementasikan **Creative Editorial Photo Gallery (Magazine Collage)**: Grid kolase asimetris 3 kolom (Spans 5-4-3) ditambah elemen **Floating Polaroid Overlapping Card** di sudut kanan bawah dengan rotasi artistik 3 derajat dan transisi hover pelurusan, menghasilkan visual perjalanan yang sangat estetik dan kreatif.
+  - Mengubah rasio split layout kolom desktop menjadi **col-span-8 (kiri, fokus konten)** dan **col-span-4 (kanan, booking panel)** dengan `gap-6` (sebelumnya `gap-8`) untuk meniadakan whitespace yang terlalu lapang (*tighter layout*).
+  - Mengetatkan seluruh margin dan padding halaman detail: mengurangi padding kartu luar/dalam dari `p-8` menjadi `p-6`, merapatkan spasi vertikal kolom dari `space-y-8` menjadi `space-y-6`, dan mengurangi margin antar-elemen (misalnya tombol kembali, judul, dan peta) untuk hasil visual yang lebih padat dan pas.
+  - Mengubah kartu booking kolom kanan menjadi **statis (non-sticky)** sehingga kartu diam di tempatnya dan menggulung normal mengikuti scroll halaman tanpa ada pergeseran posisi melayang yang mengganggu kenyamanan visual (*fixed static layout*).
+  - Mengganti navigasi teks breadcrumbs dengan **tombol kembali melingkar berdesain minimalis dengan ikon chevron kiri** (`mb-6`) untuk navigasi kembali ke katalog/beranda yang lebih bersih.
+  - Menerapkan **Custom Floating Date Picker** menggunakan menu dropdown absolute Alpine.js melayang di atas layout agar pembukaan list tidak memicu getaran atau perubahan tinggi layout (*anti-jitter*).
+  - Menyediakan panel **Fixed-Size Participant Counter** dengan stepper horizontal yang dimensinya kokoh untuk menjaga stabilitas layout.
+  - Menyusun rute, fasilitas, peta Leaflet.js, serta kartu profil Trip Leader yang representatif (foto, bio, rating) di kolom utama sebelah kiri secara mengalir.
+  - Memperbarui `customer/booking.blade.php` untuk menyelaraskan font weights (menghapus `font-black` dan `font-extrabold` kasar, digantikan `font-semibold` & `font-medium`) serta menyelaraskan radius sudut dan warna agar serasi.
+  - Memperlebar max-width kontainer utama dari `max-w-[1200px]` ke `max-w-[1400px]` pada berkas `detail.blade.php`, `welcome.blade.php`, dan `navbar.blade.php` untuk menyusutkan whitespace margin luar (kiri dan kanan) di layar desktop.
+  - Mengganti galeri gambar statis di halaman detail dengan **Premium Animated Image Slider** menggunakan Alpine.js dengan efek transisi slide-fade yang halus (`ease-out duration-700`), tombol navigasi chevron glassmorphic, indikator nomor slide, serta navigasi thumbnail mini horizontal.
+  - Menambahkan utilitas `.no-scrollbar` pada `app.css` untuk memastikan navigasi thumbnail horizontal tidak memicu scrollbar browser bawaan yang mengganggu visual di sistem operasi Windows.
+  - Memperbarui `layouts/guest.blade.php`, `auth/login.blade.php`, dan `auth/register.blade.php` agar menggunakan font **Figtree** yang seragam dengan landing page.
+- [x] Update theme colors in `tailwind.config.js` to use the forest green palette from `design.md`: `electric-lime` `#1e5e3a`, `near-black` `#0f1a15`, `warm-cream` `#f4f3ed`, `stone` `#dfdfd6`, `graphite` `#3f4e45`, and `charcoal` `#0b1611` (AI)
+- [x] Adjust filled CTA buttons text to `text-white` to meet WCAG contrast requirements on the new forest green background (AI)
+- [x] Refine secondary button component (`secondary-button.blade.php`) to a soft-filled borderless style (`bg-stone/50 border-transparent`) (AI)
+- [x] Remove hover outlines (`hover:border-near-black`) from back buttons in `guest.blade.php` and `detail.blade.php` (AI)
+- [x] Re-style Google login/register buttons in `auth/login.blade.php` and `auth/register.blade.php` to borderless soft-filled style (`bg-stone/50 border-transparent`) (AI)
+- [x] Standardize all UI text, notifications, alerts, and navigation menus to English (AI)
+- [x] Refine FAQ card design in `welcome.blade.php` by removing card borders, adding scale hover effect, and coloring chevrons to forest green `text-electric-lime` (AI)
+- [x] Verify navbar and footer contain the clean text-only logo "Kelana" without outlines or icons (AI)
+- [x] Reposition Back button to the top-left in `layouts/guest.blade.php` (AI)
+- [x] Relocate and enlarge "Kelana" branding logo above the login/register form content in `layouts/guest.blade.php` (AI)
+- [x] Replace the airplane wing sunset image with a misty mountain landscape image and remove the text overlay completely in `layouts/guest.blade.php` (AI)
+- [x] Remove the copyright footer text completely from `layouts/guest.blade.php` for a clean minimalist aesthetic (AI)
+- [x] Upgrade detail page image gallery slider in `publik/detail.blade.php` to use a hardware-accelerated horizontal translation sliding track (with custom cubic-bezier ease-out transition timing) for premium, fluid slider animations (AI)
+- [x] De-wrap all panels in the left column on the product details page (`publik/detail.blade.php`), keeping only the booking form card wrapped on the right side (AI)
+- [x] Implement the flat Overview section on details page including a styled circular attributes key-value grid (Trip Length, Group Size, Experience Type, Languages) (AI)
+- [x] Configure section dividing lines (`border-t border-stone/50`) between flat sections in details page left column (AI)
+
+
