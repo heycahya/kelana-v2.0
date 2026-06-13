@@ -1,83 +1,84 @@
-# 🤝 Handoff Document - Kelana v2.0
-**Features:** UI/UX Refinements (Forest Green Nature Theme, Minimalist Brand Layout, Slide Track, De-wrapped Details)
-**Issue References:** #36, #37, #38, #39
-**Branch:** `feature/ui-refinements-and-color-theme`
+# 🤝 Handoff & Progress Document - Kelana v2.0
+**Features:** Customer Wishlist & Cart Pop-up System with AJAX Hardening
+**Issue References:** #38
+**Branch:** `feature/wishlist-cart-issue-38`
 **Status:** Completed & Ready for Review ✅
 
 ---
 
-## 📋 Summary of Upgrades
+## 📋 Summary of Work & Progress
 
-We have successfully refined the user interface of Kelana v2.0 to move away from bright neon Travelperk tones to a organic, premium **nature forest-green visual identity** as requested by the user. Additionally, we completed layout de-wrapping and implemented a hardware-accelerated carousel slider.
+We have successfully implemented and polished the Customer Wishlist and Cart Pop-up System for Kelana v2.0. The system features a slide-over drawer for the wishlist and a center modal for pending orders (cart) built on top of Laravel and Alpine.js. 
 
-### 1. Organic Forest Green Theme Migration (`design.md`)
-Replaced the bright electric lime theme in `tailwind.config.js` with the nature-inspired organic palette:
--   **Primary Brand Green**: `#1e5e3a` (Lush Forest Green)
--   **Primary Typography/Heading**: `#0f1a15` (Deep Jungle Black)
--   **Page Ground Background**: `#f4f3ed` (Warm Cream sand/parchment)
--   **Soft Borders**: `#dfdfd6` (Soft Stone)
--   **Supporting Text**: `#3f4e45` (Deep Sage Charcoal)
--   **Dark Card Background**: `#0b1611` (Midnight Forest)
-*Accessibility adjustment:* Adjusted all primary CTA buttons relying on `bg-electric-lime` from dark text (`text-near-black`) to white text (`text-white`) for high contrast readability under WCAG AA standards.
+We also hardened the AJAX state synchronization to handle network/database connection errors gracefully without breaking the UI.
 
-### 2. Authentication Screen Layout Overhaul (`layouts/guest.blade.php`)
--   **Left Navigation Focus**: Shifted the Back navigation button to the top-left corner to match direct eye-flow hierarchy.
--   **Enlarged Branding**: Placed a large typographic logo ("Kelana" at `text-4xl font-bold tracking-tight`) directly above the slot container, left-aligned right above the form headers.
--   **Sleek Media Split**: Removed the airplane wing sunset image and loaded a majestic misty mountain landscape (`https://images.unsplash.com/photo-1464822759023-fed622ff2c3b`). Deleted the text quotes and overlays entirely.
--   **Minimalist Aesthetic**: Removed the copyright footer string from the split-column bottom for a cleaner, modern interface.
+### 1. Wishlist Slide-Over Drawer
+*   **Trigger**: Linked to the Heart icon in the Customer Navbar.
+*   **Design**: Rendered on a Warm Cream (`#f4f3ed`) sliding panel that transitions smoothly from the right edge (`translate-x-full` to `translate-x-0`).
+*   **Dynamic Actions**:
+    *   Saves/unsaves catalog items instantly.
+    *   Replaces the heart status to a filled Lush Forest Green color dynamically using a global event system.
+    *   Removes items directly inside the drawer using a delete trash icon with real-time UI updates.
 
-### 3. Removal of Outline Buttons
--   Re-styled social login (Google sign-in/up) in `login.blade.php` and `register.blade.php` from outline frames to borderless soft-filled pills (`bg-stone/50 border-transparent text-near-black hover:bg-near-black hover:text-white`).
--   Stripped hover borders (`hover:border-near-black`) from all general Back button components to keep them completely borderless.
+### 2. Cart / Pending Booking Center Modal
+*   **Trigger**: Linked to the Shopping Bag icon in the Customer Navbar.
+*   **Design**: Centered overlay modal utilizing Flat aesthetics (no box shadows) and uniform `rounded-[26px]` corners.
+*   **Logic**:
+    *   **Empty State**: Displays a custom travel-bag illustration and a CTA redirecting back to catalog navigation if no pending order exists.
+    *   **Active State**: Displays the current `Holding Order` with itinerary departure, group participant count, total calculated cost, a primary "Lanjutkan Pembayaran" button (re-opens Midtrans Snap), and a secondary "Batalkan Pesanan" button (releases reserved seats and cancels the hold).
 
-### 4. Details Page Layout De-wrapping (`publik/detail.blade.php`)
--   **Clean Flat Panels**: Removed white card container boxes (`bg-parchment-card`, borders, padding) from the entire left content column (About, Itinerary, Guide profile, and Leaflet Maps). They sit directly on the warm cream sand page background.
--   *Note:* The right-hand column booking card remains wrapped inside a crisp white card surface to focus user transaction attention.
--   **Attributes Key-Value Grid**: Implemented a flat Overview section at the top featuring styled round circular icon tokens:
-    *   🕒 **Trip Length**: 3 Days 2 Nights
-    *   👥 **Group Size**: Up to 15 participants
-    *   🌍 **Experience Type**: Nature & Adventure Trip
-    *   💬 **Languages**: English & Indonesian
--   **Dividing Accents**: Configured horizontal section borders (`border-t border-stone/50 pt-8 mt-8`) to separate contents cleanly.
-
-### 5. Hardware-Accelerated Sliding Track Carousel
-### 6. Customer Dashboard Layout Refinement (`dashboard.blade.php`)
-- **Prominent Placement**: Repositioned the **"Tiket Aktif Anda"** and **"Riwayat Perjalanan"** panels to be directly below the Immersive Hero Section. They now sit before the Promo Slider, ensuring logged-in customers instantly see their upcoming/past travel details.
-
-### 7. Eloquent Model Relation Fallback (`app/Models/Pemesanan.php`)
-- **Relation Bugfix**: Added the `jadwal()` relationship to the `Pemesanan` model to mirror `jadwalTrip()`. This resolves runtime errors where the route controller/views invoked `$trip->jadwal` instead of `$trip->jadwalTrip`, preventing filtered collections from returning empty or throwing relationship exceptions.
-
-### 8. Automated Homepage Redirects (`app/Http/Controllers/KatalogWebController.php`)
-- **Seamless Flow**: Implemented checking hooks in the root url route `/` index action. Logged-in users are automatically routed to their dashboards (e.g. `/dashboard` for Customers) instead of standard landing page layouts, making sure digital tickets are always accessible.
-
-### 9. Customer Bookings Database Seeding (`database/seeders/PemesananSeeder.php`)
-- **Populated View Testing**: Created a dedicated `PemesananSeeder` which populates the database with 1 active paid trip (Bromo Midnight) and 1 past completed trip (Pulau Komodo) for the seeded customer Budi Santoso (`budi.santoso@kelana.com`). Registered this seeder inside `DatabaseSeeder.php`.
+### 3. AJAX State Hardening (Connection Refused Fix)
+*   **The Problem**: If the local database is down (e.g., `SQLSTATE[HY000] [2002] MySQL connection refused`), Laravel throws a 500 error. The AJAX handlers parsed this JSON/HTML exception payload directly and populated `this.cartItem` as a truthy object, causing the cart modal to display `undefined Pax` and `Rp NaN`.
+*   **The Fix**:
+    *   Ensured the API responses are validated using `res.ok` before attempting JSON translation.
+    *   Verified that the parsed payload contains valid properties (e.g., `id_pemesanan` for the Cart) before assigning the state.
+    *   Hardened catch blocks to fallback gracefully to `null`/empty values.
 
 ---
 
 ## 🛠️ File Changes List
 
-*   **`app_build/app/Models/Pemesanan.php`** — Added `jadwal()` relationship fallback.
-*   **`app_build/app/Http/Controllers/KatalogWebController.php`** — Implemented auth checks and dashboard redirects on index route.
-*   **`app_build/resources/views/dashboard.blade.php`** — Moved Tiket Aktif & Riwayat sections right below the Hero.
-*   **`app_build/database/seeders/PemesananSeeder.php`** — Seeder file for customer tickets/history.
-*   **`app_build/database/seeders/DatabaseSeeder.php`** — Called the new `PemesananSeeder`.
-*   **`tailwind.config.js`** — Color palette custom property definitions.
-*   **`resources/views/components/primary-button.blade.php`** — Text contrast adjustment.
-*   **`resources/views/components/navbar.blade.php`** — Text color on CTA buttons.
-*   **`resources/views/layouts/guest.blade.php`** — Layout modifications, image source, text overlay and footer cleanup, and Back button repositioning.
-*   **`resources/views/publik/detail.blade.php`** — Flat layout conversion, overview grid implementation, back button hover refinement, and sliding carousel animation track.
-*   **`resources/views/welcome.blade.php`** — Value prop icon color updates, FAQ borderless design, and hover scaling.
-*   **`production_artifacts/STATE.md`** — Updated task checklist logs.
+*   **`app_build/app/Http/Controllers/Customer/WishlistWebController.php`**
+    *   Manages listing, adding, and removing wishlist records mapped to the authenticated customer database.
+*   **`app_build/app/Http/Controllers/Customer/CartWebController.php`**
+    *   Serves the latest `PENDING` booking hold as the customer's cart, and processes cancellations (restores schedule capacity and marks payment as `FAILED`).
+*   **`app_build/resources/views/components/customer-wishlist-cart.blade.php`**
+    *   The core Alpine.js-powered wrapper containing the Wishlist Drawer and Cart Modal HTML overlays and AJAX synchronization routines.
+*   **`app_build/resources/views/components/navbar.blade.php`**
+    *   Integrates interactive Wishlist and Cart trigger actions, badge counters, and checks.
+*   **`app_build/resources/views/welcome.blade.php`** & **`dashboard.blade.php`**
+    *   Integrated card-level heart click triggers and includes the global drawer/modal component template.
+*   **`app_build/resources/views/publik/detail.blade.php`**
+    *   Integrated dynamic wishlist toggling on the main slider photo area.
+*   **`app_build/routes/web.php`**
+    *   Configured web endpoints for wishlist and cart actions under the `'auth:customer'` guard.
+*   **`production_artifacts/STATE.md`** & **`production_artifacts/handoff.md`**
+    *   Updated logs and checklists.
 
 ---
 
-## 🧠 Brainstorming Points for AI Orchestra / Senior Devs
+## 🧪 Skenario Pengujian untuk User (Testing Guide)
 
-1.  **Dashboard Route Optimization**:
-    *   Currently, the `/dashboard` route is shared between Admin, Trip Leader, and Customer roles. If Admin/Trip Leader access `/dashboard`, they get standard Breeze layouts, while Customer gets the custom TripAdvisor design. Keep this separation as roles expand.
-2.  **Seeded Booking Expiry Dates**:
-    *   The active booking is seeded relative to the current timestamp (`Carbon::now()->addDays(7)` via `JadwalTripSeeder`). Ensure any dynamic validations (like `after_or_equal`) are seeded using standard Carbon helpers to keep them fresh.
-3.  **Tailwind JIT Class Compilation**:
-    *   The arbitrary transition timing `ease-[cubic-bezier(0.16,1,0.3,1)]` and custom duration `duration-[600ms]` require tailwind compilation. Ensure asset builders run `npm run build` consistently to pack these classes.
+Silakan jalankan langkah-langkah berikut untuk menguji fitur Wishlist dan Cart:
 
+1.  **Jalankan Lingkungan Lokal**:
+    *   Jalankan server: `php artisan serve`
+    *   Kompilasi aset CSS: `npm run dev`
+2.  **Masuk Aplikasi**:
+    *   Login ke URL `/login` menggunakan akun Customer default:
+        *   **Email**: `budi.santoso@kelana.com`
+        *   **Password**: `password`
+3.  **Uji Fitur Wishlist (Slide-over Drawer)**:
+    *   Klik **ikon Hati** di Navbar kanan. Pastikan laci meluncur halus dengan latar redup.
+    *   Tutup laci, lalu klik **tombol Hati** di kartu katalog (Halaman Utama / Detail). Ikon hati akan berubah menjadi hijau pekat (`#1e5e3a`).
+    *   Buka kembali laci Wishlist; pastikan item tersebut terdaftar di dalam laci.
+    *   Klik ikon **Tempat Sampah** di dalam laci. Item akan terhapus seketika, dan ikon hati di katalog akan kembali kosong.
+4.  **Uji Fitur Cart (Center Modal)**:
+    *   Pergi ke halaman detail paket trip, pilih jadwal, lalu klik **"Book Now"**.
+    *   Tutup pop-up snap Midtrans tanpa membayar (pesanan tersimpan dalam status `PENDING` / Hold).
+    *   Klik **ikon Tas Belanja** di Navbar. Modal "Keranjang Pemesanan" akan terbuka di tengah layar.
+    *   Pastikan detail pesanan (*paket*, *keberangkatan*, *jumlah peserta*, dan *total harga*) tampil sempurna.
+    *   Klik **"Lanjutkan Pembayaran"** untuk menyelesaikan transaksi, atau **"Batalkan Pesanan"** untuk mengosongkan keranjang (kuota trip otomatis dikembalikan).
+5.  **Uji Batas Toleransi Kesalahan (Robustness Test)**:
+    *   Matikan database MySQL Anda (Laragon/XAMPP).
+    *   Buka keranjang belanja. Keranjang harus mendeteksi respons error, menolak memprosesnya sebagai data valid, dan menampilkan **"Keranjang Anda masih kosong"** (Empty State) alih-alih menampilkan *undefined Pax / Rp NaN*.
