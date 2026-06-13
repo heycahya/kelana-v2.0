@@ -25,6 +25,9 @@ class PemesananController extends Controller
         $validator = Validator::make($request->all(), [
             'id_jadwal' => 'required|exists:jadwal_trip,id_jadwal',
             'jumlah_peserta' => 'required|integer|min:1',
+            'addons' => 'nullable|array',
+            'addons.*.id' => 'required|exists:add_ons,id',
+            'addons.*.kuantitas' => 'required|integer|min:1',
         ], [
             'id_jadwal.required' => 'ID jadwal trip wajib diisi.',
             'id_jadwal.exists' => 'Jadwal trip yang dipilih tidak valid atau tidak ditemukan.',
@@ -83,6 +86,23 @@ class PemesananController extends Controller
             // Kalkulasi: total_harga = jumlah_peserta * harga paket_wisata
             $total_harga = $request->jumlah_peserta * $paket->harga;
 
+            $total_biaya_addons = 0;
+            $addons_data = [];
+            if ($request->has('addons') && is_array($request->addons)) {
+                foreach ($request->addons as $addon_req) {
+                    $addon = \App\Models\AddOn::find($addon_req['id']);
+                    if ($addon) {
+                        $qty = (int) $addon_req['kuantitas'];
+                        $subtotal = $addon->harga * $qty;
+                        $total_biaya_addons += $subtotal;
+                        $addons_data[$addon->id] = [
+                            'kuantitas' => $qty,
+                            'subtotal' => $subtotal
+                        ];
+                    }
+                }
+            }
+
             // Generate booking_code unik (contoh: TRIP-YYYYMMDD-XXXX)
             $today = date('Ymd');
             do {
@@ -98,14 +118,22 @@ class PemesananController extends Controller
                 'tgl_pemesanan' => now(),
                 'jumlah_peserta' => $request->jumlah_peserta,
                 'total_harga' => $total_harga,
+                'total_biaya_addons' => $total_biaya_addons,
                 'status_pembayaran' => 'PENDING',
                 'attendance_status' => 'belum_hadir',
             ]);
 
+            // Save pivot addons
+            if (!empty($addons_data)) {
+                $pemesanan->addOns()->attach($addons_data);
+            }
+
+            $gross_amount = $total_harga + $total_biaya_addons;
+
             // Insert ke tabel 'pembayaran' (id_pemesanan, jumlah_bayar = total_harga)
             $pembayaran = Pembayaran::create([
                 'id_pemesanan' => $pemesanan->id_pemesanan,
-                'jumlah_bayar' => $total_harga,
+                'jumlah_bayar' => $gross_amount,
             ]);
 
             // Integrasi Midtrans: Konfigurasi Sandbox
@@ -119,7 +147,7 @@ class PemesananController extends Controller
             $params = [
                 'transaction_details' => [
                     'order_id' => $booking_code,
-                    'gross_amount' => (int) $total_harga,
+                    'gross_amount' => (int) $gross_amount,
                 ],
                 'customer_details' => [
                     'first_name' => $customer->nama_customer,

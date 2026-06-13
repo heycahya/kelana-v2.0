@@ -147,6 +147,18 @@
                     
                     <!-- Main Viewport -->
                     <div class="relative h-[300px] md:h-[450px] w-full rounded-[26px] overflow-hidden border border-stone bg-stone/10">
+                        <!-- Wishlist Heart Button -->
+                        <button class="absolute top-4 left-4 bg-white/90 backdrop-blur-md hover:bg-white rounded-full p-2.5 transition z-20 focus:outline-none" 
+                                x-data="{ isSaved: false }"
+                                @wishlist-loaded.window="isSaved = $event.detail.some(item => item.paket_wisata_id == {{ $paket->id_paket }})"
+                                :class="isSaved ? 'text-[#1e5e3a]' : 'text-near-black'"
+                                aria-label="Add to Wishlist" 
+                                @click.prevent="$dispatch('toggle-wishlist-global', { id: {{ $paket->id_paket }} })">
+                            <svg class="w-5 h-5" :fill="isSaved ? 'currentColor' : 'none'" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"></path>
+                            </svg>
+                        </button>
+                        
                         <!-- Sliding Track -->
                         <div class="flex h-full w-full transition-transform duration-[600ms] ease-[cubic-bezier(0.16,1,0.3,1)]"
                              :style="`transform: translateX(-${activeSlide * 100}%)`">
@@ -250,7 +262,7 @@
                 <!-- Profil Trip Leader -->
                 @if($leader)
                 <div class="border-t border-stone/50 pt-8 mt-8">
-                    <h4 class="text-lg font-bold text-near-black mb-6 tracking-tight">Your Trip Guide</h4>
+                    <h4 class="text-lg font-bold text-near-black mb-6 tracking-tight">Kelana Certified Trip Leader</h4>
                     <div class="flex flex-col sm:flex-row items-center sm:items-start gap-6">
                         <img src="{{ $leader->avatar ?? 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=150&q=80' }}" 
                              class="w-24 h-24 rounded-full object-cover border border-stone shrink-0" 
@@ -259,7 +271,7 @@
                             <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-2">
                                 <h3 class="text-xl font-medium text-near-black">{{ $leader->nama_leader }}</h3>
                                 <span class="px-3 py-1 rounded-full bg-electric-lime/20 text-near-black text-xs font-bold w-fit mx-auto sm:mx-0">
-                                    ⭐ {{ number_format($leader->rating_akumulatif ?? 5.0, 1) }} Certified Guide
+                                    ⭐ {{ number_format($leader->rating_akumulatif ?? 5.0, 1) }} Kelana Certified Trip Leader
                                 </span>
                             </div>
                             <p class="text-graphite leading-relaxed text-sm font-medium mb-4">

@@ -13,7 +13,7 @@ class PaketWisataSeeder extends Seeder
             [
                 'nama_paket' => 'Eksplorasi Bromo Midnight Premium',
                 'harga' => 350000,
-                'deskripsi' => 'Saksikan magisnya matahari terbit dari Penanjakan 1, dilanjutkan petualangan menggunakan Jeep 4x4 melintasi Lautan Pasir dan Kawah Bromo. Paket ini sudah termasuk fotografer profesional.',
+                'deskripsi' => 'Saksikan magisnya matahari terbit dari Penanjakan 1, dilanjutkan petualangan menggunakan Jeep 4x4 melintasi Lautan Pasir dan Kawah Bromo. Produk Eksklusif Kelana ini menjamin kenyamanan maksimal dan petualangan premium bersama fotografer profesional kami.',
                 'rute' => 'Probolinggo, Jawa Timur',
                 'fasilitas' => 'Jeep 4x4, Tiket Masuk Bromo, Fotografer Profesional, Air Mineral',
                 'latitude' => '-7.942493',
@@ -29,7 +29,7 @@ class PaketWisataSeeder extends Seeder
             [
                 'nama_paket' => 'Sailing Pulau Komodo 3D2N Luxury',
                 'harga' => 2500000,
-                'deskripsi' => 'Nikmati pelayaran mewah menggunakan kapal Phinisi. Kunjungi Pulau Padar, Pink Beach, dan temukan langsung habitat asli naga Komodo dengan fasilitas premium kelas satu.',
+                'deskripsi' => 'Nikmati pelayaran mewah menggunakan kapal Phinisi. Kunjungi Pulau Padar, Pink Beach, dan temukan langsung habitat asli naga Komodo. Sebagai Produk Eksklusif Kelana, rasakan kenyamanan bertaraf tinggi dengan layanan prima yang tak tertandingi.',
                 'rute' => 'Labuan Bajo, NTT',
                 'fasilitas' => 'Kapal Phinisi Luxury, Porter & Local Guide, Makan 3x Sehari, Tiket Taman Nasional',
                 'latitude' => '-8.625619',
@@ -45,7 +45,7 @@ class PaketWisataSeeder extends Seeder
             [
                 'nama_paket' => 'Pendakian Rinjani Jalur Sembalun',
                 'harga' => 1800000,
-                'deskripsi' => 'Taklukkan gunung berapi tertinggi kedua di Indonesia. Fasilitas porter, makan bergizi 3x sehari, dan tenda premium memastikan kenyamanan pendakian Anda menuju puncak Anjani.',
+                'deskripsi' => 'Taklukkan gunung berapi tertinggi kedua di Indonesia. Sebagai Produk Eksklusif Kelana, fasilitas porter pribadi, peralatan berkemah premium, serta sajian bergizi tiga kali sehari dirancang khusus untuk menjamin kenyamanan petualangan Anda.',
                 'rute' => 'Lombok, NTB',
                 'fasilitas' => 'Porter & Guide, Peralatan Camping Premium, Makan 3x Sehari, Tiket TNGR',
                 'latitude' => '-8.411634',
@@ -61,7 +61,7 @@ class PaketWisataSeeder extends Seeder
             [
                 'nama_paket' => 'Blue Fire Kawah Ijen & Baluran',
                 'harga' => 650000,
-                'deskripsi' => 'Saksikan fenomena langka api biru Kawah Ijen di dini hari, dilanjutkan dengan safari ala Afrika di Taman Nasional Baluran. Paket lengkap dengan transportasi AC.',
+                'deskripsi' => 'Saksikan fenomena langka api biru Kawah Ijen di dini hari, dilanjutkan dengan safari ala Afrika di Taman Nasional Baluran. Produk Eksklusif Kelana ini dilengkapi transportasi AC eksklusif dan pemandu bersertifikat kami.',
                 'rute' => 'Banyuwangi, Jawa Timur',
                 'fasilitas' => 'Transportasi AC, Tiket Masuk Kawah Ijen & Baluran, Masker Gas, Local Guide',
                 'latitude' => '-8.058564',
@@ -77,7 +77,7 @@ class PaketWisataSeeder extends Seeder
             [
                 'nama_paket' => 'Pendakian Gunung Semeru Mahameru',
                 'harga' => 1200000,
-                'deskripsi' => 'Taklukkan atap Pulau Jawa. Nikmati keindahan Danau Ranu Kumbolo di pagi hari dan saksikan matahari terbit yang spektakuler dari puncak Mahameru 3.676 mdpl.',
+                'deskripsi' => 'Jelajahi atap Pulau Jawa bersama Kelana. Nikmati keindahan Danau Ranu Kumbolo di pagi hari dan saksikan matahari terbit spektakuler dari puncak Mahameru. Produk Eksklusif Kelana ini dirancang dengan standar keselamatan tertinggi.',
                 'rute' => 'Lumajang, Jawa Timur',
                 'fasilitas' => 'Simaksi, Porter Kelompok, Tenda Premium, Makan 3x Sehari, Jeep Tumpang-Ranupane PP',
                 'latitude' => '-8.1082462',
@@ -89,7 +89,7 @@ class PaketWisataSeeder extends Seeder
             [
                 'nama_paket' => 'Caving Jomblang & Pantai Gunungkidul',
                 'harga' => 680000,
-                'deskripsi' => 'Petualangan menyusuri gua vertikal Jomblang untuk melihat "Cahaya Surga" yang menembus celah gua, dilanjutkan dengan santai menikmati sore di Pantai Indrayanti.',
+                'deskripsi' => 'Petualangan menantang menyusuri gua vertikal Jomblang untuk melihat fenomena Cahaya Surga yang menembus celah gua. Produk Eksklusif Kelana ini memadukan petualangan gua ekstrem dengan relaksasi pantai tropis yang memukau.',
                 'rute' => 'Gunungkidul, Yogyakarta',
                 'fasilitas' => 'Alat Caving Lengkap, Instruktur Bersertifikat, Makan Siang Lokal, Transport PP Yogyakarta',
                 'latitude' => '-8.0282462',
@@ -101,7 +101,7 @@ class PaketWisataSeeder extends Seeder
             [
                 'nama_paket' => 'Snorkeling Manta & Nusa Penida Escape',
                 'harga' => 950000,
-                'deskripsi' => 'Berenang bersama ikan Pari Manta di Manta Point, kunjungi Kelingking Beach yang ikonik, dan nikmati momen matahari terbenam paling indah di Crystal Bay.',
+                'deskripsi' => 'Berenang bersama ikan Pari Manta di Manta Point, kunjungi Kelingking Beach yang legendaris, dan nikmati matahari terbenam di Crystal Bay. Nikmati keindahan bawah laut Bali melalui Produk Eksklusif Kelana ini.',
                 'rute' => 'Nusa Penida, Bali',
                 'fasilitas' => 'Fastboat PP Sanur, Alat Snorkeling Lengkap, Pemandu Snorkeling, Makan Siang di Resto Pantai',
                 'latitude' => '-8.7262462',
@@ -114,7 +114,7 @@ class PaketWisataSeeder extends Seeder
             [
                 'nama_paket' => 'Trekking Rain Forest & Orangutan Bukit Lawang',
                 'harga' => 1400000,
-                'deskripsi' => 'Petualangan trekking menembus hutan hujan tropis Taman Nasional Gunung Leuser untuk melihat langsung Orangutan Sumatra di habitat aslinya. Termasuk rafting tradisional menyusuri sungai.',
+                'deskripsi' => 'Petualangan trekking menembus hutan hujan tropis Taman Nasional Gunung Leuser untuk melihat langsung Orangutan Sumatra di habitat aslinya. Produk Eksklusif Kelana ini dilengkapi arung jeram tradisional yang seru.',
                 'rute' => 'Langkat, Sumatra Utara',
                 'fasilitas' => 'Pemandu Ranger Taman Nasional, Izin Masuk TNGL, Makan Siang Hutan, Rafting Ban PP',
                 'latitude' => '3.5512462',
@@ -127,7 +127,7 @@ class PaketWisataSeeder extends Seeder
             [
                 'nama_paket' => 'Rafting Arung Jeram Sungai Serayu',
                 'harga' => 450000,
-                'deskripsi' => 'Taklukkan jeram-jeram menantang kelas III-IV di Sungai Serayu sepanjang 14 KM. Dipandu oleh skipper profesional untuk petualangan air yang aman dan seru.',
+                'deskripsi' => 'Taklukkan jeram-jeram menantang kelas III-IV di Sungai Serayu sepanjang 14 KM. Dipandu oleh skipper bersertifikat nasional, Produk Eksklusif Kelana ini memberikan pengalaman arung jeram yang aman dan memacu adrenalin.',
                 'rute' => 'Banjarnegara, Jawa Tengah',
                 'fasilitas' => 'Perahu Karet & Helm, Instruktur Skipper PP, Makan Siang Tradisional, Kelapa Muda',
                 'latitude' => '-7.3912462',
@@ -139,7 +139,7 @@ class PaketWisataSeeder extends Seeder
             [
                 'nama_paket' => 'Pendakian Gunung Merbabu Selo 2D1N',
                 'harga' => 750000,
-                'deskripsi' => 'Nikmati indahnya sabana hijau Merbabu yang luas dan pemandangan Gunung Merapi yang gagah dari kejauhan sepanjang jalur pendakian via Selo.',
+                'deskripsi' => 'Nikmati indahnya sabana hijau Merbabu yang luas dan pemandangan Gunung Merapi yang gagah sepanjang jalur pendakian via Selo. Nikmati keindahan alam Jawa Tengah melalui Produk Eksklusif Kelana ini.',
                 'rute' => 'Boyolali, Jawa Tengah',
                 'fasilitas' => 'Tiket Masuk Simaksi, Porter Kelompok, Alat Camping Lengkap, Makan Hangat 3x',
                 'latitude' => '-7.4412462',

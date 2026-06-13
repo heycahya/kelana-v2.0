@@ -2,10 +2,18 @@
 
 ## Current Status
 - **Phase**: PHASE 4: REVIEW GATE
-- **Feature**: Implementasi Sistem Pop-up Wishlist & Cart Keranjang (Customer Flow) (Issue #38)
+- **Feature**: Rombak Total Enterprise Checkout Flow & Perbaikan Data Sistem (Issue #40)
 - **Status**: Completed & Ready for Review ✅
 
 ## Tasks Checklist
+- [x] Add E-Ticket PDF download functionality (laravel-dompdf) with a printable custom ticket view featuring a dynamic scanable QR code (AI)
+- [x] Refine booking view UI to look highly custom and SaaS-premium, removing the special request card, styling add-ons as grid option cards, and binding stepper progress to payment states (AI)
+- [x] Fix login page type restriction by changing email input type to text in auth/login.blade.php (AI)
+- [x] Overhaul booking view customer/booking.blade.php with wide layout, progress stepper, split cols, details/addons/notes card, and sticky calculations card (AI)
+- [x] Support booking add-ons validation, calculation, and pivot records in BookingWebController and PemesananController (AI)
+- [x] Update Midtrans gross amount calculation to include total add-ons cost in BookingWebController and PemesananController (AI)
+- [x] Rebrand "Your Trip Guide" and "Certified Guide" labels to "Kelana Certified Trip Leader" in publik/detail.blade.php (AI)
+- [x] Refactor data dummy seeder for PaketWisataSeeder and DatabaseSeeder with "Produk Eksklusif Kelana" copywriting and professional Trip Leader details (AI)
 - [x] Fix and harden fetchCart() and fetchWishlist() in customer-wishlist-cart component to gracefully handle network/server errors and database connection issues (AI)
 - [x] Create WishlistWebController and register GET, POST, and DELETE web routes under customer guard middleware (AI)
 - [x] Create CartWebController and register GET and DELETE web routes for active pending order/cart (AI)

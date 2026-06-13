@@ -53,9 +53,12 @@ class DatabaseSeeder extends Seeder
         TripLeader::updateOrCreate(
             ['email' => 'adi.wijaya@kelana.com'],
             [
-                'nama_leader' => 'Adi Wijaya',
+                'nama_leader' => 'Bima - Senior Guide Kelana',
                 'no_telp' => '089876543210',
-                'password' => Hash::make('PasswordLeader123!')
+                'password' => Hash::make('PasswordLeader123!'),
+                'avatar' => 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=150&q=80',
+                'bio' => 'Bima adalah Senior Guide Kelana bersertifikasi internasional dengan pengalaman lebih dari 8 tahun memandu pendakian gunung dan pelayaran ekspedisi di seluruh Nusantara.',
+                'rating_akumulatif' => 4.9
             ]
         );
 

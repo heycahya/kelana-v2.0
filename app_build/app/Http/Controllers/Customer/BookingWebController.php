@@ -20,8 +20,9 @@ class BookingWebController extends Controller
     {
         $jadwalId = $request->query('jadwal_id');
         $jadwal = JadwalTrip::with('paketWisata')->findOrFail($jadwalId);
+        $addons = \App\Models\AddOn::all();
 
-        return view('customer.booking', compact('jadwal'));
+        return view('customer.booking', compact('jadwal', 'addons'));
     }
 
     /**
@@ -32,6 +33,10 @@ class BookingWebController extends Controller
         $validator = Validator::make($request->all(), [
             'id_jadwal' => 'required|exists:jadwal_trip,id_jadwal',
             'jumlah_peserta' => 'required|integer|min:1',
+            'addons' => 'nullable|array',
+            'addons.*.id' => 'required|exists:add_ons,id',
+            'addons.*.kuantitas' => 'required|integer|min:1',
+            'special_request' => 'nullable|string',
         ]);
 
         if ($validator->fails()) {
@@ -65,6 +70,23 @@ class BookingWebController extends Controller
             $paket = $jadwal->paketWisata;
             $total_harga = $request->jumlah_peserta * $paket->harga;
 
+            $total_biaya_addons = 0;
+            $addons_data = [];
+            if ($request->has('addons') && is_array($request->addons)) {
+                foreach ($request->addons as $addon_req) {
+                    $addon = \App\Models\AddOn::find($addon_req['id']);
+                    if ($addon) {
+                        $qty = (int) $addon_req['kuantitas'];
+                        $subtotal = $addon->harga * $qty;
+                        $total_biaya_addons += $subtotal;
+                        $addons_data[$addon->id] = [
+                            'kuantitas' => $qty,
+                            'subtotal' => $subtotal
+                        ];
+                    }
+                }
+            }
+
             // Generate unique booking code
             $today = date('Ymd');
             do {
@@ -80,14 +102,22 @@ class BookingWebController extends Controller
                 'tgl_pemesanan' => now(),
                 'jumlah_peserta' => $request->jumlah_peserta,
                 'total_harga' => $total_harga,
+                'total_biaya_addons' => $total_biaya_addons,
                 'status_pembayaran' => 'PENDING',
                 'attendance_status' => 'belum_hadir',
             ]);
 
+            // Save pivot addons
+            if (!empty($addons_data)) {
+                $pemesanan->addOns()->attach($addons_data);
+            }
+
+            $gross_amount = $total_harga + $total_biaya_addons;
+
             // Create payment record
             $pembayaran = Pembayaran::create([
                 'id_pemesanan' => $pemesanan->id_pemesanan,
-                'jumlah_bayar' => $total_harga,
+                'jumlah_bayar' => $gross_amount,
             ]);
 
             // Configure Midtrans
@@ -101,7 +131,7 @@ class BookingWebController extends Controller
             $params = [
                 'transaction_details' => [
                     'order_id' => $booking_code,
-                    'gross_amount' => (int) $total_harga,
+                    'gross_amount' => (int) $gross_amount,
                 ],
                 'customer_details' => [
                     'first_name' => $customer->nama_customer,
@@ -153,5 +183,23 @@ class BookingWebController extends Controller
                 'message' => 'Terjadi kesalahan: ' . $e->getMessage()
             ], 500);
         }
+    }
+
+    /**
+     * Download E-Ticket as PDF.
+     */
+    public function downloadTicketPdf(string $booking_code)
+    {
+        $pesanan = Pemesanan::with(['jadwal.paketWisata', 'jadwal.tripLeader', 'customer', 'addOns'])
+            ->where('booking_code', $booking_code)
+            ->where('id_customer', auth()->id())
+            ->firstOrFail();
+
+        if ($pesanan->status_pembayaran !== 'PAID') {
+            abort(403, 'Ticket is not paid yet.');
+        }
+
+        $pdf = \Barryvdh\DomPDF\Facade\Pdf::loadView('pdf.tiket-digital', compact('pesanan'));
+        return $pdf->download("e-ticket-{$booking_code}.pdf");
     }
 }

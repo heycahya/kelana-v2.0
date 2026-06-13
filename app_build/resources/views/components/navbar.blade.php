@@ -1,5 +1,5 @@
 <!-- Premium Navigation Bar -->
-<nav class="w-full bg-warm-cream border-b border-stone sticky top-0 z-50">
+<nav x-data="wishlistCartData()" class="w-full bg-warm-cream border-b border-stone sticky top-0 z-50">
     <div class="max-w-[1400px] mx-auto px-6 py-5 flex justify-between items-center">
         <a href="/" class="text-2xl font-bold tracking-tight text-near-black flex items-center">
             Kelana
@@ -17,18 +17,19 @@
         <div class="flex items-center space-x-4">
             @if (Auth::guard('customer')->check())
                 <!-- Wishlist (Heart) -->
-                <a href="{{ route('dashboard') }}" class="text-graphite hover:text-electric-lime p-2 transition-colors relative" aria-label="Wishlist">
+                <a href="#" @click.prevent="isWishlistOpen = true" class="text-graphite hover:text-electric-lime p-2 transition-colors relative" aria-label="Wishlist">
                     <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"></path>
                     </svg>
-                    <span class="absolute top-1 right-1 w-2 h-2 bg-[#1e5e3a] rounded-full"></span>
+                    <span x-show="wishlistItems.length > 0" class="absolute -top-0.5 -right-0.5 min-w-5 h-5 flex items-center justify-center bg-[#1e5e3a] text-white rounded-full text-[9px] font-bold px-1" x-text="wishlistItems.length" style="display: none;"></span>
                 </a>
                 
                 <!-- Cart/Bookings -->
-                <a href="{{ route('dashboard') }}" class="text-graphite hover:text-electric-lime p-2 transition-colors" aria-label="Bookings">
+                <a href="#" @click.prevent="isCartOpen = true" class="text-graphite hover:text-electric-lime p-2 transition-colors relative" aria-label="Bookings">
                     <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"></path>
                     </svg>
+                    <span x-show="cartItem" class="absolute top-1.5 right-1.5 w-2.5 h-2.5 bg-[#1e5e3a] rounded-full" style="display: none;"></span>
                 </a>
 
                 <!-- Profile Dropdown -->
@@ -81,4 +82,7 @@
             @endif
         </div>
     </div>
+
+    <!-- Reusable Drawer & Modal components -->
+    @include('components.customer-wishlist-cart')
 </nav>

@@ -65,10 +65,20 @@ Route::middleware('auth:customer,admin,trip_leader')->group(function () {
 });
 
 use App\Http\Controllers\Customer\BookingWebController;
+use App\Http\Controllers\Customer\WishlistWebController;
+use App\Http\Controllers\Customer\CartWebController;
 
 Route::middleware('auth:customer')->group(function () {
     Route::get('/booking', [BookingWebController::class, 'create'])->name('customer.booking');
     Route::post('/booking', [BookingWebController::class, 'store'])->name('customer.booking.store');
+    Route::get('/booking/tiket/{booking_code}/pdf', [BookingWebController::class, 'downloadTicketPdf'])->name('customer.booking.ticket.pdf');
+    
+    Route::get('/wishlist', [WishlistWebController::class, 'index'])->name('customer.wishlist.index');
+    Route::post('/wishlist', [WishlistWebController::class, 'store'])->name('customer.wishlist.store');
+    Route::delete('/wishlist/{id}', [WishlistWebController::class, 'destroy'])->name('customer.wishlist.destroy');
+
+    Route::get('/cart', [CartWebController::class, 'index'])->name('customer.cart.index');
+    Route::delete('/cart/{id}', [CartWebController::class, 'destroy'])->name('customer.cart.destroy');
 });
 
 require __DIR__.'/auth.php';
