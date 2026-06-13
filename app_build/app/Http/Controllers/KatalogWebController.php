@@ -13,6 +13,16 @@ class KatalogWebController extends Controller
      */
     public function index()
     {
+        if (\Illuminate\Support\Facades\Auth::guard('customer')->check()) {
+            return redirect()->route('dashboard');
+        }
+        if (\Illuminate\Support\Facades\Auth::guard('admin')->check()) {
+            return redirect()->route('admin.dashboard');
+        }
+        if (\Illuminate\Support\Facades\Auth::guard('trip_leader')->check()) {
+            return redirect()->route('trip_leader.dashboard');
+        }
+
         $paketWisata = PaketWisata::all();
         return view('welcome', compact('paketWisata'));
     }

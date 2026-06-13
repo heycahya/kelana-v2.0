@@ -41,32 +41,43 @@ Replaced the bright electric lime theme in `tailwind.config.js` with the nature-
 -   **Dividing Accents**: Configured horizontal section borders (`border-t border-stone/50 pt-8 mt-8`) to separate contents cleanly.
 
 ### 5. Hardware-Accelerated Sliding Track Carousel
--   Replaced absolute fade layering inside the details image slider container with a continuous flex row track (`flex h-full w-full`).
--   Bound translation to index using `transform: translateX(-[activeSlide * 100]%)` running on a custom transition curve `transition-transform duration-[600ms] ease-[cubic-bezier(0.16,1,0.3,1)]`, ensuring smooth, responsive slider frames.
+### 6. Customer Dashboard Layout Refinement (`dashboard.blade.php`)
+- **Prominent Placement**: Repositioned the **"Tiket Aktif Anda"** and **"Riwayat Perjalanan"** panels to be directly below the Immersive Hero Section. They now sit before the Promo Slider, ensuring logged-in customers instantly see their upcoming/past travel details.
+
+### 7. Eloquent Model Relation Fallback (`app/Models/Pemesanan.php`)
+- **Relation Bugfix**: Added the `jadwal()` relationship to the `Pemesanan` model to mirror `jadwalTrip()`. This resolves runtime errors where the route controller/views invoked `$trip->jadwal` instead of `$trip->jadwalTrip`, preventing filtered collections from returning empty or throwing relationship exceptions.
+
+### 8. Automated Homepage Redirects (`app/Http/Controllers/KatalogWebController.php`)
+- **Seamless Flow**: Implemented checking hooks in the root url route `/` index action. Logged-in users are automatically routed to their dashboards (e.g. `/dashboard` for Customers) instead of standard landing page layouts, making sure digital tickets are always accessible.
+
+### 9. Customer Bookings Database Seeding (`database/seeders/PemesananSeeder.php`)
+- **Populated View Testing**: Created a dedicated `PemesananSeeder` which populates the database with 1 active paid trip (Bromo Midnight) and 1 past completed trip (Pulau Komodo) for the seeded customer Budi Santoso (`budi.santoso@kelana.com`). Registered this seeder inside `DatabaseSeeder.php`.
 
 ---
 
 ## 🛠️ File Changes List
 
+*   **`app_build/app/Models/Pemesanan.php`** — Added `jadwal()` relationship fallback.
+*   **`app_build/app/Http/Controllers/KatalogWebController.php`** — Implemented auth checks and dashboard redirects on index route.
+*   **`app_build/resources/views/dashboard.blade.php`** — Moved Tiket Aktif & Riwayat sections right below the Hero.
+*   **`app_build/database/seeders/PemesananSeeder.php`** — Seeder file for customer tickets/history.
+*   **`app_build/database/seeders/DatabaseSeeder.php`** — Called the new `PemesananSeeder`.
 *   **`tailwind.config.js`** — Color palette custom property definitions.
 *   **`resources/views/components/primary-button.blade.php`** — Text contrast adjustment.
 *   **`resources/views/components/navbar.blade.php`** — Text color on CTA buttons.
 *   **`resources/views/layouts/guest.blade.php`** — Layout modifications, image source, text overlay and footer cleanup, and Back button repositioning.
 *   **`resources/views/publik/detail.blade.php`** — Flat layout conversion, overview grid implementation, back button hover refinement, and sliding carousel animation track.
 *   **`resources/views/welcome.blade.php`** — Value prop icon color updates, FAQ borderless design, and hover scaling.
-*   **`resources/views/dashboard.blade.php`** — Dynamic badge and explore button contrast updates.
-*   **`resources/views/customer/booking.blade.php`** — Submit button text contrast.
-*   **`resources/views/auth/login.blade.php`** — Submit button text contrast and Google soft-filled design.
-*   **`resources/views/auth/register.blade.php`** — Submit button text contrast and Google soft-filled design.
 *   **`production_artifacts/STATE.md`** — Updated task checklist logs.
 
 ---
 
 ## 🧠 Brainstorming Points for AI Orchestra / Senior Devs
 
-1.  **Tailwind JIT Class Compilation**:
+1.  **Dashboard Route Optimization**:
+    *   Currently, the `/dashboard` route is shared between Admin, Trip Leader, and Customer roles. If Admin/Trip Leader access `/dashboard`, they get standard Breeze layouts, while Customer gets the custom TripAdvisor design. Keep this separation as roles expand.
+2.  **Seeded Booking Expiry Dates**:
+    *   The active booking is seeded relative to the current timestamp (`Carbon::now()->addDays(7)` via `JadwalTripSeeder`). Ensure any dynamic validations (like `after_or_equal`) are seeded using standard Carbon helpers to keep them fresh.
+3.  **Tailwind JIT Class Compilation**:
     *   The arbitrary transition timing `ease-[cubic-bezier(0.16,1,0.3,1)]` and custom duration `duration-[600ms]` require tailwind compilation. Ensure asset builders run `npm run build` consistently to pack these classes.
-2.  **Responsive Layout Scaling**:
-    *   Now that the left column is completely flat (transparent background), evaluate font size scaling on mobile screens to ensure the section dividers (`border-t border-stone/50`) do not crowd elements.
-3.  **Dynamic Slide Track Dimensions**:
-    *   Verify height ratios (`h-[300px] md:h-[450px]`) on the details image slider across ultra-wide desktop monitors to ensure the slide imagery remains properly cropped without visual stretch.
+

@@ -73,6 +73,81 @@ class PaketWisataSeeder extends Seeder
                     ['image_url' => 'https://images.unsplash.com/photo-1441974231531-c6227db76b6e?auto=format&fit=crop&w=400&q=80', 'is_primary' => false],
                     ['image_url' => 'https://images.unsplash.com/photo-1502082553048-f009c37129b9?auto=format&fit=crop&w=400&q=80', 'is_primary' => false],
                 ]
+            ],
+            [
+                'nama_paket' => 'Pendakian Gunung Semeru Mahameru',
+                'harga' => 1200000,
+                'deskripsi' => 'Taklukkan atap Pulau Jawa. Nikmati keindahan Danau Ranu Kumbolo di pagi hari dan saksikan matahari terbit yang spektakuler dari puncak Mahameru 3.676 mdpl.',
+                'rute' => 'Lumajang, Jawa Timur',
+                'fasilitas' => 'Simaksi, Porter Kelompok, Tenda Premium, Makan 3x Sehari, Jeep Tumpang-Ranupane PP',
+                'latitude' => '-8.1082462',
+                'longitude' => '112.922462',
+                'galleries' => [
+                    ['image_url' => 'https://images.unsplash.com/photo-1454496522488-7a8e488e8606?auto=format&fit=crop&w=800&q=80', 'is_primary' => true],
+                ]
+            ],
+            [
+                'nama_paket' => 'Caving Jomblang & Pantai Gunungkidul',
+                'harga' => 680000,
+                'deskripsi' => 'Petualangan menyusuri gua vertikal Jomblang untuk melihat "Cahaya Surga" yang menembus celah gua, dilanjutkan dengan santai menikmati sore di Pantai Indrayanti.',
+                'rute' => 'Gunungkidul, Yogyakarta',
+                'fasilitas' => 'Alat Caving Lengkap, Instruktur Bersertifikat, Makan Siang Lokal, Transport PP Yogyakarta',
+                'latitude' => '-8.0282462',
+                'longitude' => '110.642462',
+                'galleries' => [
+                    ['image_url' => 'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=800&q=80', 'is_primary' => true],
+                ]
+            ],
+            [
+                'nama_paket' => 'Snorkeling Manta & Nusa Penida Escape',
+                'harga' => 950000,
+                'deskripsi' => 'Berenang bersama ikan Pari Manta di Manta Point, kunjungi Kelingking Beach yang ikonik, dan nikmati momen matahari terbenam paling indah di Crystal Bay.',
+                'rute' => 'Nusa Penida, Bali',
+                'fasilitas' => 'Fastboat PP Sanur, Alat Snorkeling Lengkap, Pemandu Snorkeling, Makan Siang di Resto Pantai',
+                'latitude' => '-8.7262462',
+                'longitude' => '115.542462',
+                'galleries' => [
+                    ['image_url' => 'https://images.unsplash.com/photo-1506929562872-bb421503ef21?auto=format&fit=crop&w=800&q=80', 'is_primary' => true],
+                    ['image_url' => 'https://images.unsplash.com/photo-1516690561799-46d8f74f9abf?auto=format&fit=crop&w=400&q=80', 'is_primary' => false],
+                ]
+            ],
+            [
+                'nama_paket' => 'Trekking Rain Forest & Orangutan Bukit Lawang',
+                'harga' => 1400000,
+                'deskripsi' => 'Petualangan trekking menembus hutan hujan tropis Taman Nasional Gunung Leuser untuk melihat langsung Orangutan Sumatra di habitat aslinya. Termasuk rafting tradisional menyusuri sungai.',
+                'rute' => 'Langkat, Sumatra Utara',
+                'fasilitas' => 'Pemandu Ranger Taman Nasional, Izin Masuk TNGL, Makan Siang Hutan, Rafting Ban PP',
+                'latitude' => '3.5512462',
+                'longitude' => '98.132462',
+                'galleries' => [
+                    ['image_url' => 'https://images.unsplash.com/photo-1447752875215-b2761acb3c5d?auto=format&fit=crop&w=800&q=80', 'is_primary' => true],
+                    ['image_url' => 'https://images.unsplash.com/photo-1502082553048-f009c37129b9?auto=format&fit=crop&w=400&q=80', 'is_primary' => false],
+                ]
+            ],
+            [
+                'nama_paket' => 'Rafting Arung Jeram Sungai Serayu',
+                'harga' => 450000,
+                'deskripsi' => 'Taklukkan jeram-jeram menantang kelas III-IV di Sungai Serayu sepanjang 14 KM. Dipandu oleh skipper profesional untuk petualangan air yang aman dan seru.',
+                'rute' => 'Banjarnegara, Jawa Tengah',
+                'fasilitas' => 'Perahu Karet & Helm, Instruktur Skipper PP, Makan Siang Tradisional, Kelapa Muda',
+                'latitude' => '-7.3912462',
+                'longitude' => '109.682462',
+                'galleries' => [
+                    ['image_url' => 'https://images.unsplash.com/photo-1516690561799-46d8f74f9abf?auto=format&fit=crop&w=800&q=80', 'is_primary' => true],
+                ]
+            ],
+            [
+                'nama_paket' => 'Pendakian Gunung Merbabu Selo 2D1N',
+                'harga' => 750000,
+                'deskripsi' => 'Nikmati indahnya sabana hijau Merbabu yang luas dan pemandangan Gunung Merapi yang gagah dari kejauhan sepanjang jalur pendakian via Selo.',
+                'rute' => 'Boyolali, Jawa Tengah',
+                'fasilitas' => 'Tiket Masuk Simaksi, Porter Kelompok, Alat Camping Lengkap, Makan Hangat 3x',
+                'latitude' => '-7.4412462',
+                'longitude' => '110.432462',
+                'galleries' => [
+                    ['image_url' => 'https://images.unsplash.com/photo-1522199755839-a2bacb67c546?auto=format&fit=crop&w=800&q=80', 'is_primary' => true],
+                    ['image_url' => 'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=400&q=80', 'is_primary' => false],
+                ]
             ]
         ];
 

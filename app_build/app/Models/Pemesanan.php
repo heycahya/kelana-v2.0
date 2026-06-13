@@ -31,6 +31,11 @@ class Pemesanan extends Model
         return $this->belongsTo(JadwalTrip::class, 'id_jadwal', 'id_jadwal');
     }
 
+    public function jadwal()
+    {
+        return $this->belongsTo(JadwalTrip::class, 'id_jadwal', 'id_jadwal');
+    }
+
     public function pembayaran()
     {
         return $this->hasOne(Pembayaran::class, 'id_pemesanan', 'id_pemesanan');

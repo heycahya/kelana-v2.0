@@ -40,10 +40,13 @@ Route::get('/dashboard', function () {
         return $jadwal && ($jadwal->tanggal_mulai < $today || $jadwal->status_trip === 'Selesai');
     });
 
+    $paketWisata = \App\Models\PaketWisata::all();
+
     return view('dashboard', [
         'role' => 'Customer',
         'activeTrips' => $activeTrips,
-        'pastTrips' => $pastTrips
+        'pastTrips' => $pastTrips,
+        'paketWisata' => $paketWisata
     ]);
 })->middleware(['auth:customer,admin,trip_leader'])->name('dashboard');
 

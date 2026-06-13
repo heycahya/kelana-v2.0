@@ -82,5 +82,90 @@ class JadwalTripSeeder extends Seeder
                 ]
             );
         }
+
+        // New packages schedules
+        $paketSemeru = PaketWisata::where('nama_paket', 'Pendakian Gunung Semeru Mahameru')->first();
+        if ($paketSemeru) {
+            JadwalTrip::updateOrCreate(
+                ['id_paket' => $paketSemeru->id_paket, 'tanggal_mulai' => Carbon::now()->addDays(5)->format('Y-m-d')],
+                [
+                    'id_leader' => $leaderId,
+                    'tanggal_selesai' => Carbon::now()->addDays(8)->format('Y-m-d'),
+                    'kuota' => 10,
+                    'sisa_kuota' => 8,
+                    'status_trip' => 'Open'
+                ]
+            );
+        }
+
+        $paketJomblang = PaketWisata::where('nama_paket', 'Caving Jomblang & Pantai Gunungkidul')->first();
+        if ($paketJomblang) {
+            JadwalTrip::updateOrCreate(
+                ['id_paket' => $paketJomblang->id_paket, 'tanggal_mulai' => Carbon::now()->addDays(18)->format('Y-m-d')],
+                [
+                    'id_leader' => $leaderId,
+                    'tanggal_selesai' => Carbon::now()->addDays(18)->format('Y-m-d'),
+                    'kuota' => 8,
+                    'sisa_kuota' => 5,
+                    'status_trip' => 'Open'
+                ]
+            );
+        }
+
+        $paketPenida = PaketWisata::where('nama_paket', 'Snorkeling Manta & Nusa Penida Escape')->first();
+        if ($paketPenida) {
+            JadwalTrip::updateOrCreate(
+                ['id_paket' => $paketPenida->id_paket, 'tanggal_mulai' => Carbon::now()->addDays(12)->format('Y-m-d')],
+                [
+                    'id_leader' => $leaderId,
+                    'tanggal_selesai' => Carbon::now()->addDays(12)->format('Y-m-d'),
+                    'kuota' => 15,
+                    'sisa_kuota' => 12,
+                    'status_trip' => 'Open'
+                ]
+            );
+        }
+
+        $paketBukitLawang = PaketWisata::where('nama_paket', 'Trekking Rain Forest & Orangutan Bukit Lawang')->first();
+        if ($paketBukitLawang) {
+            JadwalTrip::updateOrCreate(
+                ['id_paket' => $paketBukitLawang->id_paket, 'tanggal_mulai' => Carbon::now()->addDays(25)->format('Y-m-d')],
+                [
+                    'id_leader' => $leaderId,
+                    'tanggal_selesai' => Carbon::now()->addDays(28)->format('Y-m-d'),
+                    'kuota' => 10,
+                    'sisa_kuota' => 6,
+                    'status_trip' => 'Open'
+                ]
+            );
+        }
+
+        $paketSerayu = PaketWisata::where('nama_paket', 'Rafting Arung Jeram Sungai Serayu')->first();
+        if ($paketSerayu) {
+            JadwalTrip::updateOrCreate(
+                ['id_paket' => $paketSerayu->id_paket, 'tanggal_mulai' => Carbon::now()->addDays(6)->format('Y-m-d')],
+                [
+                    'id_leader' => $leaderId,
+                    'tanggal_selesai' => Carbon::now()->addDays(6)->format('Y-m-d'),
+                    'kuota' => 20,
+                    'sisa_kuota' => 18,
+                    'status_trip' => 'Open'
+                ]
+            );
+        }
+
+        $paketMerbabu = PaketWisata::where('nama_paket', 'Pendakian Gunung Merbabu Selo 2D1N')->first();
+        if ($paketMerbabu) {
+            JadwalTrip::updateOrCreate(
+                ['id_paket' => $paketMerbabu->id_paket, 'tanggal_mulai' => Carbon::now()->addDays(15)->format('Y-m-d')],
+                [
+                    'id_leader' => $leaderId,
+                    'tanggal_selesai' => Carbon::now()->addDays(16)->format('Y-m-d'),
+                    'kuota' => 12,
+                    'sisa_kuota' => 10,
+                    'status_trip' => 'Open'
+                ]
+            );
+        }
     }
 }

@@ -292,3 +292,41 @@ app/
 - **Design Language:** Minimalist, Dark Mode, Rounded-xl components (Diimplementasi pada sisi Klien).
 - **Operational Integrity:** Validasi relasional ketat di sisi MySQL.
 - **Efficiency:** Automasi status via Webhook Midtrans (No manual approval needed).
+
+---
+
+## **🎨 PHASE 7: FRONT-END COMPONENT DESIGN SYSTEM (TRIPADVISOR STYLE)**
+
+Berdasarkan referensi arsitektur aplikasi travel global (Tripadvisor), Kelana v2.0 menggunakan pustaka komponen *Forest Green Theme* yang distandardisasi. Sistem komponen ini memastikan antarmuka kaya fitur dan konsisten dari halaman eksplorasi hingga transaksi.
+
+### **A. Core Brand Identity**
+- **Primary Color:** `Forest Green (#1e5e3a)`
+- **Backgrounds:** `Warm Cream Sand (#f4f3ed)` untuk halaman umum, `Midnight Forest (#0b1611)` untuk blok *trust/awards*.
+- **Typography:** Font modern (Figtree/Inter) dengan *contrast ratio* standar WCAG AA (Teks putih di atas background warna gelap).
+- **Styling Rule:** Sudut membulat konstan `rounded-[26px]` untuk kartu/gambar, dan *pill-shape* (`rounded-full`) untuk tombol aksi. Desain 100% *Flat* (tanpa *box-shadow*).
+
+### **B. Global Navigation Components**
+1. **Global Search Navbar (Sticky)**
+   - Latar belakang putih/krem dengan logo tipografi Kelana.
+   - *Search bar* (Bilah Pencarian) memanjang di tengah untuk mencari destinasi atau nama trip.
+   - Menu aksi di kanan: Ikon Hati (*Wishlist*), Lonceng (*Notifikasi*), dan Avatar Profil.
+2. **Promotional Hero Banner**
+   - Spanduk horizontal raksasa berwarna dasar *Forest Green*.
+   - Gambar lanskap pegunungan yang menggugah, diletakkan berdampingan dengan *headline* raksasa.
+   - Kolom pencarian atau tombol *Call to Action* diletakkan di dalam *banner*.
+
+### **C. Content Display Components (Organisms)**
+1. **Category Tiles (Grid Kategori Wisata)**
+   - Format visual untuk "Hal yang Dapat Dilakukan berdasarkan Minat" (Misal: Mendaki, Budaya, Pantai).
+   - Bentuk persegi/vertikal proporsional.
+   - Gambar *full-bleed* dengan *gradient overlay* gelap di bagian dasar. Teks kategori tebal putih menempel di pojok kiri bawah.
+2. **Inspiration Carousel (Horizontal Scroll)**
+   - Format geser mendatar untuk "Inspirasi untuk Anda".
+   - Rasio gambar lebar (*landscape*). Teks sub-judul tebal dicetak di luar (di bawah) gambar.
+3. **Standard Product Card (Katalog Kelana)**
+   - **Gambar Thumbnail:** Dilengkapi tombol hati (*Wishlist Toggle*) absolut di pojok kanan atas.
+   - **Badge Dinamis (Scarcity):** Kotak label hijau kecil (Misal: "Paling Laku" / "Sisa 3 Kursi") yang muncul berdasarkan kalkulasi `sisa_kuota` dari tabel `jadwal_trip`.
+   - **Informasi:** Judul tebal, deretan bintang rating warna hijau (di-fetch dari tabel `ulasan`), total ulasan, dan harga yang diformat ("Mulai dari Rp XXX").
+4. **Awards / Trust Block**
+   - Spanduk raksasa *full-width* dengan latar gelap `Midnight Forest (#0b1611)`.
+   - Menampilkan kredibilitas platform. Terdapat lencana warna Emas/Kuning, teks testimoni raksasa ("Penghargaan Travellers' Choice" / "Trip Leader Tersertifikasi"), dan tombol aksi sekunder berwarna cerah.
