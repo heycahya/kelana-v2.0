@@ -2,10 +2,16 @@
 
 ## Current Status
 - **Phase**: PHASE 4: REVIEW GATE
-- **Feature**: Rombak Total Landing Page - Kelana Premium Flow (Issue #36)
-- **Status**: Completed & Ready for Verification ✅
+- **Feature**: Implementasi Sistem Pop-up Wishlist & Cart Keranjang (Customer Flow) (Issue #38)
+- **Status**: Completed & Ready for Review ✅
 
 ## Tasks Checklist
+- [x] Fix and harden fetchCart() and fetchWishlist() in customer-wishlist-cart component to gracefully handle network/server errors and database connection issues (AI)
+- [x] Create WishlistWebController and register GET, POST, and DELETE web routes under customer guard middleware (AI)
+- [x] Create CartWebController and register GET and DELETE web routes for active pending order/cart (AI)
+- [x] Implement reusable customer-wishlist-cart component containing Slide-over Drawer for Wishlist and Center Modal for Pending Orders (AI)
+- [x] Integrate wishlistCartData Alpine.js controller into components/navbar.blade.php, welcome.blade.php, and dashboard.blade.php (AI)
+- [x] Add interactive Wishlist Heart buttons with dynamic active states to catalog cards and main image detail page slider (AI)
 - [x] Overhaul Landing Page (welcome.blade.php) with premium forest green layout, floating navbar, promo slider, extended catalog with categories filter, stats, storytelling masonry, accordion FAQs, and English localization (AI)
 - [x] Enrich PaketWisataSeeder and JadwalTripSeeder with 6 new adventure open trips representing Kelana core wilderness context: Mountain Trekking, Sailing, and Rimba (AI)
 - [x] Implement logged-in state customer navbar in welcome.blade.php and components/navbar.blade.php featuring Wishlist (Heart icon), Cart/Bookings (Shopping Bag icon), and Profile Avatar dropdown (AI)
