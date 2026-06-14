@@ -1,87 +1,58 @@
-<div align="center">
-  <h1>🏕️ Kelana v2.0 - Enterprise Open Trip System</h1>
-  <p><strong>Platform Manajemen Pariwisata Petualangan Terintegrasi</strong></p>
-  <p>Dibangun dengan Laravel 11, Tailwind CSS (Siohioma Style), dan Alpine.js</p>
-</div>
+<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
 
----
+<p align="center">
+<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
+<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
+<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
+<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
+</p>
 
-## 🚀 Tentang Proyek
-Kelana v2.0 adalah sebuah platform *Enterprise Resource Planning* (ERP) dan Operasional Lapangan berbasis web yang dirancang khusus untuk memecahkan masalah pencarian informasi open trip wisata alam, keamanan transaksi, dan koordinasi lapangan bagi *solo traveler*.
+## About Laravel
 
-Aplikasi ini tidak hanya berfungsi sebagai etalase pemesanan (B2C), tetapi juga menyediakan **Sistem Back-Office (Admin)** yang canggih dan **Aplikasi Lapangan (Trip Leader)** untuk *check-in* digital berbasis QR Code.
+Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
 
-## 🛠️ Tech Stack & Infrastruktur
-*   **Backend:** Laravel 11.x (PHP 8.2+), RESTful API via Sanctum.
-*   **Frontend:** Laravel Blade SSR, Alpine.js (Reaktivitas), Tailwind CSS (Kustomisasi Tema Siohioma).
-*   **Database:** MySQL 8.0+ (Relasional ketat dengan 13 Tabel terpadu).
-*   **Integrasi Pihak Ketiga:**
-    *   **Midtrans Snap:** Payment Gateway & Asynchronous Webhook (Sandbox).
-    *   **Laravel DomPDF:** Generator laporan dan cetak E-Ticket.
-    *   **HTML5-QRCode:** Kamera pemindai tiket digital berbasis browser.
-    *   **Leaflet.js:** Peta interaktif destinasi wisata.
+- [Simple, fast routing engine](https://laravel.com/docs/routing).
+- [Powerful dependency injection container](https://laravel.com/docs/container).
+- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
+- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
+- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
+- [Robust background job processing](https://laravel.com/docs/queues).
+- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
 
-## ✨ Fitur Utama (Highlight)
-1.  **Arsitektur Multi-Guard (3 Role):** Pemisahan akses absolut antara *Customer*, *Admin*, dan *Trip Leader* dengan satu gerbang masuk terpadu.
-2.  **Siohioma Design System:** Antarmuka premium 100% *Flat Design* (tanpa shadow), sudut `rounded-26px`, warna *Forest Green*, dan tipografi *Figtree*.
-3.  **Booking Engine & Midtrans Integration:** Alur *checkout* presisi dengan dukungan pemotongan kuota instan, kode promo dinamis, dan *Add-ons* perlengkapan.
-4.  **Field Ops App (Mobile-First):** *Trip Leader* dapat menggunakan *smartphone* mereka untuk membuka manifes dan me-*scan* kode QR peserta langsung dari *browser*.
-5.  **Smart Chat & Auto-Responder:** Sistem percakapan CS bawaan (Customer ↔ Admin ↔ Leader) yang dilengkapi bot notifikasi otomatis saat pembayaran lunas.
+Laravel is accessible, powerful, and provides tools required for large, robust applications.
 
----
+## Learning Laravel
 
-## ⚙️ Cara Instalasi (Local Development)
+Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework.
 
-Ikuti langkah-langkah berikut untuk menjalankan sistem Kelana v2.0 di komputer lokal Anda:
+In addition, [Laracasts](https://laracasts.com) contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
 
-### 1. Kloning Repositori
+You can also watch bite-sized lessons with real-world projects on [Laravel Learn](https://laravel.com/learn), where you will be guided through building a Laravel application from scratch while learning PHP fundamentals.
+
+## Agentic Development
+
+Laravel's predictable structure and conventions make it ideal for AI coding agents like Claude Code, Cursor, and GitHub Copilot. Install [Laravel Boost](https://laravel.com/docs/ai) to supercharge your AI workflow:
+
 ```bash
-git clone https://github.com/heycahya/kelana-v2.0.git
-cd kelana-v2.0/app_build
+composer require laravel/boost --dev
+
+php artisan boost:install
 ```
 
-### 2. Instalasi Dependensi
-```bash
-composer install
-npm install
-```
+Boost provides your agent 15+ tools and skills that help agents build Laravel applications while following best practices.
 
-### 3. Konfigurasi Environment
-Salin file environment dan *generate app key*:
-```bash
-cp .env.example .env
-php artisan key:generate
-```
-*(Catatan: Pastikan Anda telah mengatur kredensial database `DB_DATABASE`, `DB_USERNAME`, `DB_PASSWORD` dan API Keys Midtrans di dalam file `.env` Anda)*
+## Contributing
 
-### 4. Migrasi & Pengisian Data Awal (Seeding)
-Bangun struktur tabel dan isi dengan data *dummy* premium (termasuk paket trip, admin, leader, dan customer):
-```bash
-php artisan migrate:fresh --seed
-```
+Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
 
-### 5. Kompilasi Aset Frontend
-```bash
-npm run build
-```
+## Code of Conduct
 
-### 6. Jalankan Server
-```bash
-php artisan serve
-```
-Buka browser Anda di: `http://localhost:8000`
+In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
 
----
+## Security Vulnerabilities
 
-## 🔑 Kredensial Pengujian (Data Seeder)
+If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
 
-Untuk mencoba masing-masing modul, silakan login dengan akun berikut (Password untuk semua akun adalah: `password`):
+## License
 
-| Role | Identitas Login | Tujuan Modul |
-| :--- | :--- | :--- |
-| **Admin ERP** | Username: `admin` | `/admin/dashboard` |
-| **Trip Leader** | Email: `adi.wijaya@kelana.com` | `/trip-leader/dashboard` |
-| **Customer** | Email: `budi.santoso@kelana.com` | `/dashboard` |
-
----
-*Proyek ini dikembangkan menggunakan metodologi Solo Developer - Vibe Coding yang diorkestrasikan melalui framework arsitektur Golden Loop AI.*
+The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
