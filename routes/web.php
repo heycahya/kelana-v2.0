@@ -106,6 +106,7 @@ Route::middleware('auth:customer')->group(function () {
     Route::post('/booking', [BookingWebController::class, 'store'])->name('customer.booking.store');
     Route::get('/booking/tiket/{booking_code}/pdf', [BookingWebController::class, 'downloadTicketPdf'])->name('customer.booking.ticket.pdf');
     Route::get('/my-bookings', [BookingWebController::class, 'myBookings'])->name('customer.bookings');
+    Route::post('/my-bookings/ulasan', [\App\Http\Controllers\CustomerWeb\UlasanWebController::class, 'store'])->name('customer.ulasan.store');
     
     Route::get('/wishlist', [WishlistWebController::class, 'index'])->name('customer.wishlist.index');
     Route::post('/wishlist', [WishlistWebController::class, 'store'])->name('customer.wishlist.store');
@@ -115,8 +116,13 @@ Route::middleware('auth:customer')->group(function () {
     Route::delete('/cart/{id}', [CartWebController::class, 'destroy'])->name('customer.cart.destroy');
 
     // Customer Support Chat
+    Route::get('/chat/contacts', [\App\Http\Controllers\Customer\CustomerChatWebController::class, 'getContacts'])->name('customer.chat.contacts');
     Route::get('/chat/messages', [\App\Http\Controllers\Customer\CustomerChatWebController::class, 'getMessages'])->name('customer.chat.messages');
     Route::post('/chat/messages', [\App\Http\Controllers\Customer\CustomerChatWebController::class, 'sendMessage'])->name('customer.chat.send');
 });
+
+// --- GOOGLE SOCIALITE ROUTES ---
+Route::get('/auth/google/redirect', [\App\Http\Controllers\Auth\SocialiteController::class, 'redirectToGoogle'])->name('google.redirect');
+Route::get('/auth/google/callback', [\App\Http\Controllers\Auth\SocialiteController::class, 'handleGoogleCallback'])->name('google.callback');
 
 require __DIR__.'/auth.php';

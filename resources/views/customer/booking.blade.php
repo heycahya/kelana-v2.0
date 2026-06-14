@@ -131,9 +131,9 @@
                         <label class="block text-[10px] font-bold text-graphite uppercase tracking-widest mb-3">Number of Participants (Pax)</label>
                         <div class="flex items-center gap-5">
                             <div class="flex items-center border border-stone rounded-full p-1.5 bg-white">
-                                <button type="button" @click="if (jumlah > 1) jumlah--" class="w-10 h-10 rounded-full bg-stone/40 text-near-black hover:bg-near-black hover:text-white flex items-center justify-center font-bold text-lg select-none transition-all duration-200">-</button>
+                                <button type="button" @click="if (jumlah > 1) { jumlah--; clampAddonQuantities(); }" class="w-10 h-10 rounded-full bg-stone/40 text-near-black hover:bg-near-black hover:text-white flex items-center justify-center font-bold text-lg select-none transition-all duration-200">-</button>
                                 <span x-text="jumlah" class="text-lg font-bold w-12 text-center text-near-black"></span>
-                                <button type="button" @click="if (jumlah < {{ $jadwal->sisa_kuota }}) jumlah++" class="w-10 h-10 rounded-full bg-stone/40 text-near-black hover:bg-near-black hover:text-white flex items-center justify-center font-bold text-lg select-none transition-all duration-200">+</button>
+                                <button type="button" @click="if (jumlah < {{ $jadwal->sisa_kuota }}) { jumlah++; }" class="w-10 h-10 rounded-full bg-stone/40 text-near-black hover:bg-near-black hover:text-white flex items-center justify-center font-bold text-lg select-none transition-all duration-200">+</button>
                             </div>
                             <div class="text-xs text-graphite font-semibold">
                                 <p class="text-near-black">Rp <span x-text="formatRupiah(harga)"></span> / person</p>
@@ -337,6 +337,9 @@
         function bookingForm() {
             return {
                 currentStep: 1,
+                init() {
+                    this.clampAddonQuantities();
+                },
                 jumlah: {{ request()->query('jumlah_peserta', 1) }},
                 harga: {{ $jadwal->paketWisata->harga }},
                 loading: false,
@@ -399,8 +402,24 @@
                 changeAddonQty(id, delta) {
                     const addon = this.selectedAddons.find(a => a.id === id);
                     if (addon) {
-                        addon.kuantitas = Math.max(1, addon.kuantitas + delta);
+                        const addonName = addon.nama.toLowerCase();
+                        let maxQty = this.jumlah;
+                        if (addonName.includes('drone')) {
+                            maxQty = 1;
+                        }
+                        addon.kuantitas = Math.max(1, Math.min(maxQty, addon.kuantitas + delta));
                     }
+                },
+
+                clampAddonQuantities() {
+                    this.selectedAddons.forEach(addon => {
+                        const addonName = addon.nama.toLowerCase();
+                        let maxQty = this.jumlah;
+                        if (addonName.includes('drone')) {
+                            maxQty = 1;
+                        }
+                        addon.kuantitas = Math.max(1, Math.min(maxQty, addon.kuantitas));
+                    });
                 },
 
                 get totalAddons() {

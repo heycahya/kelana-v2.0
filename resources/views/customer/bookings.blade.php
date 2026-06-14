@@ -12,7 +12,7 @@
     <!-- Scripts & Styles -->
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 </head>
-<body class="bg-warm-cream font-sans text-near-black antialiased min-h-screen flex flex-col">
+<body class="bg-warm-cream font-sans text-near-black antialiased min-h-screen flex flex-col" x-data="{ isUlasanOpen: false, activeJadwalId: null, rating: 0, hoverRating: 0 }">
     @include('components.navbar')
 
     <main class="max-w-[1400px] mx-auto px-6 py-12 flex-grow w-full">
@@ -142,6 +142,28 @@
                                     <span class="text-[10px] text-[#1e5e3a] font-bold block mt-0.5">Promo: {{ $trip->promo_code }} (-Rp {{ number_format($trip->diskon, 0, ',', '.') }})</span>
                                 @endif
                             </p>
+                            
+                            @if($trip->jadwal)
+                                @php
+                                    $ulasan = $trip->jadwal->ulasan->first();
+                                @endphp
+                                
+                                <div class="mt-4 pt-4 border-t border-stone/30 flex justify-between items-center">
+                                    @if($ulasan)
+                                        <div class="flex items-center gap-1">
+                                            @for($i = 1; $i <= 5; $i++)
+                                                <span class="text-lg {{ $i <= $ulasan->rating ? 'text-yellow-400' : 'text-[#dfdfd6]' }}">★</span>
+                                            @endfor
+                                            <span class="text-xs font-bold text-graphite ml-1">Rating: {{ $ulasan->rating }}/5</span>
+                                        </div>
+                                    @else
+                                        <span class="text-xs text-graphite font-semibold">Belum diulas</span>
+                                        <button @click="isUlasanOpen = true; activeJadwalId = {{ $trip->id_jadwal }}; rating = 0; hoverRating = 0" class="inline-flex items-center gap-1.5 px-4 py-2 bg-[#1e5e3a] text-white text-[10px] font-bold uppercase tracking-wider rounded-full hover:bg-near-black hover:scale-105 active:scale-95 transition-all duration-300">
+                                            <span>Tulis Ulasan</span>
+                                        </button>
+                                    @endif
+                                </div>
+                            @endif
                         </div>
                     @empty
                         <div class="text-center py-12 bg-white border border-stone rounded-[26px] p-6">
@@ -159,5 +181,58 @@
             <p class="text-xs text-white/40">&copy; {{ date('Y') }} Kelana Travel. All rights reserved.</p>
         </div>
     </footer>
+
+    <!-- Alpine.js Ulasan Modal -->
+    <div x-show="isUlasanOpen" 
+         class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm"
+         x-transition:enter="transition ease-out duration-300"
+         x-transition:enter-start="opacity-0"
+         x-transition:enter-end="opacity-100"
+         x-transition:leave="transition ease-in duration-200"
+         x-transition:leave-start="opacity-100"
+         x-transition:leave-end="opacity-0"
+         x-cloak>
+        <div @click.away="isUlasanOpen = false" 
+             class="bg-white border border-stone rounded-[26px] w-full max-w-md p-8 text-near-black relative"
+             x-transition:enter="transition ease-out duration-300"
+             x-transition:enter-start="scale-95 translate-y-4"
+             x-transition:enter-end="scale-100 translate-y-0">
+            
+            <button @click="isUlasanOpen = false" class="absolute top-6 right-6 text-[#3f4e45] hover:text-[#0f1a15] text-xl font-bold focus:outline-none">✕</button>
+            
+            <h3 class="text-xl font-bold text-[#0f1a15] mb-2 leading-tight">Bagaimana pengalaman petualangan Anda?</h3>
+            <p class="text-xs text-[#3f4e45] font-semibold mb-6">Berikan rating dan ceritakan pengalaman seru Anda selama trip ini.</p>
+            
+            <form action="{{ route('customer.ulasan.store') }}" method="POST">
+                @csrf
+                <input type="hidden" name="id_jadwal" :value="activeJadwalId">
+                <input type="hidden" name="rating" :value="rating">
+                
+                <!-- Star Rating Input -->
+                <div class="flex items-center justify-center gap-2.5 mb-6" x-data="{ stars: [1, 2, 3, 4, 5] }">
+                    <template x-for="star in stars" :key="star">
+                        <button type="button" 
+                            @click="rating = star"
+                            @mouseover="hoverRating = star"
+                            @mouseleave="hoverRating = 0"
+                            class="text-4xl transition-colors focus:outline-none duration-200"
+                            :class="(hoverRating || rating) >= star ? 'text-yellow-400 scale-110' : 'text-[#dfdfd6]'">
+                            ★
+                        </button>
+                    </template>
+                </div>
+                
+                <div class="mb-6">
+                    <label for="komentar" class="text-[10px] font-bold uppercase tracking-wider text-[#3f4e45] mb-2 block">Ceritakan keseruan Anda (opsional)</label>
+                    <textarea name="komentar" id="komentar" rows="4" placeholder="Tulis testimoni atau ulasan perjalanan Anda..." class="w-full p-4 rounded-[26px] bg-[#f4f3ed] border border-stone focus:border-[#1e5e3a] focus:ring-2 focus:ring-[#1e5e3a] outline-none text-sm placeholder-stone-500/60 transition-all duration-300"></textarea>
+                </div>
+                
+                <div class="flex justify-end gap-3 pt-2">
+                    <button type="button" @click="isUlasanOpen = false" class="px-6 py-3 rounded-full border border-stone text-xs font-bold uppercase tracking-wider hover:bg-stone/20 active:scale-95 transition-all duration-300">Batal</button>
+                    <button type="submit" class="px-6 py-3 bg-[#1e5e3a] text-white rounded-full text-xs font-bold uppercase tracking-wider hover:bg-[#154329] active:scale-95 transition-all duration-300">Kirim Ulasan</button>
+                </div>
+            </form>
+        </div>
+    </div>
 </body>
 </html>

@@ -211,76 +211,124 @@
         </div>
     </div>
 
-    <!-- Floating Chat Widget Button -->
-    <div class="fixed bottom-6 right-6 z-40">
-        <button @click="isChatOpen = !isChatOpen; if(isChatOpen) { $nextTick(() => scrollChatToBottom()) }" 
-                class="w-14 h-14 bg-[#1e5e3a] text-white rounded-full flex items-center justify-center shadow-lg hover:bg-[#154329] hover:scale-105 active:scale-95 transition-all duration-300 relative"
-                title="Hubungi Kami (CS)">
-            <!-- Chat bubble SVG -->
-            <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M8.625 9.75a.375.375 0 11-.75 0 .375.375 0 01.75 0zm0 0H8.25m4.125 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zm0 0H12m4.125 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zm0 0h-.375m-13.5 3.01c0 1.6 1.123 2.994 2.707 3.227 1.087.16 2.185.283 3.293.369V21l4.184-4.183a1.14 1.14 0 01.778-.332 48.294 48.294 0 005.83-.498c1.585-.233 2.708-1.626 2.708-3.228V6.741c0-1.602-1.123-2.995-2.707-3.228A48.394 48.394 0 0012 3c-2.392 0-4.744.175-7.043.513C3.373 3.746 2.25 5.14 2.25 6.741v6.018z"/>
-            </svg>
-            <!-- Unread Dot Indicator (if any admin message is unread) -->
-            <span x-show="chatMessages.some(m => m.sender_type === 'admin' && !m.is_read)" class="absolute top-0 right-0 w-3.5 h-3.5 bg-red-500 border border-white rounded-full" style="display: none;"></span>
-        </button>
-    </div>
+    <!-- Chat Drawer (Slide-Over) -->
+    <div x-show="isChatOpen" class="fixed inset-0 z-50 overflow-hidden" style="display: none;" @keydown.window.escape="isChatOpen = false">
+        <!-- Background overlay -->
+        <div x-show="isChatOpen" 
+             x-transition:enter="transition ease-out duration-300"
+             x-transition:enter-start="opacity-0"
+             x-transition:enter-end="opacity-100"
+             x-transition:leave="transition ease-in duration-200"
+             x-transition:leave-start="opacity-100"
+             x-transition:leave-end="opacity-0"
+             class="absolute inset-0 bg-[#0f1a15]/50 transition-opacity" 
+             @click="isChatOpen = false"></div>
 
-    <!-- Chat Card Box -->
-    <div x-show="isChatOpen" 
-         x-transition:enter="transition ease-out duration-200"
-         x-transition:enter-start="opacity-0 translate-y-8 scale-95"
-         x-transition:enter-end="opacity-100 translate-y-0 scale-100"
-         x-transition:leave="transition ease-in duration-150"
-         x-transition:leave-start="opacity-100 translate-y-0 scale-100"
-         x-transition:leave-end="opacity-0 translate-y-8 scale-95"
-         class="fixed bottom-24 right-6 w-80 sm:w-96 max-h-[500px] h-[500px] bg-[#f4f3ed] rounded-[24px] border border-stone shadow-2xl z-50 flex flex-col overflow-hidden text-near-black"
-         style="display: none;">
-        
-        <!-- Header -->
-        <div class="px-5 py-4 bg-[#0b1611] text-white flex justify-between items-center shrink-0 border-b border-white/10">
-            <div class="flex items-center gap-2.5">
-                <div class="w-8 h-8 rounded-full bg-[#1e5e3a] text-white flex items-center justify-center font-bold text-xs uppercase">
-                    CS
+        <div class="fixed inset-y-0 right-0 pl-10 max-w-full flex">
+            <!-- Drawer Panel -->
+            <div x-show="isChatOpen"
+                 x-transition:enter="transform transition ease-in-out duration-300 sm:duration-300"
+                 x-transition:enter-start="translate-x-full"
+                 x-transition:enter-end="translate-x-0"
+                 x-transition:leave="transform transition ease-in-out duration-200 sm:duration-200"
+                 x-transition:leave-start="translate-x-0"
+                 x-transition:leave-end="translate-x-full"
+                 class="w-screen max-w-md bg-[#f4f3ed] text-near-black flex flex-col h-full border-l border-stone">
+                
+                <!-- CONTACTS LIST VIEW -->
+                <div x-show="selectedContact === null" class="flex flex-col h-full">
+                    <!-- Header -->
+                    <div class="px-6 py-6 border-b border-stone flex items-center justify-between shrink-0 bg-[#0b1611] text-white">
+                        <h2 class="text-xl font-bold tracking-tight text-white">Obrolan Kelana</h2>
+                        <button @click="isChatOpen = false" class="text-white/70 hover:text-white focus:outline-none transition">
+                            <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"></path>
+                            </svg>
+                        </button>
+                    </div>
+
+                    <!-- Contacts Body -->
+                    <div class="flex-grow overflow-y-auto px-6 py-6 space-y-4 no-scrollbar">
+                        <p class="text-xs text-[#3f4e45] font-semibold uppercase tracking-wider mb-2">Pilih Kontak Obrolan</p>
+                        
+                        <template x-for="contact in chatContacts" :key="contact.type + '-' + contact.id">
+                            <div @click="selectContact(contact)" class="bg-white rounded-[26px] p-4 flex items-center gap-4 border border-stone transition-all duration-300 hover:scale-[1.01] cursor-pointer">
+                                <!-- Avatar -->
+                                <div class="w-12 h-12 rounded-full overflow-hidden bg-[#1e5e3a] text-white flex items-center justify-center shrink-0 font-bold uppercase text-sm">
+                                    <img x-show="contact.avatar" :src="contact.avatar" :alt="contact.name" class="w-full h-full object-cover rounded-full">
+                                    <span x-show="!contact.avatar" x-text="contact.type === 'admin' ? 'CS' : contact.name.substring(0, 2)"></span>
+                                </div>
+
+                                <!-- Details -->
+                                <div class="flex-grow min-w-0">
+                                    <div class="flex items-center justify-between gap-2">
+                                        <h3 class="font-bold text-sm text-[#0f1a15] truncate" x-text="contact.name"></h3>
+                                        <span x-show="contact.unread_count > 0" class="bg-[#eb3131] text-white text-[10px] font-bold px-2 py-0.5 rounded-full shrink-0" x-text="contact.unread_count"></span>
+                                    </div>
+                                    <p class="text-[10px] font-bold mt-0.5 truncate" :class="contact.type === 'admin' ? 'text-electric-lime' : 'text-[#1e5e3a]'" x-text="contact.status"></p>
+                                    <p class="text-xs text-graphite truncate mt-1" x-text="contact.last_message || 'Belum ada percakapan.'"></p>
+                                </div>
+                            </div>
+                        </template>
+                    </div>
                 </div>
-                <div>
-                    <h4 class="text-xs font-bold leading-tight">Kelana Customer Service</h4>
-                    <span class="text-[9px] text-electric-lime font-bold block mt-0.5">🟢 Online - Admin Support</span>
+
+                <!-- CHAT MESSAGES VIEW -->
+                <div x-show="selectedContact !== null" class="flex flex-col h-full">
+                    <!-- Header -->
+                    <div class="px-6 py-5 bg-[#0b1611] text-white flex justify-between items-center shrink-0 border-b border-white/10">
+                        <div class="flex items-center gap-3 min-w-0">
+                            <button @click="backToContacts()" class="text-white/70 hover:text-white transition focus:outline-none pr-1">
+                                <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7"/>
+                                </svg>
+                            </button>
+                            <div class="w-10 h-10 rounded-full bg-[#1e5e3a] text-white flex items-center justify-center font-bold text-sm uppercase shrink-0 overflow-hidden">
+                                <img x-show="selectedContact && selectedContact.avatar" :src="selectedContact ? selectedContact.avatar : ''" :alt="selectedContact ? selectedContact.name : ''" class="w-full h-full object-cover rounded-full">
+                                <span x-show="selectedContact && !selectedContact.avatar" x-text="selectedContact ? (selectedContact.type === 'admin' ? 'CS' : selectedContact.name.substring(0, 2)) : ''"></span>
+                            </div>
+                            <div class="min-w-0">
+                                <h4 class="text-sm font-bold leading-tight truncate text-white" x-text="selectedContact ? selectedContact.name : ''"></h4>
+                                <span class="text-[10px] font-bold block mt-0.5 truncate" :class="selectedContact && selectedContact.type === 'admin' ? 'text-electric-lime' : 'text-[#a0cfa5]'" x-text="selectedContact ? selectedContact.status : ''"></span>
+                            </div>
+                        </div>
+                        <button @click="isChatOpen = false" class="text-white/70 hover:text-white transition focus:outline-none">
+                            <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/>
+                            </svg>
+                        </button>
+                    </div>
+
+                    <!-- Chat Stream -->
+                    <div class="flex-grow overflow-y-auto p-6 space-y-4 flex flex-col no-scrollbar" id="customer-chat-container">
+                        <div class="bg-white text-near-black p-4 rounded-[20px] text-xs font-semibold leading-relaxed border border-stone/50 self-start rounded-bl-none max-w-[85%]">
+                            Halo! Ada yang bisa kami bantu seputar trip, pemesanan, atau rute perjalanan Kelana? 😊
+                        </div>
+                        <template x-for="msg in chatMessages" :key="msg.id">
+                            <div class="max-w-[85%] rounded-[20px] p-4 text-xs font-semibold leading-relaxed"
+                                 :class="msg.sender_type === 'customer' ? 'bg-[#1e5e3a] text-white self-end rounded-br-none' : 'bg-white text-near-black border border-stone/50 self-start rounded-bl-none'">
+                                <span x-show="msg.sender_type !== 'customer'" class="block text-[9px] text-[#1e5e3a] font-bold mb-1" x-text="msg.sender_type === 'admin' ? 'Admin Support' : 'Trip Leader'"></span>
+                                <p class="whitespace-pre-line" x-text="msg.message"></p>
+                                <span class="block text-[8px] text-right mt-1.5"
+                                      :class="msg.sender_type === 'customer' ? 'text-white/60' : 'text-stone/70'"
+                                      x-text="formatChatTime(msg.created_at)"></span>
+                            </div>
+                        </template>
+                    </div>
+
+                    <!-- Input Footer -->
+                    <div class="p-6 bg-white border-t border-stone/50 shrink-0">
+                        <form @submit.prevent="sendChatMessage()" class="flex items-center gap-2">
+                            <input type="text" x-model="chatNewMessage" placeholder="Ketik pertanyaan Anda..." class="flex-grow p-4 rounded-full bg-[#f4f3ed]/60 border border-stone text-xs font-semibold outline-none focus:border-near-black focus:bg-white transition">
+                            <button type="submit" class="bg-[#1e5e3a] text-white hover:bg-near-black p-4 rounded-full text-xs font-bold transition flex items-center justify-center shrink-0">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M6 12L3.269 3.126A59.768 59.768 0 0121.485 12 59.77 59.77 0 013.27 20.876L5.999 12zm0 0h7.5"/>
+                                </svg>
+                            </button>
+                        </form>
+                    </div>
                 </div>
             </div>
-            <button @click="isChatOpen = false" class="text-white/70 hover:text-white transition">
-                <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/>
-                </svg>
-            </button>
-        </div>
-
-        <!-- Chat Stream -->
-        <div class="flex-grow overflow-y-auto p-4 space-y-3.5 flex flex-col" id="customer-chat-container">
-            <div class="bg-white text-near-black p-3.5 rounded-[18px] text-[11px] font-semibold leading-relaxed border border-stone/50 self-start rounded-bl-none">
-                Halo! Ada yang bisa kami bantu seputar trip, pemesanan, atau rute perjalanan Kelana? 😊
-            </div>
-            <template x-for="msg in chatMessages" :key="msg.id">
-                <div class="max-w-[80%] rounded-[18px] p-3 text-[11px] font-semibold leading-relaxed"
-                     :class="msg.sender_type === 'customer' ? 'bg-[#1e5e3a] text-white self-end rounded-br-none' : 'bg-white text-near-black border border-stone/50 self-start rounded-bl-none'">
-                    <span x-show="msg.sender_type !== 'customer'" class="block text-[8px] text-[#1e5e3a] font-bold mb-1" x-text="msg.sender_type === 'admin' ? 'Admin Support' : 'Trip Leader'"></span>
-                    <p class="whitespace-pre-line" x-text="msg.message"></p>
-                    <span class="block text-[8px] text-right mt-1"
-                          :class="msg.sender_type === 'customer' ? 'text-white/60' : 'text-stone/70'"
-                          x-text="formatChatTime(msg.created_at)"></span>
-                </div>
-            </template>
-        </div>
-
-        <!-- Input Footer -->
-        <div class="p-4 bg-white border-t border-stone/50 shrink-0">
-            <form @submit.prevent="sendChatMessage()" class="flex items-center gap-2">
-                <input type="text" x-model="chatNewMessage" placeholder="Ketik pertanyaan Anda..." class="flex-grow p-3 rounded-full bg-[#f4f3ed]/60 border border-stone text-xs font-semibold outline-none focus:border-near-black focus:bg-white transition">
-                <button type="submit" class="bg-[#1e5e3a] text-white hover:bg-near-black p-3 rounded-full text-xs font-bold transition">
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M6 12L3.269 3.126A59.768 59.768 0 0121.485 12 59.77 59.77 0 013.27 20.876L5.999 12zm0 0h7.5"/>
-                    </svg>
-                </button>
-            </form>
         </div>
     </div>
 
@@ -295,6 +343,8 @@
                 pemesananIdToCancel: null,
                 wishlistItems: [],
                 cartItem: null,
+                chatContacts: [],
+                selectedContact: null,
                 chatMessages: [],
                 chatNewMessage: '',
                 chatPollingInterval: null,
@@ -302,7 +352,7 @@
                 init() {
                     this.fetchWishlist();
                     this.fetchCart();
-                    this.pollChatMessages();
+                    this.pollChat();
                     
                     // Listen for global custom events to allow components to interact with wishlist/cart
                     window.addEventListener('toggle-wishlist-global', (e) => {
@@ -314,23 +364,65 @@
                     window.addEventListener('open-cart-global', () => {
                         this.isCartOpen = true;
                     });
+                    
+                    // Watch for chat open/close to trigger initial load
+                    this.$watch('isChatOpen', (value) => {
+                        if (value) {
+                            if (!this.selectedContact) {
+                                this.fetchChatContacts();
+                            } else {
+                                this.fetchChatMessages();
+                            }
+                        }
+                    });
                 },
-                pollChatMessages() {
-                    this.fetchChatMessages();
+                pollChat() {
                     this.chatPollingInterval = setInterval(() => {
-                        this.fetchChatMessages();
+                        if (this.isChatOpen) {
+                            if (this.selectedContact) {
+                                this.fetchChatMessages();
+                            } else {
+                                this.fetchChatContacts();
+                            }
+                        }
                     }, 3000);
                 },
-                fetchChatMessages() {
-                    fetch('{{ route('customer.chat.messages') }}')
+                fetchChatContacts() {
+                    if (!this.isLoggedIn) return;
+                    fetch('{{ route('customer.chat.contacts') }}')
                         .then(res => res.json())
                         .then(data => {
+                            this.chatContacts = Array.isArray(data) ? data : [];
+                        })
+                        .catch(err => console.error('Error fetching chat contacts:', err));
+                },
+                selectContact(contact) {
+                    this.selectedContact = contact;
+                    this.chatMessages = [];
+                    this.fetchChatMessages();
+                    this.$nextTick(() => this.scrollChatToBottom());
+                },
+                backToContacts() {
+                    this.selectedContact = null;
+                    this.chatMessages = [];
+                    this.fetchChatContacts();
+                },
+                fetchChatMessages() {
+                    if (!this.isLoggedIn || !this.selectedContact) return;
+                    fetch(`{{ route('customer.chat.messages') }}?contact_type=${this.selectedContact.type}&contact_id=${this.selectedContact.id}`)
+                        .then(res => res.json())
+                        .then(data => {
+                            const newCount = Array.isArray(data) ? data.length : 0;
+                            const oldCount = this.chatMessages.length;
                             this.chatMessages = Array.isArray(data) ? data : [];
+                            if (newCount > oldCount) {
+                                this.$nextTick(() => this.scrollChatToBottom());
+                            }
                         })
                         .catch(err => console.error('Error fetching chat messages:', err));
                 },
                 sendChatMessage() {
-                    if (!this.chatNewMessage.trim()) return;
+                    if (!this.chatNewMessage.trim() || !this.selectedContact) return;
                     const text = this.chatNewMessage;
                     this.chatNewMessage = '';
                     
@@ -340,7 +432,11 @@
                             'Content-Type': 'application/json',
                             'X-CSRF-TOKEN': '{{ csrf_token() }}'
                         },
-                        body: JSON.stringify({ message: text })
+                        body: JSON.stringify({ 
+                            message: text,
+                            contact_type: this.selectedContact.type,
+                            contact_id: this.selectedContact.id
+                        })
                     })
                     .then(res => res.json())
                     .then(msg => {

@@ -11,8 +11,16 @@ class UlasanSeeder extends Seeder
 {
     public function run(): void
     {
-        $customer = Customer::where('email', 'budi.santoso@kelana.com')->first();
-        $customerId = $customer ? $customer->id_customer : 1;
+        $dewi = Customer::updateOrCreate(
+            ['email' => 'dewi.seeder@kelana.com'],
+            [
+                'nama_customer' => 'Dewi Seeder',
+                'password' => bcrypt('PasswordCustomer123!'),
+                'no_telp' => '081234567891',
+                'alamat' => 'Jl. Diponegoro No. 12'
+            ]
+        );
+        $dewiId = $dewi->id_customer;
 
         // Fetch seeded schedules
         $jadwalBromo = JadwalTrip::whereHas('paketWisata', function ($q) {
@@ -25,7 +33,7 @@ class UlasanSeeder extends Seeder
 
         if ($jadwalBromo) {
             Ulasan::updateOrCreate(
-                ['id_customer' => $customerId, 'id_jadwal' => $jadwalBromo->id_jadwal],
+                ['id_customer' => $dewiId, 'id_jadwal' => $jadwalBromo->id_jadwal],
                 [
                     'rating' => 5,
                     'komentar' => 'Trip yang luar biasa! Pelayanan sangat memuaskan, pemandangan Bromo sangat indah, dan tour leader-nya sangat ramah dan informatif.'
@@ -35,7 +43,7 @@ class UlasanSeeder extends Seeder
 
         if ($jadwalKomodo) {
             Ulasan::updateOrCreate(
-                ['id_customer' => $customerId, 'id_jadwal' => $jadwalKomodo->id_jadwal],
+                ['id_customer' => $dewiId, 'id_jadwal' => $jadwalKomodo->id_jadwal],
                 [
                     'rating' => 5,
                     'komentar' => 'Sailing dengan Phinisi mewah yang luar biasa menyenangkan. Makanan enak sekali, pemandangan Labuan Bajo menakjubkan.'

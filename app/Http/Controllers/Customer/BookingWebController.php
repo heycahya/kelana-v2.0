@@ -95,6 +95,17 @@ class BookingWebController extends Controller
                     $addon = \App\Models\AddOn::find($addon_req['id']);
                     if ($addon) {
                         $qty = (int) $addon_req['kuantitas'];
+                        
+                        // Limit qty logic: drone is max 1, other addons max is jumlah_peserta
+                        $addonName = strtolower($addon->nama_addon);
+                        $maxQty = (int) $request->jumlah_peserta;
+                        if (str_contains($addonName, 'drone')) {
+                            $maxQty = 1;
+                        }
+                        if ($qty > $maxQty) {
+                            $qty = $maxQty;
+                        }
+                        
                         $subtotal = $addon->harga * $qty;
                         $total_biaya_addons += $subtotal;
                         $addons_data[$addon->id] = [
@@ -242,7 +253,12 @@ class BookingWebController extends Controller
         $user = auth()->user();
         
         $pemesanan = Pemesanan::where('id_customer', $user->id_customer)
-            ->with(['jadwal.paketWisata'])
+            ->with([
+                'jadwal.paketWisata',
+                'jadwal.ulasan' => function ($query) use ($user) {
+                    $query->where('id_customer', $user->id_customer);
+                }
+            ])
             ->get();
 
         $today = now()->toDateString();

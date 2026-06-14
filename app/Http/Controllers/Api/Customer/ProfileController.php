@@ -40,7 +40,7 @@ class ProfileController extends Controller
      */
     public function update(Request $request): JsonResponse
     {
-        $customerId = auth()->id();
+        $customerId = auth()->user()->id_customer;
         
         $validator = Validator::make($request->all(), [
             'nama_customer' => 'required|string|max:255',

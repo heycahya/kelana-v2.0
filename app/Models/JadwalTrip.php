@@ -28,4 +28,9 @@ class JadwalTrip extends Model
     {
         return $this->hasMany(Pemesanan::class, 'id_jadwal', 'id_jadwal');
     }
+
+    public function ulasan()
+    {
+        return $this->hasMany(Ulasan::class, 'id_jadwal', 'id_jadwal');
+    }
 }

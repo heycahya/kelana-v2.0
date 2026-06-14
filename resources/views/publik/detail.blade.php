@@ -336,6 +336,7 @@
                                     <div @click="selectedScheduleId = '{{ $jadwal->id_jadwal }}'; 
                                                  selectedScheduleText = '{{ \Carbon\Carbon::parse($jadwal->tanggal_mulai)->format('d M Y') }}'; 
                                                  selectedScheduleQuota = {{ $jadwal->sisa_kuota }};
+                                                 if (jumlahPeserta > selectedScheduleQuota) { jumlahPeserta = Math.max(1, selectedScheduleQuota); }
                                                  showDropdown = false;"
                                          :class="selectedScheduleId == '{{ $jadwal->id_jadwal }}' ? 'bg-warm-cream text-near-black' : 'hover:bg-warm-cream/50'"
                                          class="px-5 py-4 cursor-pointer flex justify-between items-center transition-colors border-b border-stone/30 last:border-b-0">
@@ -360,7 +361,7 @@
                                     <span class="font-semibold text-base text-near-black" x-text="jumlahPeserta"></span>
                                     <span class="text-xs text-graphite font-semibold uppercase">People</span>
                                 </div>
-                                <button @click="jumlahPeserta++" type="button" class="w-10 h-9 rounded-[14px] bg-warm-cream text-near-black hover:bg-near-black hover:text-white transition flex items-center justify-center font-bold text-lg select-none">+</button>
+                                <button @click="if (selectedScheduleId && jumlahPeserta < selectedScheduleQuota) jumlahPeserta++" type="button" class="w-10 h-9 rounded-[14px] bg-warm-cream text-near-black hover:bg-near-black hover:text-white transition flex items-center justify-center font-bold text-lg select-none">+</button>
                             </div>
                         </div>
 
