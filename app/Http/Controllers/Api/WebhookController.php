@@ -127,11 +127,12 @@ class WebhookController extends Controller
                     $pembayaran->update($pembayaranUpdate);
 
                     // Send automated bot message
+                    $roomName = "Chat Customer #{$pemesanan->id_customer} & Admin CS";
+                    $room = \App\Models\ChatRoom::getOrCreateRoomForTwo('admin', 1, 'customer', $pemesanan->id_customer, null, $roomName);
                     \App\Models\Message::create([
-                        'sender_type' => 'admin',
+                        'id_room' => $room->id_room,
+                        'sender_role' => 'admin',
                         'sender_id' => 1,
-                        'receiver_type' => 'customer',
-                        'receiver_id' => $pemesanan->id_customer,
                         'message' => "Pembayaran Anda untuk Kode Booking {$pemesanan->booking_code} telah berhasil dikonfirmasi secara otomatis! Status pemesanan Anda kini telah berubah menjadi PAID. Silakan download E-Ticket PDF Anda di menu 'Tiket Saya'. Terima kasih!",
                         'is_read' => false
                     ]);
@@ -146,11 +147,12 @@ class WebhookController extends Controller
                             
                             // Send confirmation to Admin (CS)
                             $leaderMessage = "Halo CS/Admin, saya {$leaderName} selaku Trip Leader untuk paket {$paketName} (Booking Code: {$pemesanan->booking_code}). Saya mengonfirmasi bahwa saya siap bertugas memandu trip ini!";
+                            $roomLeaderAdminName = "Chat Leader #{$leader->id_leader} & Admin CS";
+                            $roomLeaderAdmin = \App\Models\ChatRoom::getOrCreateRoomForTwo('admin', 1, 'trip_leader', $leader->id_leader, null, $roomLeaderAdminName);
                             \App\Models\Message::create([
-                                'sender_type' => 'trip_leader',
+                                'id_room' => $roomLeaderAdmin->id_room,
+                                'sender_role' => 'trip_leader',
                                 'sender_id' => $leader->id_leader,
-                                'receiver_type' => 'admin',
-                                'receiver_id' => 1, // Default Admin ID
                                 'message' => $leaderMessage,
                                 'is_read' => false
                             ]);
@@ -158,11 +160,12 @@ class WebhookController extends Controller
                             // Send confirmation to Customer
                             $custName = $pemesanan->customer->nama_customer ?? 'Kak';
                             $customerMessage = "Halo {$custName}, saya {$leaderName} selaku Trip Leader Anda untuk paket {$paketName}. Pembayaran Anda telah terverifikasi lunas (PAID). Saya siap memandu perjalanan Anda! Silakan balas chat ini langsung jika ada koordinasi teknis atau perlengkapan yang dibutuhkan.";
+                            $roomLeaderCustName = "Chat Booking {$pemesanan->booking_code} - Customer & Leader";
+                            $roomLeaderCust = \App\Models\ChatRoom::getOrCreateRoomForTwo('customer', $pemesanan->id_customer, 'trip_leader', $leader->id_leader, $pemesanan->booking_code, $roomLeaderCustName);
                             \App\Models\Message::create([
-                                'sender_type' => 'trip_leader',
+                                'id_room' => $roomLeaderCust->id_room,
+                                'sender_role' => 'trip_leader',
                                 'sender_id' => $leader->id_leader,
-                                'receiver_type' => 'customer',
-                                'receiver_id' => $pemesanan->id_customer,
                                 'message' => $customerMessage,
                                 'is_read' => false
                             ]);
@@ -184,11 +187,12 @@ class WebhookController extends Controller
 
                     // Send automated bot message
                     $statusName = $transactionStatus == 'cancel' ? 'dibatalkan' : 'gagal/kedaluwarsa';
+                    $roomName = "Chat Customer #{$pemesanan->id_customer} & Admin CS";
+                    $room = \App\Models\ChatRoom::getOrCreateRoomForTwo('admin', 1, 'customer', $pemesanan->id_customer, null, $roomName);
                     \App\Models\Message::create([
-                        'sender_type' => 'admin',
+                        'id_room' => $room->id_room,
+                        'sender_role' => 'admin',
                         'sender_id' => 1,
-                        'receiver_type' => 'customer',
-                        'receiver_id' => $pemesanan->id_customer,
                         'message' => "Pemesanan Anda untuk Kode Booking {$pemesanan->booking_code} telah {$statusName}. Jika Anda telah melakukan pembayaran, silakan hubungi CS kami dengan bukti transaksi untuk klaim pengembalian dana (refund).",
                         'is_read' => false
                     ]);

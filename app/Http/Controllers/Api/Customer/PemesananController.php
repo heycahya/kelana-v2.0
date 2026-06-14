@@ -144,11 +144,12 @@ class PemesananController extends Controller
             ]);
 
             // Send automated CS bot message for new pending booking
+            $roomName = "Chat Customer #" . auth()->id() . " & Admin CS";
+            $room = \App\Models\ChatRoom::getOrCreateRoomForTwo('admin', 1, 'customer', auth()->id(), null, $roomName);
             \App\Models\Message::create([
-                'sender_type' => 'admin',
+                'id_room' => $room->id_room,
+                'sender_role' => 'admin',
                 'sender_id' => 1, // Default Admin ID
-                'receiver_type' => 'customer',
-                'receiver_id' => auth()->id(),
                 'message' => "Halo! Terima kasih telah melakukan pemesanan dengan Kode Booking {$booking_code}. Pemesanan Anda saat ini terdaftar dengan status PENDING. Tim kami sedang melakukan pengecekan ketersediaan kuota dan detail transaksi Anda pada jam kerja. Mohon tunggu proses pengecekan. Jika dibatalkan atau tidak disetujui, dana pembayaran Anda akan direfund sepenuhnya. Jika sukses diverifikasi, status tiket Anda akan berubah menjadi PAID.",
                 'is_read' => false
             ]);

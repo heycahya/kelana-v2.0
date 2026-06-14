@@ -28,3 +28,26 @@ Telah diimplementasikan perbaikan keamanan kritis pada webhook Midtrans, pembaha
 
 4. **Perbaikan Middleware Autentikasi Role (`app/Http/Middleware/EnsureUserIs*.php`)**:
    - Memperbaiki middleware `EnsureUserIsAdmin`, `EnsureUserIsCustomer`, dan `EnsureUserIsTripLeader` agar dapat mengenali user yang terautentikasi melalui token API (Sanctum) dengan melakukan pengecekan tipe instance model user (`instanceof`), di samping pengecekan session guard bawaan. Ini menyelesaikan isu error `403 Forbidden` ("Akses ditolak") ketika mengakses endpoint API terproteksi setelah berhasil login.
+
+---
+
+### 🗄️ Database Structure Normalization & ERD Prep
+Telah diimplementasikan normalisasi struktur database untuk standarisasi Primary Key dan perubahan sistem chat dari model polymorphic ke Room-based Chat demi integritas data referensial yang lebih kuat.
+
+#### Perubahan Detail:
+1. **Refaktor Sistem Chat ke Room-Based**:
+   - Membuat migrasi `database/migrations/2026_06_14_205000_create_chat_rooms_system.php` untuk mendefinisikan tabel `chat_rooms` dan `chat_participants` (tabel jembatan role partisipan).
+   - Menghapus dan mendesain ulang tabel `messages` agar mereferensikan `id_room` (FK ke `chat_rooms`) dengan kolom pengirim `sender_role` (enum) dan `sender_id`.
+   - Membuat model baru `App\Models\ChatRoom` dan `App\Models\ChatParticipant`, serta merestrukturisasi model `App\Models\Message` (menambahkan accessor/appends `sender_type` untuk backward compatibility dengan frontend).
+   - Menyesuaikan logika controller chat: `CustomerChatWebController`, `LeaderChatWebController`, `ChatAdminWebController`, `WebhookController` (webhook bot), `BookingWebController`, `PemesananController` (API), dan `TransaksiWebController`.
+
+2. **Dokumentasi Snapshot Finansial**:
+   - Menambahkan PHPDoc block pada model `App\Models\Pemesanan` di atas properti `$fillable` yang mendokumentasikan secara tertulis bahwa kolom `total_harga` dan `diskon` bertindak sebagai *historical snapshot* transaksi dan tidak boleh dihitung ulang secara dinamis.
+
+3. **Standarisasi Penamaan Primary Key (Generic ID Rename)**:
+   - Membuat migrasi `database/migrations/2026_06_14_204000_rename_generic_primary_keys.php` untuk mengubah kolom primary key generik `id` menjadi spesifik sesuai standar penamaan tabel:
+     - `paket_wisata_galleries.id` ➔ `id_gallery`
+     - `pemesanan_addon.id` ➔ `id_pemesanan_addon`
+     - `wishlists.id` ➔ `id_wishlist`
+   - Memperbarui properti `protected $primaryKey` pada model `PaketWisataGallery`, `PemesananAddon` (Pivot), dan `Wishlist`.
+   - Memperbarui akses primary key pada `WishlistWebController`.

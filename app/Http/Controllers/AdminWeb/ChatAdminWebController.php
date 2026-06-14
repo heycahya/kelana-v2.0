@@ -4,6 +4,7 @@ namespace App\Http\Controllers\AdminWeb;
 
 use App\Http\Controllers\Controller;
 use App\Models\Message;
+use App\Models\ChatRoom;
 use App\Models\Customer;
 use App\Models\TripLeader;
 use Illuminate\Http\Request;
@@ -28,17 +29,26 @@ class ChatAdminWebController extends Controller
         // 1. Fetch Customers
         $customers = Customer::all();
         foreach ($customers as $c) {
-            $lastMsg = Message::where(function ($q) use ($c) {
-                $q->where('sender_type', 'customer')->where('sender_id', $c->id_customer);
-            })->orWhere(function ($q) use ($c) {
-                $q->where('receiver_type', 'customer')->where('receiver_id', $c->id_customer);
-            })->orderBy('created_at', 'desc')->first();
+            // Find the room between Admin (1) and Customer
+            $room = ChatRoom::whereHas('participants', function($q) use ($c) {
+                $q->where('role_type', 'customer')->where('role_id', $c->id_customer);
+            })->whereHas('participants', function($q) {
+                $q->where('role_type', 'admin')->where('role_id', 1);
+            })->first();
 
-            $unreadCount = Message::where('sender_type', 'customer')
-                ->where('sender_id', $c->id_customer)
-                ->where('receiver_type', 'admin')
-                ->where('is_read', false)
-                ->count();
+            $lastMsg = null;
+            $unreadCount = 0;
+
+            if ($room) {
+                $lastMsg = Message::where('id_room', $room->id_room)
+                    ->orderBy('created_at', 'desc')
+                    ->first();
+
+                $unreadCount = Message::where('id_room', $room->id_room)
+                    ->where('sender_role', 'customer')
+                    ->where('is_read', false)
+                    ->count();
+            }
 
             $contacts->push([
                 'id' => $c->id_customer,
@@ -55,17 +65,26 @@ class ChatAdminWebController extends Controller
         // 2. Fetch Trip Leaders
         $leaders = TripLeader::all();
         foreach ($leaders as $l) {
-            $lastMsg = Message::where(function ($q) use ($l) {
-                $q->where('sender_type', 'trip_leader')->where('sender_id', $l->id_leader);
-            })->orWhere(function ($q) use ($l) {
-                $q->where('receiver_type', 'trip_leader')->where('receiver_id', $l->id_leader);
-            })->orderBy('created_at', 'desc')->first();
+            // Find the room between Admin (1) and Trip Leader
+            $room = ChatRoom::whereHas('participants', function($q) use ($l) {
+                $q->where('role_type', 'trip_leader')->where('role_id', $l->id_leader);
+            })->whereHas('participants', function($q) {
+                $q->where('role_type', 'admin')->where('role_id', 1);
+            })->first();
 
-            $unreadCount = Message::where('sender_type', 'trip_leader')
-                ->where('sender_id', $l->id_leader)
-                ->where('receiver_type', 'admin')
-                ->where('is_read', false)
-                ->count();
+            $lastMsg = null;
+            $unreadCount = 0;
+
+            if ($room) {
+                $lastMsg = Message::where('id_room', $room->id_room)
+                    ->orderBy('created_at', 'desc')
+                    ->first();
+
+                $unreadCount = Message::where('id_room', $room->id_room)
+                    ->where('sender_role', 'trip_leader')
+                    ->where('is_read', false)
+                    ->count();
+            }
 
             $contacts->push([
                 'id' => $l->id_leader,
@@ -95,21 +114,19 @@ class ChatAdminWebController extends Controller
      */
     public function getMessages($contact_type, $contact_id)
     {
-        // Mark incoming messages from this contact as read
-        Message::where('sender_type', $contact_type)
+        $roomName = "Chat " . ucfirst($contact_type) . " #{$contact_id} & Admin CS";
+        $room = ChatRoom::getOrCreateRoomForTwo('admin', 1, $contact_type, $contact_id, null, $roomName);
+
+        // Mark incoming messages from this contact as read in this room
+        Message::where('id_room', $room->id_room)
+            ->where('sender_role', $contact_type)
             ->where('sender_id', $contact_id)
-            ->where('receiver_type', 'admin')
+            ->where('is_read', false)
             ->update(['is_read' => true]);
 
-        $messages = Message::where(function ($q) use ($contact_type, $contact_id) {
-            $q->where('sender_type', $contact_type)
-              ->where('sender_id', $contact_id)
-              ->where('receiver_type', 'admin');
-        })->orWhere(function ($q) use ($contact_type, $contact_id) {
-            $q->where('sender_type', 'admin')
-              ->where('receiver_type', $contact_type)
-              ->where('receiver_id', $contact_id);
-        })->orderBy('created_at', 'asc')->get();
+        $messages = Message::where('id_room', $room->id_room)
+            ->orderBy('created_at', 'asc')
+            ->get();
 
         return response()->json($messages);
     }
@@ -123,11 +140,13 @@ class ChatAdminWebController extends Controller
             'message' => 'required|string'
         ]);
 
+        $roomName = "Chat " . ucfirst($contact_type) . " #{$contact_id} & Admin CS";
+        $room = ChatRoom::getOrCreateRoomForTwo('admin', 1, $contact_type, $contact_id, null, $roomName);
+
         $message = Message::create([
-            'sender_type' => 'admin',
+            'id_room' => $room->id_room,
+            'sender_role' => 'admin',
             'sender_id' => auth()->id() ?? 1, // Default Admin ID fallback
-            'receiver_type' => $contact_type,
-            'receiver_id' => $contact_id,
             'message' => $request->message,
             'is_read' => false
         ]);

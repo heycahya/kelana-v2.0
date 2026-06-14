@@ -32,7 +32,7 @@ class WishlistWebController extends Controller
                     ?? 'https://images.unsplash.com/photo-1506012787146-f92b2d7d6d96?auto=format&fit=crop&w=800&q=80';
 
                 return [
-                    'id' => $item->id,
+                    'id' => $item->id_wishlist,
                     'paket_wisata_id' => $paket->id_paket,
                     'nama' => $paket->nama_paket,
                     'harga' => $paket->harga,
