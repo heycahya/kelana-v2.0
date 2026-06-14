@@ -31,7 +31,7 @@ class AuthenticatedSessionController extends Controller
         if (Auth::guard('admin')->check()) {
             return redirect()->intended(route('admin.dashboard', absolute: false));
         } elseif (Auth::guard('trip_leader')->check()) {
-            return redirect()->intended(route('trip_leader.dashboard', absolute: false));
+            return redirect()->intended(route('leader.dashboard', absolute: false));
         } else {
             return redirect()->intended(route('dashboard', absolute: false));
         }

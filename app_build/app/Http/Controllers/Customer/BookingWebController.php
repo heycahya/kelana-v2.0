@@ -37,6 +37,7 @@ class BookingWebController extends Controller
             'addons.*.id' => 'required|exists:add_ons,id',
             'addons.*.kuantitas' => 'required|integer|min:1',
             'special_request' => 'nullable|string',
+            'promo_code' => 'nullable|string',
         ]);
 
         if ($validator->fails()) {
@@ -68,7 +69,24 @@ class BookingWebController extends Controller
             }
 
             $paket = $jadwal->paketWisata;
-            $total_harga = $request->jumlah_peserta * $paket->harga;
+            $basePrice = $request->jumlah_peserta * $paket->harga;
+
+            $discount = 0;
+            $promoCode = $request->input('promo_code');
+            if ($promoCode) {
+                $promoCode = strtoupper(trim($promoCode));
+                if ($promoCode === 'MERDEKA20') {
+                    $discount = $basePrice * 0.20;
+                } elseif ($promoCode === 'RINJANIPAS') {
+                    $discount = $basePrice * 0.10;
+                } elseif ($promoCode === 'KOMODOLUX') {
+                    $discount = 100000;
+                } else {
+                    $promoCode = null;
+                }
+            }
+
+            $total_harga = max(0, $basePrice - $discount);
 
             $total_biaya_addons = 0;
             $addons_data = [];
@@ -105,6 +123,18 @@ class BookingWebController extends Controller
                 'total_biaya_addons' => $total_biaya_addons,
                 'status_pembayaran' => 'PENDING',
                 'attendance_status' => 'belum_hadir',
+                'promo_code' => $promoCode,
+                'diskon' => $discount,
+            ]);
+
+            // Send automated CS bot message for new pending booking
+            \App\Models\Message::create([
+                'sender_type' => 'admin',
+                'sender_id' => 1, // Default Admin ID
+                'receiver_type' => 'customer',
+                'receiver_id' => auth()->id(),
+                'message' => "Halo! Terima kasih telah melakukan pemesanan dengan Kode Booking {$booking_code}. Pemesanan Anda saat ini terdaftar dengan status PENDING. Tim kami sedang melakukan pengecekan ketersediaan kuota dan detail transaksi Anda pada jam kerja. Mohon tunggu proses pengecekan. Jika dibatalkan atau tidak disetujui, dana pembayaran Anda akan direfund sepenuhnya. Jika sukses diverifikasi, status tiket Anda akan berubah menjadi PAID.",
+                'is_read' => false
             ]);
 
             // Save pivot addons
@@ -201,5 +231,31 @@ class BookingWebController extends Controller
 
         $pdf = \Barryvdh\DomPDF\Facade\Pdf::loadView('pdf.tiket-digital', compact('pesanan'));
         return $pdf->download("e-ticket-{$booking_code}.pdf");
+    }
+
+    /**
+     * Show customer bookings history and active tickets.
+     */
+    public function myBookings()
+    {
+        $user = auth()->user();
+        
+        $pemesanan = Pemesanan::where('id_customer', $user->id_customer)
+            ->with(['jadwal.paketWisata'])
+            ->get();
+
+        $today = now()->toDateString();
+
+        $activeTrips = $pemesanan->filter(function ($trip) use ($today) {
+            $jadwal = $trip->jadwal;
+            return $jadwal && $jadwal->tanggal_mulai >= $today && $jadwal->status_trip !== 'Selesai';
+        });
+
+        $pastTrips = $pemesanan->filter(function ($trip) use ($today) {
+            $jadwal = $trip->jadwal;
+            return $jadwal && ($jadwal->tanggal_mulai < $today || $jadwal->status_trip === 'Selesai');
+        });
+
+        return view('customer.bookings', compact('activeTrips', 'pastTrips'));
     }
 }

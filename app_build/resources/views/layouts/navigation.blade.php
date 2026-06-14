@@ -5,8 +5,17 @@
             <div class="flex">
                 <!-- Logo -->
                 <div class="shrink-0 flex items-center">
-                    <a href="{{ route('dashboard') }}">
-                        <x-application-logo class="block h-9 w-auto fill-current text-gray-800" />
+                    <a href="{{ route('dashboard') }}" class="flex items-center gap-2 text-xl font-bold tracking-tight text-near-black">
+                        <svg class="w-6 h-6 text-[#1e5e3a]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                            <line x1="12" y1="2" x2="12" y2="22"></line>
+                            <line x1="12" y1="12" x2="2" y2="12"></line>
+                            <line x1="12" y1="12" x2="22" y2="12"></line>
+                            <line x1="12" y1="12" x2="4.93" y2="4.93"></line>
+                            <line x1="12" y1="12" x2="19.07" y2="19.07"></line>
+                            <line x1="12" y1="12" x2="4.93" y2="19.07"></line>
+                            <line x1="12" y1="12" x2="19.07" y2="4.93"></line>
+                        </svg>
+                        <span>Kelana</span>
                     </a>
                 </div>
 

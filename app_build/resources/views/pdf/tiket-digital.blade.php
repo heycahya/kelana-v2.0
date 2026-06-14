@@ -177,6 +177,26 @@
                 </td>
             </tr>
             @endif
+            <tr>
+                <td class="label">Package Cost</td>
+                <td class="value">Rp {{ number_format($pesanan->jumlah_peserta * $pesanan->jadwal->paketWisata->harga, 0, ',', '.') }}</td>
+            </tr>
+            @if($pesanan->promo_code)
+            <tr>
+                <td class="label">Promo Discount ({{ $pesanan->promo_code }})</td>
+                <td class="value" style="color: #c2410c;">-Rp {{ number_format($pesanan->diskon, 0, ',', '.') }}</td>
+            </tr>
+            @endif
+            @if($pesanan->total_biaya_addons > 0)
+            <tr>
+                <td class="label">Add-ons Subtotal</td>
+                <td class="value">Rp {{ number_format($pesanan->total_biaya_addons, 0, ',', '.') }}</td>
+            </tr>
+            @endif
+            <tr>
+                <td class="label" style="color: #1e5e3a; font-weight: 800;">Total Payment</td>
+                <td class="value" style="color: #1e5e3a; font-size: 15px; font-weight: 800;">Rp {{ number_format($pesanan->total_harga + $pesanan->total_biaya_addons, 0, ',', '.') }}</td>
+            </tr>
         </table>
 
         <!-- QR Code Check-in Section -->

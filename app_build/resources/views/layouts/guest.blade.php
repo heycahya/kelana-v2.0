@@ -23,7 +23,13 @@
                 <!-- Top Header: Back Button on the Left -->
                 <div class="flex items-center justify-start">
                     <!-- Consistent Back Button with Text -->
-                    <a href="/" class="inline-flex items-center gap-2 px-4 py-2.5 rounded-full border border-transparent bg-stone/50 text-xs font-semibold uppercase tracking-wider text-near-black hover:bg-near-black hover:text-white transition-all duration-300 ease-in-out">
+                    @php
+                        $backUrl = url()->previous();
+                        if (!$backUrl || str_contains($backUrl, '/login') || str_contains($backUrl, '/register') || $backUrl === request()->url()) {
+                            $backUrl = '/';
+                        }
+                    @endphp
+                    <a href="{{ $backUrl }}" class="inline-flex items-center gap-2 px-4 py-2.5 rounded-full border border-transparent bg-stone/50 text-xs font-semibold uppercase tracking-wider text-near-black hover:bg-near-black hover:text-white transition-all duration-300 ease-in-out">
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" />
                         </svg>
@@ -35,8 +41,17 @@
                 <div class="my-auto w-full max-w-[360px] mx-auto py-8">
                     <!-- Enlarged Typography Branding above Welcome header -->
                     <div class="mb-8">
-                        <a href="/" class="text-4xl font-bold tracking-tight text-near-black hover:opacity-85 transition-opacity">
-                            Kelana
+                        <a href="/" class="text-4xl font-bold tracking-tight text-near-black hover:opacity-85 transition-opacity flex items-center gap-2">
+                            <svg class="w-8 h-8 text-[#1e5e3a]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                                <line x1="12" y1="2" x2="12" y2="22"></line>
+                                <line x1="12" y1="12" x2="2" y2="12"></line>
+                                <line x1="12" y1="12" x2="22" y2="12"></line>
+                                <line x1="12" y1="12" x2="4.93" y2="4.93"></line>
+                                <line x1="12" y1="12" x2="19.07" y2="19.07"></line>
+                                <line x1="12" y1="12" x2="4.93" y2="19.07"></line>
+                                <line x1="12" y1="12" x2="19.07" y2="4.93"></line>
+                            </svg>
+                            <span>Kelana</span>
                         </a>
                     </div>
                     

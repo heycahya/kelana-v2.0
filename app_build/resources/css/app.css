@@ -6,6 +6,10 @@
     body {
         @apply bg-warm-cream text-near-black font-sans;
     }
+    /* Ensure all elements, buttons, inputs, tables, and selects inherit Figtree */
+    body, button, input, optgroup, select, textarea, table, th, td {
+        font-family: 'Figtree', sans-serif !important;
+    }
     /* Menghapus semua box-shadow bawaan di seluruh elemen jika ada */
     * {
         box-shadow: none !important;

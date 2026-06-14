@@ -2,10 +2,22 @@
 
 ## Current Status
 - **Phase**: PHASE 4: REVIEW GATE
-- **Feature**: Rombak Total Enterprise Checkout Flow & Perbaikan Data Sistem (Issue #40)
+- **Feature**: Full-Stack Dashboard Admin dan Trip Leader (Issue #42)
 - **Status**: Completed & Ready for Review ✅
 
 ## Tasks Checklist
+- [x] Create dedicated "Statistics" screen for Trip Leader (leader.statistics) with CSS visual status breakdown, trip-by-trip checklist performance and active state navigation highlight (AI)
+- [x] Fix RouteNotFoundException by mapping `trip_leader.dashboard` to `leader.dashboard` in AuthenticatedSessionController, KatalogWebController, and navbar component (AI)
+
+- [x] Redesign the entire Admin ERP layout, dashboard, packages index/create/edit/show, schedules index/create/edit/show, and financial reports index view to meet high-contrast, premium flat design rules (AI)
+- [x] Refurbish Trip Leader mobile-responsive dashboard and manifest check-in view with customized CSS overrides for the html5-qrcode camera UI (AI)
+- [x] Create Admin Web routing groups and resource routes for Paket and Jadwal (AI)
+- [x] Create Trip Leader Web routing groups for mobile dashboard, manifest, and check-in (AI)
+- [x] Implement AdminDashboardController, PaketWebController, JadwalWebController, and LaporanWebController (AI)
+- [x] Implement LeaderDashboardController and ManifestWebController (AI)
+- [x] Build layouts and views for Admin (admin.blade.php, dashboard, paket, jadwal, laporan) (AI)
+- [x] Build layouts and views for Trip Leader (leader.blade.php, dashboard, manifest with HTML5-QR Code scanner) (AI)
+- [x] Harden EnsureUserIsAdmin, EnsureUserIsCustomer, and EnsureUserIsTripLeader middlewares to support web redirects/aborts (AI)
 - [x] Add E-Ticket PDF download functionality (laravel-dompdf) with a printable custom ticket view featuring a dynamic scanable QR code (AI)
 - [x] Refine booking view UI to look highly custom and SaaS-premium, removing the special request card, styling add-ons as grid option cards, and binding stepper progress to payment states (AI)
 - [x] Fix login page type restriction by changing email input type to text in auth/login.blade.php (AI)
@@ -369,5 +381,17 @@
    - Pastikan border radius pada kartu gambar adalah membulat `26px` dan *button* adalah `rounded-full`.
    - Pastikan struktur hero banner, kategori wisata, inspirasi (carousel horizontal), dan trust/award block sesuai dengan blueprint Tripadvisor.
 
-> **Langkah Pengujian untuk User:**
-> Silakan buka terminal, jalankan `php artisan serve` dan/atau `npm run dev` untuk mengompilasi aset, lalu periksa antarmuka Landing Page yang baru di rute URL root (`/`). Pastikan untuk menguji interaksi klik pada Card Destinasi (pengalihan Login vs Detail), efek transisi pada Floating Navbar, putaran otomatis Promo Slider, serta klik pada accordion FAQ.
+### Langkah Pengujian untuk User (Full-Stack Dashboard Admin & Trip Leader - Issue #42)
+1. Jalankan `npm run dev` dan `php artisan serve` di terminal `app_build/`.
+2. Login sebagai Admin (sesuai data seeder) dan buka `http://localhost:8000/admin/dashboard` untuk memverifikasi:
+   - Panel dashboard menampilkan total pendapatan (lunas) dan pax sold secara real-time.
+   - Tabel menampilkan detail pemesanan terbaru dengan format visual flat.
+   - Akses tab **Master Paket Wisata** untuk melakukan CRUD paket wisata.
+   - Akses tab **Jadwal & Penugasan** untuk membuat dan memetakan penugasan leader.
+   - Akses tab **Laporan Finansial** untuk mengunduh rekap manifest peserta dalam format PDF.
+3. Login sebagai Trip Leader (sesuai data seeder) dan buka `http://localhost:8000/trip-leader/dashboard`:
+   - Panel harus responsive menyerupai aplikasi mobile (HP layout).
+   - Terdapat list jadwal trip yang didelegasikan ke leader yang bersangkutan.
+   - Klik **Buka Manifes & Scan QR** untuk mengakses halaman manifest.
+   - Uji input manual kode booking atau arahkan kamera web/HP ke QR Code untuk check-in. Pastikan status manifest berubah menjadi HADIR secara real-time.
+

@@ -11,7 +11,7 @@ class UlasanSeeder extends Seeder
 {
     public function run(): void
     {
-        $customer = Customer::where('email', 'siti.rahma@kelana.com')->first();
+        $customer = Customer::where('email', 'budi.santoso@kelana.com')->first();
         $customerId = $customer ? $customer->id_customer : 1;
 
         // Fetch seeded schedules

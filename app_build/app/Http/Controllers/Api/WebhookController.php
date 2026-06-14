@@ -99,6 +99,49 @@ class WebhookController extends Controller
                     $pemesanan->update(['status_pembayaran' => 'PAID']);
                     $pembayaranUpdate['status_transaksi'] = 'SUCCESS';
                     $pembayaran->update($pembayaranUpdate);
+
+                    // Send automated bot message
+                    \App\Models\Message::create([
+                        'sender_type' => 'admin',
+                        'sender_id' => 1,
+                        'receiver_type' => 'customer',
+                        'receiver_id' => $pemesanan->id_customer,
+                        'message' => "Pembayaran Anda untuk Kode Booking {$pemesanan->booking_code} telah berhasil dikonfirmasi secara otomatis! Status pemesanan Anda kini telah berubah menjadi PAID. Silakan download E-Ticket PDF Anda di menu 'Tiket Saya'. Terima kasih!",
+                        'is_read' => false
+                    ]);
+
+                    // Trip Leader automatically contacts CS/Admin and Customer
+                    $pemesanan->load(['jadwalTrip.paketWisata', 'jadwalTrip.tripLeader', 'customer']);
+                    if ($pemesanan->jadwalTrip && $pemesanan->jadwalTrip->id_leader) {
+                        $leader = $pemesanan->jadwalTrip->tripLeader;
+                        if ($leader) {
+                            $paketName = $pemesanan->jadwalTrip->paketWisata->nama_paket ?? 'Trip Wisata';
+                            $leaderName = $leader->nama_leader ?? 'Trip Leader';
+                            
+                            // Send confirmation to Admin (CS)
+                            $leaderMessage = "Halo CS/Admin, saya {$leaderName} selaku Trip Leader untuk paket {$paketName} (Booking Code: {$pemesanan->booking_code}). Saya mengonfirmasi bahwa saya siap bertugas memandu trip ini!";
+                            \App\Models\Message::create([
+                                'sender_type' => 'trip_leader',
+                                'sender_id' => $leader->id_leader,
+                                'receiver_type' => 'admin',
+                                'receiver_id' => 1, // Default Admin ID
+                                'message' => $leaderMessage,
+                                'is_read' => false
+                            ]);
+
+                            // Send confirmation to Customer
+                            $custName = $pemesanan->customer->nama_customer ?? 'Kak';
+                            $customerMessage = "Halo {$custName}, saya {$leaderName} selaku Trip Leader Anda untuk paket {$paketName}. Pembayaran Anda telah terverifikasi lunas (PAID). Saya siap memandu perjalanan Anda! Silakan balas chat ini langsung jika ada koordinasi teknis atau perlengkapan yang dibutuhkan.";
+                            \App\Models\Message::create([
+                                'sender_type' => 'trip_leader',
+                                'sender_id' => $leader->id_leader,
+                                'receiver_type' => 'customer',
+                                'receiver_id' => $pemesanan->id_customer,
+                                'message' => $customerMessage,
+                                'is_read' => false
+                            ]);
+                        }
+                    }
                 } 
                 elseif (in_array($transactionStatus, ['deny', 'cancel', 'expire'])) {
                     // Update status pemesanan & pembayaran
@@ -112,6 +155,17 @@ class WebhookController extends Controller
                         $pemesanan->update(['status_pembayaran' => 'CANCELLED']);
                     }
                     $pembayaran->update($pembayaranUpdate);
+
+                    // Send automated bot message
+                    $statusName = $transactionStatus == 'cancel' ? 'dibatalkan' : 'gagal/kedaluwarsa';
+                    \App\Models\Message::create([
+                        'sender_type' => 'admin',
+                        'sender_id' => 1,
+                        'receiver_type' => 'customer',
+                        'receiver_id' => $pemesanan->id_customer,
+                        'message' => "Pemesanan Anda untuk Kode Booking {$pemesanan->booking_code} telah {$statusName}. Jika Anda telah melakukan pembayaran, silakan hubungi CS kami dengan bukti transaksi untuk klaim pengembalian dana (refund).",
+                        'is_read' => false
+                    ]);
 
                     // PENTING: Increment sisa_kuota di tabel jadwal_trip sebesar jumlah_peserta agar kuota tidak hangus
                     $jadwal = JadwalTrip::lockForUpdate()->find($pemesanan->id_jadwal);

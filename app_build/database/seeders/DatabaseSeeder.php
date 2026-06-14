@@ -38,17 +38,6 @@ class DatabaseSeeder extends Seeder
                 'alamat' => 'Jl. Merdeka No. 45'
             ]
         );
-
-        Customer::updateOrCreate(
-            ['email' => 'siti.rahma@kelana.com'],
-            [
-                'nama_customer' => 'Siti Rahma',
-                'password' => Hash::make('PasswordCustomer123!'),
-                'no_telp' => '081234567891',
-                'alamat' => 'Jl. Sudirman No. 12'
-            ]
-        );
-
         // 3. Seed Trip Leader
         TripLeader::updateOrCreate(
             ['email' => 'adi.wijaya@kelana.com'],

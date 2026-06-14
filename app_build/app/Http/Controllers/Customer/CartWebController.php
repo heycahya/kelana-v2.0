@@ -72,16 +72,17 @@ class CartWebController extends Controller
                 ]);
             }
 
-            // Mark booking as FAILED/CANCELLED
+            // Mark booking as CANCELLED
             $booking->update([
-                'status_pembayaran' => 'FAILED'
+                'status_pembayaran' => 'CANCELLED'
             ]);
 
             DB::commit();
-            return response()->json(['status' => 'success', 'message' => 'Booking cancelled successfully.']);
+            session()->flash('success', 'Pesanan Anda berhasil dibatalkan.');
+            return response()->json(['status' => 'success', 'message' => 'Pesanan berhasil dibatalkan.']);
         } catch (\Exception $e) {
             DB::rollBack();
-            return response()->json(['status' => 'error', 'message' => 'Failed to cancel: ' . $e->getMessage()], 500);
+            return response()->json(['status' => 'error', 'message' => 'Gagal membatalkan pesanan: ' . $e->getMessage()], 500);
         }
     }
 }

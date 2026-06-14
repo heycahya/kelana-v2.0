@@ -13,17 +13,22 @@ class KatalogWebController extends Controller
      */
     public function index()
     {
-        if (\Illuminate\Support\Facades\Auth::guard('customer')->check()) {
-            return redirect()->route('dashboard');
-        }
         if (\Illuminate\Support\Facades\Auth::guard('admin')->check()) {
             return redirect()->route('admin.dashboard');
         }
         if (\Illuminate\Support\Facades\Auth::guard('trip_leader')->check()) {
-            return redirect()->route('trip_leader.dashboard');
+            return redirect()->route('leader.dashboard');
         }
 
-        $paketWisata = PaketWisata::all();
+        $query = PaketWisata::query();
+        if (request()->has('search') && !empty(request()->search)) {
+            $search = request()->search;
+            $query->where(function($q) use ($search) {
+                $q->where('nama_paket', 'like', "%{$search}%")
+                  ->orWhere('rute', 'like', "%{$search}%");
+            });
+        }
+        $paketWisata = $query->get();
         return view('welcome', compact('paketWisata'));
     }
 

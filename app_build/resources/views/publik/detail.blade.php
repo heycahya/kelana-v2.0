@@ -95,7 +95,7 @@
                   return total;
               },
               get grandTotal() {
-                  return (this.hargaPaket + this.addonTotal) * this.jumlahPeserta;
+                  return (this.hargaPaket * this.jumlahPeserta) + this.addonTotal;
               },
               formatRupiah(val) {
                   return new Intl.NumberFormat('id-ID').format(val);

@@ -24,6 +24,11 @@ class Customer extends Authenticatable
             ->withTimestamps();
     }
 
+    public function pemesanan()
+    {
+        return $this->hasMany(Pemesanan::class, 'id_customer', 'id_customer');
+    }
+
     /**
      * Get the attributes that should be cast.
      *

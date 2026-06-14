@@ -16,13 +16,17 @@ class EnsureUserIsAdmin
      */
     public function handle(Request $request, Closure $next): Response
     {
-        if ($request->user() && $request->user() instanceof Admin) {
+        if (\Illuminate\Support\Facades\Auth::guard('admin')->check()) {
             return $next($request);
         }
 
-        return response()->json([
-            'success' => false,
-            'message' => 'Akses ditolak. Khusus Admin.'
-        ], 403);
+        if ($request->expectsJson() || $request->is('api/*')) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Akses ditolak. Khusus Admin.'
+            ], 403);
+        }
+
+        abort(403, 'Akses ditolak. Khusus Admin.');
     }
 }

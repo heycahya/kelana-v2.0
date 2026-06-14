@@ -16,13 +16,17 @@ class EnsureUserIsTripLeader
      */
     public function handle(Request $request, Closure $next): Response
     {
-        if ($request->user() && $request->user() instanceof TripLeader) {
+        if (\Illuminate\Support\Facades\Auth::guard('trip_leader')->check()) {
             return $next($request);
         }
 
-        return response()->json([
-            'success' => false,
-            'message' => 'Akses ditolak. Khusus Trip Leader.'
-        ], 403);
+        if ($request->expectsJson() || $request->is('api/*')) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Akses ditolak. Khusus Trip Leader.'
+            ], 403);
+        }
+
+        abort(403, 'Akses ditolak. Khusus Trip Leader.');
     }
 }

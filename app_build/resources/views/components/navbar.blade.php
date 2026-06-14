@@ -1,15 +1,23 @@
 <!-- Premium Navigation Bar -->
 <nav x-data="wishlistCartData()" class="w-full bg-warm-cream border-b border-stone sticky top-0 z-50">
     <div class="max-w-[1400px] mx-auto px-6 py-5 flex justify-between items-center">
-        <a href="/" class="text-2xl font-bold tracking-tight text-near-black flex items-center">
-            Kelana
+        <a href="/" class="text-2xl font-bold tracking-tight text-near-black flex items-center gap-2">
+            <svg class="w-6 h-6 text-[#1e5e3a]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                <line x1="12" y1="2" x2="12" y2="22"></line>
+                <line x1="12" y1="12" x2="2" y2="12"></line>
+                <line x1="12" y1="12" x2="22" y2="12"></line>
+                <line x1="12" y1="12" x2="4.93" y2="4.93"></line>
+                <line x1="12" y1="12" x2="19.07" y2="19.07"></line>
+                <line x1="12" y1="12" x2="4.93" y2="19.07"></line>
+                <line x1="12" y1="12" x2="19.07" y2="4.93"></line>
+            </svg>
+            <span>Kelana</span>
         </a>
 
         <!-- Center Menu (English Translated) -->
         <div class="hidden md:flex space-x-8 text-sm font-semibold tracking-wide">
             <a href="{{ url('/') }}" class="text-graphite hover:text-near-black transition-colors">Home</a>
             <a href="{{ url('/#destinasi') }}" class="text-graphite hover:text-near-black transition-colors">Destinations</a>
-            <a href="#" class="text-graphite hover:text-near-black transition-colors">How It Works</a>
             <a href="#" class="text-graphite hover:text-near-black transition-colors">Testimonials</a>
         </div>
 
@@ -53,7 +61,7 @@
                             Signed in as <br/>
                             <span class="font-semibold text-white truncate block">{{ Auth::guard('customer')->user()->email }}</span>
                         </div>
-                        <a href="{{ route('dashboard') }}" class="block px-4 py-2.5 text-white hover:bg-white/10 transition-colors">My Bookings</a>
+                        <a href="{{ route('customer.bookings') }}" class="block px-4 py-2.5 text-white hover:bg-white/10 transition-colors">My Bookings</a>
                         <a href="{{ route('profile.edit') }}" class="block px-4 py-2.5 text-white hover:bg-white/10 transition-colors">Profile Settings</a>
                         <div class="border-t border-white/10 my-1"></div>
                         <form method="POST" action="{{ route('logout') }}" class="w-full">
@@ -71,7 +79,7 @@
                     <button type="submit" class="bg-stone/50 border border-transparent px-6 py-2.5 rounded-[26px] hover:bg-near-black hover:text-white hover:scale-105 active:scale-95 transition-all duration-300 ease-in-out font-semibold text-near-black">Logout</button>
                 </form>
             @elseif (Auth::guard('trip_leader')->check())
-                <a href="{{ route('trip_leader.dashboard') }}" class="bg-electric-lime border border-transparent px-6 py-2.5 rounded-[26px] font-semibold text-white hover:bg-near-black hover:text-white hover:scale-105 active:scale-95 transition-all duration-300 ease-in-out">Leader Dashboard</a>
+                <a href="{{ route('leader.dashboard') }}" class="bg-electric-lime border border-transparent px-6 py-2.5 rounded-[26px] font-semibold text-white hover:bg-near-black hover:text-white hover:scale-105 active:scale-95 transition-all duration-300 ease-in-out">Leader Dashboard</a>
                 <form method="POST" action="{{ route('logout') }}" class="inline">
                     @csrf
                     <button type="submit" class="bg-stone/50 border border-transparent px-6 py-2.5 rounded-[26px] hover:bg-near-black hover:text-white hover:scale-105 active:scale-95 transition-all duration-300 ease-in-out font-semibold text-near-black">Logout</button>

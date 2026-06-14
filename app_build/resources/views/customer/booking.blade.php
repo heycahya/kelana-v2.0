@@ -268,6 +268,35 @@
                             <span class="text-xs font-bold text-graphite">Total Add-ons</span>
                             <span class="text-xs font-bold text-near-black">Rp <span x-text="formatRupiah(totalAddons)"></span></span>
                         </div>
+
+                        <!-- Promo Discount -->
+                        <div class="flex justify-between items-center text-[#1e5e3a] pt-3 border-t border-dashed border-stone/40 mt-2" x-show="promoDiscount > 0" x-transition>
+                            <div class="flex flex-col">
+                                <span class="text-[#1e5e3a] font-bold text-xs">Promo Discount (<span x-text="appliedPromo"></span>)</span>
+                            </div>
+                            <span class="font-bold">- Rp <span x-text="formatRupiah(promoDiscount)"></span></span>
+                        </div>
+                    </div>
+
+                    <!-- Promo Code Input -->
+                    <div class="pb-6 border-b border-stone/40 mb-6">
+                        <label class="block text-[10px] font-bold text-graphite uppercase tracking-widest mb-2">Have a Promo Code?</label>
+                        <div class="flex gap-2">
+                            <input type="text" x-model="promoCode" placeholder="Contoh: MERDEKA20" class="flex-grow p-3 rounded-full border border-stone text-xs font-semibold outline-none focus:border-electric-lime bg-warm-cream/20">
+                            <button type="button" @click="applyPromo" class="bg-near-black text-white hover:bg-electric-lime px-5 py-2.5 rounded-full text-xs font-bold transition">
+                                Apply
+                            </button>
+                        </div>
+                        
+                        <!-- Success / Error messages -->
+                        <div x-show="promoSuccess" class="text-xs text-[#1e5e3a] font-bold mt-2" x-text="promoSuccess" style="display: none;"></div>
+                        <div x-show="promoError" class="text-xs text-coral-alert font-bold mt-2" x-text="promoError" style="display: none;"></div>
+                        
+                        <!-- Applied Promo Chip -->
+                        <div x-show="appliedPromo" class="mt-2.5 flex items-center justify-between bg-electric-lime/5 border border-electric-lime/20 rounded-full px-4 py-1.5" style="display: none;">
+                            <span class="text-[10px] text-electric-lime font-bold uppercase tracking-wider">Applied: <strong x-text="appliedPromo"></strong></span>
+                            <button type="button" @click="clearPromo" class="text-xs font-bold text-coral-alert hover:text-red-700">Remove ×</button>
+                        </div>
                     </div>
 
                     <!-- Total Bayar Akhir & Action Button -->
@@ -312,6 +341,10 @@
                 harga: {{ $jadwal->paketWisata->harga }},
                 loading: false,
                 errorMessage: '',
+                promoCode: '',
+                appliedPromo: '',
+                promoSuccess: '',
+                promoError: '',
                 addonsList: [
                     @foreach($addons as $addon)
                     { id: {{ $addon->id }}, nama: '{{ $addon->nama_addon }}', harga: {{ $addon->harga }} },
@@ -374,8 +407,53 @@
                     return this.selectedAddons.reduce((sum, a) => sum + (a.price * a.kuantitas), 0);
                 },
 
+                get promoDiscount() {
+                    const basePrice = this.jumlah * this.harga;
+                    if (this.appliedPromo === 'MERDEKA20') {
+                        return basePrice * 0.20;
+                    } else if (this.appliedPromo === 'RINJANIPAS') {
+                        return basePrice * 0.10;
+                    } else if (this.appliedPromo === 'KOMODOLUX') {
+                        return 100000;
+                    }
+                    return 0;
+                },
+
                 get grandTotal() {
-                    return (this.jumlah * this.harga) + this.totalAddons;
+                    const total = (this.jumlah * this.harga) + this.totalAddons - this.promoDiscount;
+                    return Math.max(0, total);
+                },
+
+                applyPromo() {
+                    this.promoError = '';
+                    this.promoSuccess = '';
+                    
+                    const code = this.promoCode.trim().toUpperCase();
+                    if (!code) {
+                        this.promoError = 'Silakan masukkan kode promo.';
+                        return;
+                    }
+
+                    if (code === 'MERDEKA20') {
+                        this.appliedPromo = code;
+                        this.promoSuccess = 'Kode promo MERDEKA20 berhasil diterapkan! Diskon 20% diperoleh.';
+                    } else if (code === 'RINJANIPAS') {
+                        this.appliedPromo = code;
+                        this.promoSuccess = 'Kode promo RINJANIPAS berhasil diterapkan! Diskon 10% diperoleh.';
+                    } else if (code === 'KOMODOLUX') {
+                        this.appliedPromo = code;
+                        this.promoSuccess = 'Kode promo KOMODOLUX berhasil diterapkan! Diskon Rp 100.000 diperoleh.';
+                    } else {
+                        this.promoError = 'Kode promo tidak valid.';
+                        this.appliedPromo = '';
+                    }
+                },
+
+                clearPromo() {
+                    this.promoCode = '';
+                    this.appliedPromo = '';
+                    this.promoSuccess = '';
+                    this.promoError = '';
                 },
 
                 submitBooking() {
@@ -398,7 +476,8 @@
                         body: JSON.stringify({
                             id_jadwal: {{ $jadwal->id_jadwal }},
                             jumlah_peserta: this.jumlah,
-                            addons: addonsPayload
+                            addons: addonsPayload,
+                            promo_code: this.appliedPromo
                         })
                     })
                     .then(response => response.json().then(data => ({ status: response.status, body: data })))

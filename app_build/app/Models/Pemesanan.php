@@ -6,7 +6,7 @@ use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-#[Fillable(['booking_code', 'id_customer', 'id_jadwal', 'tgl_pemesanan', 'jumlah_peserta', 'total_harga', 'status_pembayaran', 'attendance_status', 'jumlah_hadir', 'qr_code_token', 'total_biaya_addons'])]
+#[Fillable(['booking_code', 'id_customer', 'id_jadwal', 'tgl_pemesanan', 'jumlah_peserta', 'total_harga', 'status_pembayaran', 'attendance_status', 'jumlah_hadir', 'qr_code_token', 'total_biaya_addons', 'promo_code', 'diskon'])]
 class Pemesanan extends Model
 {
     use HasFactory;

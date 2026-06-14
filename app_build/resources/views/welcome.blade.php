@@ -18,15 +18,23 @@
     <nav class="w-full fixed top-0 left-0 z-50 transition-all duration-300 border-b"
          :class="scrolled ? 'bg-[#0f1a15] py-4 border-white/10' : 'bg-transparent py-6 border-transparent'">
         <div class="max-w-[1400px] mx-auto px-6 flex justify-between items-center">
-            <a href="/" class="text-2xl font-bold tracking-tight text-white flex items-center">
-                Kelana
+            <a href="/" class="text-2xl font-bold tracking-tight text-white flex items-center gap-2">
+                <svg class="w-6 h-6 text-[#1e5e3a]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                    <line x1="12" y1="2" x2="12" y2="22"></line>
+                    <line x1="12" y1="12" x2="2" y2="12"></line>
+                    <line x1="12" y1="12" x2="22" y2="12"></line>
+                    <line x1="12" y1="12" x2="4.93" y2="4.93"></line>
+                    <line x1="12" y1="12" x2="19.07" y2="19.07"></line>
+                    <line x1="12" y1="12" x2="4.93" y2="19.07"></line>
+                    <line x1="12" y1="12" x2="19.07" y2="4.93"></line>
+                </svg>
+                <span>Kelana</span>
             </a>
 
             <!-- Center Menu -->
             <div class="hidden md:flex space-x-8 text-sm font-semibold tracking-wide">
                 <a href="{{ url('/') }}" class="text-white/80 hover:text-white transition-colors">Home</a>
                 <a href="{{ url('/#destinasi') }}" class="text-white/80 hover:text-white transition-colors">Destinations</a>
-                <a href="#" class="text-white/80 hover:text-white transition-colors">How It Works</a>
                 <a href="#" class="text-white/80 hover:text-white transition-colors">Testimonials</a>
             </div>
 
@@ -70,7 +78,7 @@
                                 Signed in as <br/>
                                 <span class="font-semibold text-white truncate block">{{ Auth::guard('customer')->user()->email }}</span>
                             </div>
-                            <a href="{{ route('dashboard') }}" class="block px-4 py-2.5 text-white hover:bg-white/10 transition-colors">My Bookings</a>
+                            <a href="{{ route('customer.bookings') }}" class="block px-4 py-2.5 text-white hover:bg-white/10 transition-colors">My Bookings</a>
                             <a href="{{ route('profile.edit') }}" class="block px-4 py-2.5 text-white hover:bg-white/10 transition-colors">Profile Settings</a>
                             <div class="border-t border-white/10 my-1"></div>
                             <form method="POST" action="{{ route('logout') }}" class="w-full">
@@ -101,6 +109,29 @@
         </div>
     </nav>
 
+    <!-- GLOBAL TOAST NOTIFICATION COMPONENT -->
+    @if (session('success') || session('error'))
+        <div x-data="{ show: true }" 
+             x-show="show" 
+             x-init="setTimeout(() => show = false, 5000)"
+             x-transition:enter="transition ease-out duration-300"
+             x-transition:enter-start="opacity-0 translate-y-2"
+             x-transition:enter-end="opacity-100 translate-y-0"
+             x-transition:leave="transition ease-in duration-200"
+             x-transition:leave-start="opacity-100"
+             x-transition:leave-end="opacity-0"
+             class="fixed bottom-5 right-5 z-[9999] max-w-sm w-full bg-white border border-stone/30 rounded-[24px] p-4 flex items-center justify-between gap-4">
+            <div class="flex items-center gap-3">
+                <span class="text-2xl">{{ session('success') ? '✅' : '❌' }}</span>
+                <div>
+                    <h4 class="font-bold text-xs uppercase tracking-wider text-near-black">{{ session('success') ? 'Sukses' : 'Peringatan' }}</h4>
+                    <p class="text-xs text-graphite font-semibold mt-0.5">{{ session('success') ?? session('error') }}</p>
+                </div>
+            </div>
+            <button @click="show = false" class="text-xs font-bold text-near-black bg-stone/20 hover:bg-stone/30 px-3 py-1.5 rounded-full transition shrink-0">Tutup</button>
+        </div>
+    @endif
+
     <!-- 2. Immersive Hero Section -->
     <section class="relative min-h-[90vh] flex flex-col items-center justify-center text-center px-6 py-32 bg-[#0f1a15] overflow-hidden">
         <div class="absolute inset-0 z-0">
@@ -120,17 +151,17 @@
             </p>
             
             <!-- Search Bar Capsule -->
-            <div class="bg-white p-2 rounded-full max-w-2xl mx-auto flex items-center border border-stone/30 w-full">
+            <form method="GET" action="{{ route('home') }}#destinasi" class="bg-white p-2 rounded-full max-w-2xl mx-auto flex items-center border border-stone/30 w-full">
                 <div class="flex-grow flex items-center pl-4">
                     <svg class="w-5 h-5 text-[#3f4e45]" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
                     </svg>
-                    <input type="text" placeholder="Search for a location..." class="w-full bg-transparent border-0 focus:ring-0 text-[#0f1a15] placeholder-[#3f4e45] px-3 py-2 outline-none">
+                    <input id="search-input" type="text" name="search" value="{{ request('search') }}" placeholder="Search for a location..." class="w-full bg-transparent border-0 focus:ring-0 text-[#0f1a15] placeholder-[#3f4e45] px-3 py-2 outline-none">
                 </div>
-                <a href="#destinasi" class="bg-[#1e5e3a] hover:bg-[#154329] text-white px-8 py-3 rounded-full font-medium transition whitespace-nowrap">
+                <button type="submit" class="bg-[#1e5e3a] hover:bg-[#154329] text-white px-8 py-3 rounded-full font-medium transition whitespace-nowrap">
                     Search Now
-                </a>
-            </div>
+                </button>
+            </form>
         </div>
     </section>
 
@@ -331,50 +362,15 @@
         ];
 
         // Merge mock tours into cards list so it looks populated and massive
-        $cards = array_merge($cards, $mockTours);
+        // $cards = array_merge($cards, $mockTours);
     @endphp
 
-    <!-- 4. Hal yang dapat dilakukan berdasarkan minat (Open Trip Focus) -->
-    <section class="w-full bg-[#f4f3ed] py-16 px-6 border-b border-stone/30">
-        <div class="max-w-[1400px] mx-auto">
-            <div class="mb-10 text-center md:text-left">
-                <h2 class="text-3xl md:text-4xl font-bold text-[#0f1a15]">Hal yang dapat dilakukan berdasarkan minat</h2>
-                <p class="text-[#3f4e45] mt-2 text-sm md:text-base">Apa pun tipe petualangan Anda, kami siap membantu</p>
-            </div>
-            
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-                <!-- Pendakian Gunung -->
-                <button @click="activeCategory = 'mountain'; document.getElementById('destinasi').scrollIntoView({ behavior: 'smooth' })" class="group flex flex-col items-center p-6 bg-white rounded-[26px] hover:bg-[#1e5e3a]/5 transition-all duration-300 border border-stone/30">
-                    <div class="w-16 h-16 rounded-full bg-[#1e5e3a]/10 flex items-center justify-center mb-4 text-[#1e5e3a] group-hover:bg-[#1e5e3a] group-hover:text-white transition-all duration-300">
-                        <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364-6.364l-.707.707M6.343 17.657l-.707.707m0-12.728l.707.707m12.728 12.728l.707-.707M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
-                    </div>
-                    <span class="font-bold text-[#0f1a15]">Pendakian Gunung</span>
-                </button>
-                
-                <!-- Sailing & Trip Laut -->
-                <button @click="activeCategory = 'beach'; document.getElementById('destinasi').scrollIntoView({ behavior: 'smooth' })" class="group flex flex-col items-center p-6 bg-white rounded-[26px] hover:bg-[#1e5e3a]/5 transition-all duration-300 border border-stone/30">
-                    <div class="w-16 h-16 rounded-full bg-[#1e5e3a]/10 flex items-center justify-center mb-4 text-[#1e5e3a] group-hover:bg-[#1e5e3a] group-hover:text-white transition-all duration-300">
-                        <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M3 10h18M3 14h18m-9-4v8m-7 0h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"></path></svg>
-                    </div>
-                    <span class="font-bold text-[#0f1a15]">Sailing & Trip Laut</span>
-                </button>
-                
-                <!-- Petualangan Rimba -->
-                <button @click="activeCategory = 'forest'; document.getElementById('destinasi').scrollIntoView({ behavior: 'smooth' })" class="group flex flex-col items-center p-6 bg-white rounded-[26px] hover:bg-[#1e5e3a]/5 transition-all duration-300 border border-stone/30">
-                    <div class="w-16 h-16 rounded-full bg-[#1e5e3a]/10 flex items-center justify-center mb-4 text-[#1e5e3a] group-hover:bg-[#1e5e3a] group-hover:text-white transition-all duration-300">
-                        <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011-1v5m-4 0h4"></path></svg>
-                    </div>
-                    <span class="font-bold text-[#0f1a15]">Petualangan Rimba</span>
-                </button>
-            </div>
-        </div>
-    </section>
 
     <!-- 5. Paling Laku (Best Sellers) -->
     <section class="w-full bg-[#f4f3ed] py-12 px-6">
         <div class="max-w-[1400px] mx-auto">
             <div class="mb-8">
-                <h3 class="text-2xl md:text-3xl font-bold text-[#0f1a15]">Paling Laku di Kelana</h3>
+                <h3 class="text-3xl md:text-4xl font-bold tracking-tight text-[#0f1a15]">Paling Laku di Kelana</h3>
                 <p class="text-[#3f4e45] text-sm mt-1">Aktivitas open trip terlaris pilihan pelancong Indonesia</p>
             </div>
             
@@ -386,12 +382,7 @@
                     $bestSellers = array_slice($bestSellers, 0, 4);
                 @endphp
                 @foreach($bestSellers as $card)
-                    <!-- Logika Halaman Universal: Click redirects to login/register if not customer -->
-                    @if(Auth::guard('customer')->check())
-                        <a href="{{ route('paket.detail', $card['id']) }}" class="group bg-white rounded-[26px] overflow-hidden border border-stone/30 block hover:scale-[1.02] transition-transform duration-300">
-                    @else
-                        <a href="{{ route('login') }}" class="group bg-white rounded-[26px] overflow-hidden border border-stone/30 block hover:scale-[1.02] transition-transform duration-300">
-                    @endif
+                    <a href="{{ route('paket.detail', $card['id']) }}" class="group bg-white rounded-[26px] overflow-hidden border border-stone/30 block hover:scale-[1.02] transition-transform duration-300">
                         <div class="relative overflow-hidden aspect-[4/3] bg-stone/20">
                             <img src="{{ $card['gambar'] }}" alt="{{ $card['nama'] }}" class="w-full h-full object-cover">
                             <span class="absolute top-4 left-4 bg-red-600 text-white px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider">Paling Laku</span>
@@ -422,7 +413,7 @@
     <section class="w-full bg-[#f4f3ed] py-12 px-6">
         <div class="max-w-[1400px] mx-auto">
             <div class="mb-8">
-                <h3 class="text-2xl md:text-3xl font-bold text-[#0f1a15]">Kemungkinan Akan Terjual Habis</h3>
+                <h3 class="text-3xl md:text-4xl font-bold tracking-tight text-[#0f1a15]">Kemungkinan Akan Terjual Habis</h3>
                 <p class="text-[#3f4e45] text-sm mt-1">Destinasi favorit dengan kapasitas sisa kuota yang menipis</p>
             </div>
             
@@ -434,12 +425,7 @@
                     $fastSelling = array_slice($fastSelling, 0, 4);
                 @endphp
                 @foreach($fastSelling as $card)
-                    <!-- Logika Halaman Universal: Click redirects to login/register if not customer -->
-                    @if(Auth::guard('customer')->check())
-                        <a href="{{ route('paket.detail', $card['id']) }}" class="group bg-white rounded-[26px] overflow-hidden border border-stone/30 block hover:scale-[1.02] transition-transform duration-300">
-                    @else
-                        <a href="{{ route('login') }}" class="group bg-white rounded-[26px] overflow-hidden border border-stone/30 block hover:scale-[1.02] transition-transform duration-300">
-                    @endif
+                    <a href="{{ route('paket.detail', $card['id']) }}" class="group bg-white rounded-[26px] overflow-hidden border border-stone/30 block hover:scale-[1.02] transition-transform duration-300">
                         <div class="relative overflow-hidden aspect-[4/3] bg-stone/20">
                             <img src="{{ $card['gambar'] }}" alt="{{ $card['nama'] }}" class="w-full h-full object-cover">
                             <span class="absolute top-4 left-4 bg-orange-600 text-white px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider">Kuota Terbatas</span>
@@ -470,8 +456,7 @@
     <div id="destinasi" class="w-full bg-[#f4f3ed] py-20 px-6 border-t border-stone/30">
         <div class="max-w-[1400px] mx-auto">
             <div class="mb-12">
-                <span class="text-xs font-bold text-[#1e5e3a] uppercase tracking-widest block mb-2">Katalog Lengkap</span>
-                <h2 class="text-4xl md:text-5xl font-medium tracking-tight text-[#0f1a15] mb-8">Pilih Destinasi Petualanganmu</h2>
+                <h2 class="text-3xl md:text-4xl font-bold tracking-tight text-[#0f1a15] mb-8">Pilih Destinasi Petualanganmu</h2>
                 
                 <!-- Tab Kategori Wisata -->
                 <div class="flex gap-3 overflow-x-auto pb-4 no-scrollbar">
@@ -488,69 +473,85 @@
                         Petualangan Rimba
                     </button>
                 </div>
+
+                <!-- Info Pencarian Aktif -->
+                @if(request('search'))
+                    <div class="mt-6 flex flex-wrap items-center justify-between gap-3 bg-white border border-stone/30 p-4 rounded-[26px]">
+                        <span class="text-xs font-semibold text-[#0f1a15]">
+                            🔎 Menampilkan hasil pencarian untuk: <strong class="text-[#1e5e3a]">"{{ request('search') }}"</strong>
+                        </span>
+                        <a href="{{ route('home') }}#destinasi" class="bg-near-black hover:bg-[#1e5e3a] text-white text-[10px] font-bold px-4 py-2 rounded-full transition">
+                            Hapus Filter Pencarian ×
+                        </a>
+                    </div>
+                @endif
             </div>
 
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-                @foreach($cards as $card)
-                    <!-- Logika Halaman Universal: Click redirects to login/register if not customer -->
-                    @if(Auth::guard('customer')->check())
-                        <a href="{{ route('paket.detail', $card['id']) }}" 
-                           x-show="activeCategory === 'all' || activeCategory === '{{ $card['kategori'] }}'" 
-                           class="group bg-white rounded-[26px] overflow-hidden relative border border-stone/30 block hover:scale-[1.02] transition-transform duration-300">
-                    @else
-                        <a href="{{ route('login') }}" 
-                           x-show="activeCategory === 'all' || activeCategory === '{{ $card['kategori'] }}'" 
-                           class="group bg-white rounded-[26px] overflow-hidden relative border border-stone/30 block hover:scale-[1.02] transition-transform duration-300">
-                    @endif
-                        <!-- Image Container with Wishlist and Badge -->
-                        <div class="relative overflow-hidden aspect-[4/3] bg-stone/20">
-                            <img src="{{ $card['gambar'] }}" alt="{{ $card['nama'] }}" class="w-full h-full object-cover transition-transform duration-75 group-hover:scale-[1.03]">
-                            
-                            <!-- Wishlist Heart Button -->
-                            <button class="absolute top-4 right-4 bg-white/95 backdrop-blur-sm hover:bg-white rounded-full p-2.5 transition z-20 focus:outline-none" 
-                                    :class="wishlistItems.some(item => item.paket_wisata_id == {{ $card['id'] }}) ? 'text-[#1e5e3a]' : 'text-near-black'"
-                                    aria-label="Add to Wishlist" 
-                                    @click.prevent="toggleWishlist({{ $card['id'] }})">
-                                <svg class="w-5 h-5" :fill="wishlistItems.some(item => item.paket_wisata_id == {{ $card['id'] }}) ? 'currentColor' : 'none'" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"></path>
-                                </svg>
-                            </button>
+            @if(count($cards) > 0)
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                    @foreach($cards as $card)
+                            <a href="{{ route('paket.detail', $card['id']) }}" 
+                               x-show="activeCategory === 'all' || activeCategory === '{{ $card['kategori'] }}'" 
+                               class="group bg-white rounded-[26px] overflow-hidden relative border border-stone/30 block hover:scale-[1.02] transition-transform duration-300">
+                            <!-- Image Container with Wishlist and Badge -->
+                            <div class="relative overflow-hidden aspect-[4/3] bg-stone/20">
+                                <img src="{{ $card['gambar'] }}" alt="{{ $card['nama'] }}" class="w-full h-full object-cover transition-transform duration-75 group-hover:scale-[1.03]">
+                                
+                                <!-- Wishlist Heart Button -->
+                                <button class="absolute top-4 right-4 bg-white/95 backdrop-blur-sm hover:bg-white rounded-full p-2.5 transition z-20 focus:outline-none" 
+                                        :class="wishlistItems.some(item => item.paket_wisata_id == {{ $card['id'] }}) ? 'text-[#1e5e3a]' : 'text-near-black'"
+                                        aria-label="Add to Wishlist" 
+                                        @click.prevent="toggleWishlist({{ $card['id'] }})">
+                                    <svg class="w-5 h-5" :fill="wishlistItems.some(item => item.paket_wisata_id == {{ $card['id'] }}) ? 'currentColor' : 'none'" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"></path>
+                                    </svg>
+                                </button>
 
-                            <!-- Badge Kelangkaan -->
-                            <span class="absolute bottom-4 left-4 bg-[#1e5e3a] text-white px-3 py-1 rounded-full text-xs font-bold">
-                                {{ $card['badge'] }}
-                            </span>
-                        </div>
-
-                        <!-- Card Content -->
-                        <div class="p-6">
-                            <!-- Location & Rating Row -->
-                            <div class="flex items-center justify-between mb-2">
-                                <span class="text-xs text-[#3f4e45] font-semibold tracking-wide flex items-center gap-1">
-                                    <svg class="w-4 h-4 text-[#1e5e3a]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
-                                    {{ $card['rute'] }}
-                                </span>
-                                <span class="text-xs font-bold text-[#1e5e3a] flex items-center gap-0.5">
-                                    ★ {{ number_format($card['rating'], 1) }} ({{ $card['reviews_count'] }})
+                                <!-- Badge Kelangkaan -->
+                                <span class="absolute bottom-4 left-4 bg-[#1e5e3a] text-white px-3 py-1 rounded-full text-xs font-bold">
+                                    {{ $card['badge'] }}
                                 </span>
                             </div>
-                            <h3 class="text-lg font-bold text-[#0f1a15] mb-4 line-clamp-1 hover:text-[#1e5e3a] transition">
-                                {{ $card['nama'] }}
-                            </h3>
-                            <div class="flex items-center justify-between pt-4 border-t border-stone/50">
-                                <div>
-                                    <span class="text-xs text-[#3f4e45] block">Price starts from</span>
-                                    <span class="text-lg font-bold text-[#0f1a15]">Rp {{ number_format($card['harga'], 0, ',', '.') }}</span>
+
+                            <!-- Card Content -->
+                            <div class="p-6">
+                                <!-- Location & Rating Row -->
+                                <div class="flex items-center justify-between mb-2">
+                                    <span class="text-xs text-[#3f4e45] font-semibold tracking-wide flex items-center gap-1">
+                                        <svg class="w-4 h-4 text-[#1e5e3a]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
+                                        {{ $card['rute'] }}
+                                    </span>
+                                    <span class="text-xs font-bold text-[#1e5e3a] flex items-center gap-0.5">
+                                        ★ {{ number_format($card['rating'], 1) }} ({{ $card['reviews_count'] }})
+                                    </span>
                                 </div>
-                                <!-- Arrow CTA -->
-                                <div class="w-10 h-10 bg-[#1e5e3a]/10 text-[#1e5e3a] group-hover:bg-[#1e5e3a] group-hover:text-white rounded-full flex items-center justify-center transition-all duration-300">
-                                    <svg class="w-5 h-5 transform group-hover:translate-x-0.5 transition" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>
+                                <h3 class="text-lg font-bold text-[#0f1a15] mb-4 line-clamp-1 hover:text-[#1e5e3a] transition">
+                                    {{ $card['nama'] }}
+                                </h3>
+                                <div class="flex items-center justify-between pt-4 border-t border-stone/50">
+                                    <div>
+                                        <span class="text-xs text-[#3f4e45] block">Price starts from</span>
+                                        <span class="text-lg font-bold text-[#0f1a15]">Rp {{ number_format($card['harga'], 0, ',', '.') }}</span>
+                                    </div>
+                                    <!-- Arrow CTA -->
+                                    <div class="w-10 h-10 bg-[#1e5e3a]/10 text-[#1e5e3a] group-hover:bg-[#1e5e3a] group-hover:text-white rounded-full flex items-center justify-center transition-all duration-300">
+                                        <svg class="w-5 h-5 transform group-hover:translate-x-0.5 transition" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>
+                                    </div>
                                 </div>
                             </div>
-                        </div>
+                        </a>
+                    @endforeach
+                </div>
+            @else
+                <div class="bg-white border border-stone/30 rounded-[26px] p-12 text-center max-w-xl mx-auto space-y-4">
+                    <div class="text-5xl">🔍❌</div>
+                    <h3 class="text-lg font-bold text-near-black">Destinasi Tidak Ditemukan</h3>
+                    <p class="text-xs text-graphite leading-relaxed">Maaf, kami tidak dapat menemukan destinasi atau paket wisata yang cocok dengan kata kunci <strong class="text-near-black">"{{ request('search') }}"</strong>. Silakan coba kata kunci lain atau bersihkan pencarian untuk melihat semua paket.</p>
+                    <a href="{{ route('home') }}#destinasi" class="inline-block bg-[#1e5e3a] hover:bg-[#154329] text-white px-6 py-2.5 rounded-full text-xs font-bold transition">
+                        Lihat Semua Wisata
                     </a>
-                @endforeach
-            </div>
+                </div>
+            @endif
         </div>
     </div>
 
@@ -558,7 +559,7 @@
     <section class="w-full bg-white py-20 px-6 border-t border-stone/30">
         <div class="max-w-[1400px] mx-auto">
             <div class="mb-10 text-center md:text-left">
-                <h3 class="text-2xl md:text-3xl font-bold text-[#0f1a15]">Tempat ikonik yang harus Anda lihat</h3>
+                <h3 class="text-3xl md:text-4xl font-bold tracking-tight text-[#0f1a15]">Tempat ikonik yang harus Anda lihat</h3>
                 <p class="text-[#3f4e45] text-sm mt-1">Eksplorasi destinasi open trip terpopuler di Indonesia pilihan Kelana</p>
             </div>
             
@@ -655,8 +656,7 @@
         <div class="max-w-[1400px] mx-auto grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
             <!-- Left Column -->
             <div>
-                <span class="text-xs font-bold text-[#1e5e3a] uppercase tracking-widest block mb-3">Our Story</span>
-                <h2 class="text-4xl lg:text-5xl font-bold mb-6 text-[#0f1a15] leading-tight">Apa itu Kelana?</h2>
+                <h2 class="text-3xl md:text-4xl font-bold tracking-tight text-[#0f1a15] mb-6">Apa itu Kelana?</h2>
                 <p class="text-[#3f4e45] text-lg mb-6 leading-relaxed">
                     Kelana adalah platform perjalanan premium yang menghubungkan Anda dengan keindahan alam dunia secara mendalam dan personal. Kami percaya bahwa petualangan sejati tidak hanya tentang destinasi, melainkan kenyamanan, keamanan, dan makna yang Anda temukan sepanjang perjalanan.
                 </p>
@@ -664,7 +664,7 @@
                     Setiap perjalanan kami dirancang secara eksklusif dan dipandu oleh Trip Leader bersertifikat internasional. Dari jalur pendakian pegunungan mistis hingga pelayaran pulau tropis terpencil, kami memastikan setiap momen terasa istimewa dan bebas khawatir.
                 </p>
                 <div class="flex gap-4">
-                    <a href="#destinasi" class="bg-[#1e5e3a] hover:bg-[#154329] text-white px-8 py-3.5 rounded-full font-semibold transition text-sm">Cari Destinasi</a>
+                    <a href="#search-input" @click.prevent="document.getElementById('search-input').scrollIntoView({ behavior: 'smooth' }); document.getElementById('search-input').focus()" class="bg-[#1e5e3a] hover:bg-[#154329] text-white px-8 py-3.5 rounded-full font-semibold transition text-sm">Cari Destinasi</a>
                 </div>
             </div>
             <!-- Right Column: Masonry Collage -->
@@ -685,7 +685,7 @@
         <div class="max-w-[800px] mx-auto w-full">
             <div class="text-center mb-16">
                 <span class="text-xs font-bold text-[#1e5e3a] uppercase tracking-widest block mb-2">Help Center</span>
-                <h2 class="text-[40px] font-medium tracking-tight text-[#0f1a15] mb-4">Frequently Asked Questions</h2>
+                <h2 class="text-3xl md:text-4xl font-bold tracking-tight text-[#0f1a15] mb-4">Frequently Asked Questions</h2>
                 <p class="text-[#3f4e45] text-lg">Find answers to common questions about our services.</p>
             </div>
 
