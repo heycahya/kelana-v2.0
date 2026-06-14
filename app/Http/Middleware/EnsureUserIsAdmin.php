@@ -16,7 +16,7 @@ class EnsureUserIsAdmin
      */
     public function handle(Request $request, Closure $next): Response
     {
-        if (\Illuminate\Support\Facades\Auth::guard('admin')->check()) {
+        if (\Illuminate\Support\Facades\Auth::guard('admin')->check() || ($request->user() && $request->user() instanceof \App\Models\Admin)) {
             return $next($request);
         }
 

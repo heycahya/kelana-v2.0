@@ -16,7 +16,7 @@ class EnsureUserIsCustomer
      */
     public function handle(Request $request, Closure $next): Response
     {
-        if (\Illuminate\Support\Facades\Auth::guard('customer')->check()) {
+        if (\Illuminate\Support\Facades\Auth::guard('customer')->check() || ($request->user() && $request->user() instanceof \App\Models\Customer)) {
             return $next($request);
         }
 

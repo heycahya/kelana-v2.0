@@ -172,14 +172,22 @@ class JadwalTripController extends Controller
             ], 422);
         }
 
-        $jadwal->update([
-            'id_paket' => $request->id_paket,
-            'id_leader' => $request->id_leader,
-            'tanggal_mulai' => $request->tanggal_mulai,
-            'tanggal_selesai' => $request->tanggal_selesai,
-            'kuota' => $request->kuota,
-            'status_trip' => $request->status_trip,
-        ]);
+        \Illuminate\Support\Facades\DB::transaction(function () use ($request, $jadwal) {
+            $jadwal = JadwalTrip::lockForUpdate()->find($jadwal->id_jadwal);
+            
+            // Adjust sisa_kuota if kuota changes
+            $diff = $request->kuota - $jadwal->kuota;
+            
+            $jadwal->update([
+                'id_paket' => $request->id_paket,
+                'id_leader' => $request->id_leader,
+                'tanggal_mulai' => $request->tanggal_mulai,
+                'tanggal_selesai' => $request->tanggal_selesai,
+                'kuota' => $request->kuota,
+                'sisa_kuota' => max(0, $jadwal->sisa_kuota + $diff),
+                'status_trip' => $request->status_trip,
+            ]);
+        });
 
         return response()->json([
             'success' => true,

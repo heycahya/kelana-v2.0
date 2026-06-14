@@ -72,8 +72,6 @@ class JadwalWebController extends Controller
 
     public function update(Request $request, $id)
     {
-        $jadwal = JadwalTrip::findOrFail($id);
-
         $validated = $request->validate([
             'id_paket' => 'required|integer|exists:paket_wisata,id_paket',
             'id_leader' => 'required|integer|exists:trip_leaders,id_leader',
@@ -83,11 +81,15 @@ class JadwalWebController extends Controller
             'status_trip' => 'required|string|in:Draft,Open,Berjalan,Selesai,Batal',
         ]);
 
-        // Adjust sisa_kuota if kuota changes
-        $diff = $validated['kuota'] - $jadwal->kuota;
-        $validated['sisa_kuota'] = max(0, $jadwal->sisa_kuota + $diff);
+        \Illuminate\Support\Facades\DB::transaction(function () use ($request, $id, $validated) {
+            $jadwal = JadwalTrip::lockForUpdate()->findOrFail($id);
 
-        $jadwal->update($validated);
+            // Adjust sisa_kuota if kuota changes
+            $diff = $validated['kuota'] - $jadwal->kuota;
+            $validated['sisa_kuota'] = max(0, $jadwal->sisa_kuota + $diff);
+
+            $jadwal->update($validated);
+        });
 
         return redirect()->route('admin.jadwal.index')->with('success', 'Jadwal dan Penugasan Leader berhasil diperbarui!');
     }

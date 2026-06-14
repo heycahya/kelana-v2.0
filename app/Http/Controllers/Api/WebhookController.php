@@ -32,6 +32,10 @@ class WebhookController extends Controller
             $transactionTime = null;
             $rawResponse = null;
 
+            $signatureKey = null;
+            $statusCode = null;
+            $grossAmount = null;
+
             try {
                 // Jika server key kosong atau placeholder, bypass Midtrans library call
                 $serverKey = env('MIDTRANS_SERVER_KEY');
@@ -46,6 +50,10 @@ class WebhookController extends Controller
                 $transactionId = $notification->transaction_id;
                 $transactionTime = $notification->transaction_time;
                 $rawResponse = json_encode($notification->getResponse());
+                
+                $signatureKey = $notification->signature_key;
+                $statusCode = $notification->status_code;
+                $grossAmount = $notification->gross_amount;
             } catch (\Exception $e) {
                 // Fallback: Ambil data langsung dari request body jika di sandbox / mock
                 $transactionStatus = $request->input('transaction_status');
@@ -54,6 +62,24 @@ class WebhookController extends Controller
                 $transactionId = $request->input('transaction_id');
                 $transactionTime = $request->input('transaction_time', now()->toDateTimeString());
                 $rawResponse = json_encode($request->all());
+                
+                $signatureKey = $request->input('signature_key');
+                $statusCode = $request->input('status_code');
+                $grossAmount = $request->input('gross_amount');
+            }
+
+            // Webhook Signature validation if MIDTRANS_SERVER_KEY is set and valid
+            $serverKey = env('MIDTRANS_SERVER_KEY');
+            if (!empty($serverKey) && $serverKey !== 'placeholder') {
+                if (empty($signatureKey) && app()->environment('local', 'testing')) {
+                    Log::info("Webhook Midtrans: Bypassing signature verification for local mock testing (no signature_key provided).");
+                } else {
+                    $mySignature = hash('sha512', $orderId . $statusCode . $grossAmount . $serverKey);
+                    if ($mySignature !== $signatureKey) {
+                        Log::warning("Webhook Midtrans Signature Verification Failed. Expected: {$mySignature}, Received: {$signatureKey}");
+                        return response()->json(['message' => 'Invalid signature'], 403);
+                    }
+                }
             }
 
             if (empty($orderId)) {

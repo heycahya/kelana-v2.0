@@ -16,7 +16,7 @@ class EnsureUserIsTripLeader
      */
     public function handle(Request $request, Closure $next): Response
     {
-        if (\Illuminate\Support\Facades\Auth::guard('trip_leader')->check()) {
+        if (\Illuminate\Support\Facades\Auth::guard('trip_leader')->check() || ($request->user() && $request->user() instanceof \App\Models\TripLeader)) {
             return $next($request);
         }
 

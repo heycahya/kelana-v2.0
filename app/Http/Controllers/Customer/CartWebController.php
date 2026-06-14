@@ -64,8 +64,8 @@ class CartWebController extends Controller
                 return response()->json(['status' => 'error', 'message' => 'Order not found or already processed'], 404);
             }
 
-            // Restore quota
-            $jadwal = JadwalTrip::find($booking->id_jadwal);
+            // Restore quota with DB locking to prevent race conditions
+            $jadwal = JadwalTrip::lockForUpdate()->find($booking->id_jadwal);
             if ($jadwal) {
                 $jadwal->update([
                     'sisa_kuota' => $jadwal->sisa_kuota + $booking->jumlah_peserta
